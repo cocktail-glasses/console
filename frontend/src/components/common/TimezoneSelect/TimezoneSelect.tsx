@@ -1,0 +1,42 @@
+import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+
+import Autocomplete from '@mui/material/Autocomplete';
+import TextField from '@mui/material/TextField';
+
+import spacetime from 'spacetime';
+
+export interface TimezoneSelectorProps {
+  initialTimezone?: string;
+  onChange: (timezone: string) => void;
+}
+
+export default function TimezoneSelect(props: TimezoneSelectorProps) {
+  const { onChange, initialTimezone } = props;
+  const { i18n, t } = useTranslation();
+  const timezoneOptions = useMemo(() => {
+    const timezoneNames = spacetime.timezones();
+    return Object.keys(timezoneNames).map((name) => {
+      const timezone = spacetime.now(name).timezone();
+      return {
+        name: timezone.name,
+        offset: timezone.current.offset,
+      };
+    });
+  }, []);
+
+  return (
+    <Autocomplete
+      id="cluster-selector-autocomplete"
+      options={timezoneOptions}
+      getOptionLabel={(option) => `(UTC${option.offset >= 0 ? '+' : ''}${option.offset}) ${option.name}`}
+      disableClearable
+      autoComplete
+      includeInputInList
+      openOnFocus
+      renderInput={(params) => <TextField {...params} label={t('Timezone')} />}
+      onChange={(_ev, value) => onChange(value.name)}
+      value={timezoneOptions.find((option) => option.name === initialTimezone)}
+    />
+  );
+}

@@ -1,0 +1,74 @@
+{
+  /**==================================================
+   * Logging
+   *==================================================*/
+
+  /**
+   * Console
+   */
+  "Console Log": {
+    "prefix": "cg_log_console",
+    "body": ["console.log(`logging - ${$1}`);"],
+  },
+
+  /**==================================================
+   * React Commands
+   *==================================================*/
+
+  /**
+   * React useXXX
+   */
+  "React useState": {
+    "prefix": "cg_useState",
+    "body": ["const [$1, set$1] = useState($2);"],
+  },
+  "React useEffect": {
+    "prefix": "cg_useEffect",
+    "body": ["useEffect(() => {", "  $1", "}, [$2]);"],
+  },
+  "React useCallback": {
+    "prefix": "cg_useCallback",
+    "body": ["useCallback(() => {", "  $1", "}, [$2]);"],
+  },
+  "React useMemo": {
+    "prefix": "cg_useMemo",
+    "body": ["useMemo(() => {", "  $1", "}, [$2]);"],
+  },
+
+  /**==================================================
+   * Files (Pages, Components, ....)
+   *==================================================*/
+
+  /**
+   * Create Files
+   */
+
+  "New Page": {
+    "prefix": "cg_newPage",
+    "body": [
+      "import { StepData } from '@uientities/stepData';",
+      "",
+      "interface $1Props {",
+      "  data: StepData;",
+      "  setData: (data: any) => void;",
+      "}",
+      "",
+      "export default function $1(props: $1Props) {",
+      "  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {",
+      "    props.setData({ ...props.data, [event.target.name]: event.target.value });",
+      "  };",
+      "",
+      "  return (",
+      "    <div>",
+      "      <h2>$2</h2>",
+      "      <input name='$3' value={props.data.field || ''} onChange={handleChange} placeholder='$3' />",
+      "    </div>",
+      "  );",
+      "}",
+    ],
+  },
+
+  /**==================================================
+   * ETC
+   *==================================================*/
+}
