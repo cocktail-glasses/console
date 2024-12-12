@@ -1,0 +1,8 @@
+.env
+.idea
+.vscode
+!.vscode/settings.json
+.DS_Store
+cypress-a11y-report.json
+/bin
+/gopath
