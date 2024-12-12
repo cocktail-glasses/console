@@ -6,3 +6,4 @@
 cypress-a11y-report.json
 /bin
 /gopath
+vendor
