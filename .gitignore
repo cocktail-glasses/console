@@ -7,3 +7,4 @@ cypress-a11y-report.json
 /bin
 /gopath
 vendor
+frontend/public/dist
