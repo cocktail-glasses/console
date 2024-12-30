@@ -314,6 +314,13 @@ func (s *Server) HTTPHandler() (http.Handler, error) {
 		})),
 	)
 
+	handle("/ws", http.StripPrefix(
+		s.BaseURL.Path,
+		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			apiServerProxy.ServeHTTP(w, r)
+		})),
+	)
+
 	handle("/api/console/monitoring-dashboard-config", authHandler(s.handleMonitoringDashboardConfigmaps))
 
 	// Dev-Console Proxy
