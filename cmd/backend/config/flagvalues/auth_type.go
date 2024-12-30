@@ -20,7 +20,7 @@ func (a *AuthType) Set(value string) error {
 		*a = AuthTypeCocktail
 	case "":
 	default:
-		return fmt.Errorf("invalid auth type: %q. Must be one of [openshift, oidc, disabled]", value)
+		return fmt.Errorf("invalid auth type: %q. Must be one of [cocktail, oidc, disabled]", value)
 	}
 	return nil
 }

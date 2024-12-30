@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/cocktailcloud/console/pkg/auth"
-	"github.com/cocktailcloud/console/pkg/auth/sessions"
 )
 
 type StaticAuthenticator struct {
@@ -29,11 +28,10 @@ func (s *StaticAuthenticator) LogoutFunc(w http.ResponseWriter, req *http.Reques
 	w.WriteHeader(http.StatusNoContent)
 }
 
-func (s *StaticAuthenticator) CallbackFunc(fn func(loginInfo sessions.LoginJSON, successURL string, w http.ResponseWriter)) func(w http.ResponseWriter, req *http.Request) {
+func (s *StaticAuthenticator) CallbackFunc(fn func(successURL string, w http.ResponseWriter)) func(w http.ResponseWriter, req *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) { w.WriteHeader(http.StatusNoContent) }
 }
 
-func (s *StaticAuthenticator) GetOCLoginCommand() string            { return "" }
 func (s *StaticAuthenticator) LogoutRedirectURL() string            { return "" }
 func (s *StaticAuthenticator) GetSpecialURLs() auth.SpecialAuthURLs { return auth.SpecialAuthURLs{} }
 func (s *StaticAuthenticator) IsStatic() bool                       { return true }

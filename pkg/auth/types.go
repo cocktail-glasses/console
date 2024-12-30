@@ -2,8 +2,6 @@ package auth
 
 import (
 	"net/http"
-
-	"github.com/cocktailcloud/console/pkg/auth/sessions"
 )
 
 type Authenticator interface {
@@ -11,9 +9,8 @@ type Authenticator interface {
 
 	LoginFunc(w http.ResponseWriter, req *http.Request)
 	LogoutFunc(w http.ResponseWriter, req *http.Request)
-	CallbackFunc(fn func(loginInfo sessions.LoginJSON, successURL string, w http.ResponseWriter)) func(w http.ResponseWriter, req *http.Request)
+	CallbackFunc(fn func(successURL string, w http.ResponseWriter)) func(w http.ResponseWriter, req *http.Request)
 
-	GetOCLoginCommand() string
 	LogoutRedirectURL() string
 	GetSpecialURLs() SpecialAuthURLs
 	IsStatic() bool
@@ -28,7 +25,13 @@ type SpecialAuthURLs struct {
 
 // User holds fields representing a user.
 type User struct {
-	ID       string
-	Username string
-	Token    string
+	ID            string
+	Username      string
+	Token         string
+	UserId        string
+	UserRole      string
+	UserWorkspace string
+	UserSeq       string
+	AccountSeq    string
+	AccountCode   string
 }

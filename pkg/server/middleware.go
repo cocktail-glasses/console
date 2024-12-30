@@ -4,14 +4,13 @@ import (
 	"compress/gzip"
 	"fmt"
 	"io"
+	"k8s.io/klog/v2"
 	"net/http"
 	"strings"
 
 	"github.com/cocktailcloud/console/pkg/auth"
 	"github.com/cocktailcloud/console/pkg/auth/csrfverifier"
 	"github.com/cocktailcloud/console/pkg/serverutils"
-
-	"k8s.io/klog/v2"
 )
 
 type HandlerWithUser func(*auth.User, http.ResponseWriter, *http.Request)
@@ -31,14 +30,23 @@ func authMiddleware(authenticator auth.Authenticator, csrfVerifier *csrfverifier
 func authMiddlewareWithUser(authenticator auth.Authenticator, csrfVerifier *csrfverifier.CSRFVerifier, h HandlerWithUser) http.HandlerFunc {
 	return csrfVerifier.WithCSRFVerification(
 		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			user, err := authenticator.Authenticate(w, r)
-			if err != nil {
-				klog.V(4).Infof("authentication failed: %v", err)
-				w.WriteHeader(http.StatusUnauthorized)
-				return
+			rUrl := r.RequestURI
+			if rUrl != "/api/auth/publickey" {
+				user, err := authenticator.Authenticate(w, r)
+				if err != nil {
+					klog.V(4).Infof("authentication failed: %v", err)
+					w.WriteHeader(http.StatusUnauthorized)
+					return
+				}
+				r.Header.Set("Authorization", fmt.Sprintf("Bearer %s", user.Token))
+				r.Header.Set("user-id", fmt.Sprintf("%s", user.UserId))
+				r.Header.Set("user-role", fmt.Sprintf("%s", user.UserRole))
+				r.Header.Set("account-seq", fmt.Sprintf("%s", user.AccountSeq))
+
+				h(user, w, r)
+			} else {
+				h(&auth.User{}, w, r)
 			}
-			r.Header.Set("Authorization", fmt.Sprintf("Bearer %s", user.Token))
-			h(user, w, r)
 		}),
 	)
 }

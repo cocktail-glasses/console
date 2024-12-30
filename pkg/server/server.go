@@ -19,7 +19,6 @@ import (
 
 	"github.com/cocktailcloud/console/pkg/auth"
 	"github.com/cocktailcloud/console/pkg/auth/csrfverifier"
-	"github.com/cocktailcloud/console/pkg/auth/sessions"
 	devconsoleProxy "github.com/cocktailcloud/console/pkg/devconsole/proxy"
 	"github.com/cocktailcloud/console/pkg/graphql/resolver"
 	"github.com/cocktailcloud/console/pkg/plugins"
@@ -127,7 +126,6 @@ type jsGlobals struct {
 
 type Server struct {
 	APIServerProxyConfig *proxy.Config
-	DashboardServerURL   *proxy.Config
 
 	AddPage                            string
 	AuthDisabled                       bool
@@ -181,7 +179,6 @@ type Server struct {
 	Telemetry                          serverconfig.MultiKeyValue
 	TerminalProxyTLSConfig             *tls.Config
 	UserSettingsLocation               string
-	AuthMetrics                        *auth.Metrics
 }
 
 func disableDirectoryListing(handler http.Handler) http.Handler {
@@ -207,19 +204,6 @@ func (s *Server) HTTPHandler() (http.Handler, error) {
 		return s.NoAuthConfiguredHandler(), nil
 	}
 
-	/*internalProxiedK8SClient, err := kubernetes.NewForConfig(s.InternalProxiedK8SClientConfig)
-	if err != nil {
-		return nil, fmt.Errorf("failed to set up internal k8s client: %w", err)
-	}
-	internalProxiedK8SRT, err := rest.TransportFor(s.InternalProxiedK8SClientConfig)
-	if err != nil {
-		return nil, fmt.Errorf("failed to set up internal k8s roundtripper: %v", err)
-	}
-	internalProxiedDynamic, err := dynamic.NewForConfig(s.InternalProxiedK8SClientConfig)
-	if err != nil {
-		return nil, fmt.Errorf("failed to set up a dynamic client: %w", err)
-	}*/
-
 	mux := http.NewServeMux()
 	k8sProxy := proxy.NewProxy(s.K8sProxyConfig)
 	handle := func(path string, handler http.Handler) {
@@ -228,14 +212,12 @@ func (s *Server) HTTPHandler() (http.Handler, error) {
 
 	handleFunc := func(path string, handler http.HandlerFunc) { handle(path, handler) }
 
-	fn := func(loginInfo sessions.LoginJSON, successURL string, w http.ResponseWriter) {
+	fn := func(successURL string, w http.ResponseWriter) {
 		templateData := struct {
-			sessions.LoginJSON `json:",inline"`
-			LoginSuccessURL    string `json:"loginSuccessURL"`
-			Branding           string `json:"branding"`
-			CustomProductName  string `json:"customProductName"`
+			LoginSuccessURL   string `json:"loginSuccessURL"`
+			Branding          string `json:"branding"`
+			CustomProductName string `json:"customProductName"`
 		}{
-			LoginJSON:         loginInfo,
 			LoginSuccessURL:   successURL,
 			Branding:          s.Branding,
 			CustomProductName: s.CustomProductName,
@@ -269,7 +251,8 @@ func (s *Server) HTTPHandler() (http.Handler, error) {
 
 	//handleFunc("/api/", notFoundHandler)
 
-	handleFunc("/sso", ssoFoundHandler)
+	handleFunc(ssoEndpoint, ssoFoundHandler)
+	handleFunc(dashboardServerEndpoint, dashboardFoundHandler)
 
 	staticHandler := http.StripPrefix(proxy.SingleJoiningSlash(s.BaseURL.Path, "/static/"), disableDirectoryListing(http.FileServer(http.Dir(s.PublicDir))))
 	handle("/static/", gzipHandler(securityHeadersMiddleware(staticHandler)))
@@ -326,26 +309,10 @@ func (s *Server) HTTPHandler() (http.Handler, error) {
 	apiServerProxy := proxy.NewProxy(s.APIServerProxyConfig)
 	handle(apiServerEndpoint, http.StripPrefix(
 		s.BaseURL.Path,
-		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		authHandler(func(w http.ResponseWriter, r *http.Request) {
 			apiServerProxy.ServeHTTP(w, r)
 		})),
 	)
-
-	dashboardServerProxy := proxy.NewProxy(s.DashboardServerURL)
-	handle(dashboardServerEndpoint, http.StripPrefix(
-		s.BaseURL.Path,
-		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			dashboardServerProxy.ServeHTTP(w, r)
-		})),
-	)
-
-	/*clusterManagementProxy := proxy.NewProxy(s.ClusterManagementProxyConfig)
-	handle(accountManagementEndpoint, http.StripPrefix(
-		s.BaseURL.Path,
-		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			clusterManagementProxy.ServeHTTP(w, r)
-		})),
-	)*/
 
 	handle("/api/console/monitoring-dashboard-config", authHandler(s.handleMonitoringDashboardConfigmaps))
 
@@ -566,6 +533,11 @@ func ssoFoundHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("{\n    \"status\": \"ok\",\n    \"keycloak\": false,\n    \"loginUrl\": \"\",\n    \"redirectUri\": \"/finish/keycloak\",\n    \"useRedis\": true,\n    \"token\": false\n}"))
 }
 
+func dashboardFoundHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("{\"title\":\"Cocktail\",\"my_host\":\"dashboard\",\"my_port\":\"3000\",\"closedNetwork\":false}"))
+}
+
 func (s *Server) handleCopyLogin(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" {
 		serverutils.SendResponse(w, http.StatusMethodNotAllowed, serverutils.ApiError{Err: "Invalid method: only GET is allowed"})
@@ -578,8 +550,7 @@ func (s *Server) handleCopyLogin(w http.ResponseWriter, r *http.Request) {
 		RequestTokenURL      string `json:"requestTokenURL"`
 		ExternalLoginCommand string `json:"externalLoginCommand"`
 	}{
-		RequestTokenURL:      specialAuthURLs.RequestToken,
-		ExternalLoginCommand: s.Authenticator.GetOCLoginCommand(),
+		RequestTokenURL: specialAuthURLs.RequestToken,
 	})
 }
 
@@ -605,4 +576,19 @@ func (s *Server) CatalogdHandler() http.Handler {
 		proxy.SingleJoiningSlash(s.BaseURL.Path, catalogdEndpoint),
 		catalogdProxy,
 	)
+}
+
+const HeadersKey string = "headers"
+
+func contextToHeaders(ctx context.Context, request *http.Request) {
+	if ctx.Value(HeadersKey) != nil {
+		headers, ok := ctx.Value(HeadersKey).(map[string]string)
+		if ok {
+			for key, value := range headers {
+				if value != "" {
+					request.Header.Add(key, value)
+				}
+			}
+		}
+	}
 }

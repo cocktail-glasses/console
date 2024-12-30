@@ -7,7 +7,6 @@ import (
 	"fmt"
 	authopts "github.com/cocktailcloud/console/cmd/backend/config/auth"
 	"github.com/cocktailcloud/console/cmd/backend/config/session"
-	"github.com/cocktailcloud/console/pkg/auth"
 	"github.com/cocktailcloud/console/pkg/flags"
 	"github.com/cocktailcloud/console/pkg/proxy"
 	"github.com/cocktailcloud/console/pkg/server"
@@ -26,8 +25,7 @@ const (
 	k8sInClusterCA          = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
 	k8sInClusterBearerToken = "/var/run/secrets/kubernetes.io/serviceaccount/token"
 
-	apiServerURL       = "http://localhost:8080"
-	dashboardServerURL = "http://localhost:3000"
+	apiServerURL = "http://localhost:8080"
 )
 
 func main() {
@@ -294,22 +292,10 @@ func main() {
 		Endpoint:        apiServerURL,
 	}
 
-	dashboardServerURL, err := url.Parse(dashboardServerURL)
-	if err != nil {
-		klog.Fatalf("failed to parse %q", dashboardServerURL)
-	}
-	srv.DashboardServerURL = &proxy.Config{
-		TLSClientConfig: oscrypto.SecureTLSConfig(&tls.Config{}),
-		HeaderBlacklist: []string{"Cookie", "X-CSRFToken"},
-		Endpoint:        dashboardServerURL,
-	}
-
 	srv.AnonymousInternalProxiedK8SRT, err = rest.TransportFor(rest.AnonymousClientConfig(srv.InternalProxiedK8SClientConfig))
 	if err != nil {
 		klog.Fatalf("Failed to create anonymous k8s HTTP client: %v", err)
 	}
-
-	srv.AuthMetrics = auth.NewMetrics(srv.AnonymousInternalProxiedK8SRT)
 
 	caCertFilePath := *fCAFile
 	if *fK8sMode == "in-cluster" {

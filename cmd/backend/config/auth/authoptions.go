@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"context"
 	"flag"
 	"fmt"
 	"github.com/cocktailcloud/console/pkg/auth/cocktail"
@@ -18,7 +17,6 @@ import (
 	"github.com/cocktailcloud/console/cmd/backend/config/session"
 	"github.com/cocktailcloud/console/pkg/auth"
 	"github.com/cocktailcloud/console/pkg/auth/csrfverifier"
-	"github.com/cocktailcloud/console/pkg/auth/oauth2"
 	"github.com/cocktailcloud/console/pkg/auth/static"
 	"github.com/cocktailcloud/console/pkg/flags"
 	"github.com/cocktailcloud/console/pkg/proxy"
@@ -69,7 +67,7 @@ func NewAuthOptions() *AuthOptions {
 
 func (c *AuthOptions) AddFlags(fs *flag.FlagSet) {
 	fs.Var(&c.AuthType, "user-auth", "User authentication provider type. Possible values: disabled, oidc, cocktail. Defaults to 'cocktail'")
-	fs.StringVar(&c.IssuerURL, "user-auth-oidc-issuer-url", "", "The OIDC/OAuth2 issuer URL.")
+	fs.StringVar(&c.IssuerURL, "user-auth-oidc-issuer-url", "", "The OIDC/OAuth2 issuer URL. or Cocktail API Server")
 	fs.StringVar(&c.ClientID, "user-auth-oidc-client-id", "", "The OIDC/OAuth2 Client ID.")
 	fs.StringVar(&c.ClientSecret, "user-auth-oidc-client-secret", "", "The OIDC/OAuth2 Client Secret.")
 	fs.StringVar(&c.ClientSecretFilePath, "user-auth-oidc-client-secret-file", "", "File containing the OIDC/OAuth2 Client Secret.")
@@ -227,7 +225,6 @@ func (c *completedOptions) ApplyTo(
 		srv.InternalProxiedK8SClientConfig,
 		useSecureCookies,
 		sessionConfig,
-		srv.AuthMetrics,
 	)
 
 	if err != nil {
@@ -245,7 +242,6 @@ func (c *completedOptions) getAuthenticator(
 	k8sClientConfig *rest.Config,
 	useSecureCookies bool,
 	sessionConfig *session.CompletedOptions,
-	authMetrics *auth.Metrics,
 ) (auth.Authenticator, error) {
 
 	if c.AuthType == flagvalues.AuthTypeDisabled {
@@ -262,8 +258,6 @@ func (c *completedOptions) getAuthenticator(
 
 	if c.AuthType == flagvalues.AuthTypeCocktail {
 
-		klog.Infof("running with AUTHENTICATION Cocktail Database")
-		return cocktail.NewCocktailAuthenticator("http://localhost:8080"), nil
 	}
 
 	flags.FatalIfFailed(flags.ValidateFlagNotEmpty("base-address", baseURL.String()))
@@ -279,13 +273,13 @@ func (c *completedOptions) getAuthenticator(
 	)
 
 	var scopes []string
-	authSource := oauth2.AuthSourceOIDC
+	authSource := cocktail.AuthSourceOIDC
 
 	if c.AuthType == "cocktail" {
 		scopes = []string{"user:full"}
-		authSource = oauth2.AuthSourceOpenShift
+		authSource = cocktail.AuthSourceCocktail
 
-		userAuthOIDCIssuerURL = k8sEndpoint
+		userAuthOIDCIssuerURL = c.IssuerURL
 	} else {
 		userAuthOIDCIssuerURL = c.IssuerURL
 		scopes = append(c.ExtraScopes, "openid")
@@ -295,7 +289,7 @@ func (c *completedOptions) getAuthenticator(
 	oidcClientSecret = c.ClientSecret
 
 	// Config for logging into console.
-	oidcClientConfig := &oauth2.Config{
+	oidcClientConfig := &cocktail.Config{
 		AuthSource:   authSource,
 		IssuerURL:    userAuthOIDCIssuerURL.String(),
 		IssuerCA:     c.CAFilePath,
@@ -315,16 +309,13 @@ func (c *completedOptions) getAuthenticator(
 		SecureCookies:           useSecureCookies,
 		CookieEncryptionKey:     sessionConfig.CookieEncryptionKey,
 		CookieAuthenticationKey: sessionConfig.CookieAuthenticationKey,
-
-		K8sConfig: k8sClientConfig,
-		Metrics:   authMetrics,
 	}
 
 	if c.LogoutRedirectURL != nil {
 		oidcClientConfig.LogoutRedirectOverride = c.LogoutRedirectURL.String()
 	}
 
-	authenticator, err := oauth2.NewOAuth2Authenticator(context.Background(), oidcClientConfig)
+	authenticator, err := cocktail.NewCocktailAuthenticator(oidcClientConfig)
 	if err != nil {
 		klog.Fatalf("Error initializing authenticator: %v", err)
 	}
