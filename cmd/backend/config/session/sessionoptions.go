@@ -3,6 +3,7 @@ package session
 import (
 	"flag"
 	"fmt"
+	"github.com/gorilla/securecookie"
 	"os"
 
 	utilerrors "k8s.io/apimachinery/pkg/util/errors"
@@ -81,7 +82,13 @@ func (opts *SessionOptions) Complete(userAuthType flagvalues.AuthType) (*Complet
 		}
 		completed.CookieAuthenticationKey = authnKey
 	}
-
+	var (
+		encKey   = securecookie.GenerateRandomKey(32)
+		authnKey = securecookie.GenerateRandomKey(32)
+		//s = securecookie.New(hashKey, blockKey)
+	)
+	completed.CookieEncryptionKey = encKey
+	completed.CookieAuthenticationKey = authnKey
 	return &CompletedOptions{
 		completedOptions: completed,
 	}, nil

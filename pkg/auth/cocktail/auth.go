@@ -138,7 +138,6 @@ func (a *CocktailAuthenticator) LoginFunc(w http.ResponseWriter, r *http.Request
 	}
 
 	serviceClient := &http.Client{}
-
 	resp, err := serviceClient.Do(request)
 	if err != nil {
 		http.Error(w, "Service unavailable", http.StatusServiceUnavailable)
@@ -159,27 +158,29 @@ func (a *CocktailAuthenticator) LoginFunc(w http.ResponseWriter, r *http.Request
 		content["result"].(map[string]interface{})["loginPage"] = loginPage
 
 		// Encrypt the response body if necessary
-		if r.Header.Get("encryption-body") == "a" {
-			r, err := EncryptAES256CBC(toJSON(content["result"]), "cocktail-glasses_encryption_data", "cocktail-glasses")
-			if err != nil {
-				return
-
-			}
-			content["result"] = r
-		} else if r.Header.Get("encryption-body") != "off" {
-		} else {
-			content["result"] = encryptAES(content["result"])
+		rs, err := EncryptAES256CBC(toJSON(content["result"]), "cocktail-glasses_encryption_data", "cocktail-glasses")
+		if err != nil {
+			return
 		}
+		content["result"] = rs
 
 		if userMap["userRole"] != nil {
-			s := userMap["userSeq"]
-			id := userMap["userId"]
-			ur := userMap["userRole"]
+			userSeq := userMap["userSeq"]
+			userId := userMap["userId"]
+			userRole := userMap["userRole"]
+			lastServiceSeq := userMap["lastServiceSeq"]
+
+			account := userMap["account"].(map[string]interface{})
+			accountSeq := account["accountSeq"]
+			accountCode := account["accountCode"]
 
 			user := &auth.User{
-				UserId:   fmt.Sprintf("%v", id),
-				UserRole: fmt.Sprintf("%v", ur),
-				UserSeq:  fmt.Sprintf("%v", s),
+				UserId:        fmt.Sprintf("%v", userId),
+				UserRole:      fmt.Sprintf("%v", userRole),
+				UserSeq:       fmt.Sprintf("%v", userSeq),
+				AccountSeq:    fmt.Sprintf("%v", accountSeq),
+				AccountCode:   fmt.Sprintf("%v", accountCode),
+				UserWorkspace: fmt.Sprintf("%v", lastServiceSeq),
 			}
 			_, err := a.sessions.AddSession(w, r, user)
 			if err != nil {
@@ -187,10 +188,13 @@ func (a *CocktailAuthenticator) LoginFunc(w http.ResponseWriter, r *http.Request
 				return
 			}
 		}
-		//handleSuccessfulLogin(w, r, respData, loginPage)
-		//a.sessions.AddSession(w, r, nil, nil)
+		b, err := json.Marshal(content)
+		if err != nil {
+			klog.Errorf("Invalid Marshal : %v", err)
+			return
+		}
 		w.WriteHeader(resp.StatusCode)
-		w.Write(respBody)
+		w.Write(b)
 	} else {
 		w.WriteHeader(resp.StatusCode)
 		w.Write(respBody)

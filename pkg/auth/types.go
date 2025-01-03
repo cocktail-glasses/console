@@ -25,13 +25,13 @@ type SpecialAuthURLs struct {
 
 // User holds fields representing a user.
 type User struct {
-	ID            string
-	Username      string
-	Token         string
-	UserId        string
-	UserRole      string
-	UserWorkspace string
-	UserSeq       string
-	AccountSeq    string
-	AccountCode   string
+	ID            string `json:"id"`
+	Username      string `json:"username"`
+	Token         string `json:"token"`
+	UserId        string `json:"userId"`
+	UserRole      string `json:"userRole"`
+	UserWorkspace string `json:"userWorkspace"`
+	UserSeq       string `json:"userSeq"`
+	AccountSeq    string `json:"accountSeq"`
+	AccountCode   string `json:"accountCode"`
 }

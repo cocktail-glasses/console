@@ -4,74 +4,16 @@ import (
 	"bytes"
 	"crypto/aes"
 	"crypto/cipher"
-	"crypto/rand"
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
-	"io"
-	"net/http"
 	"strings"
-	"sync"
 )
-
-var sessionLock sync.Mutex
-
-func handleSuccessfulLogin(w http.ResponseWriter, r *http.Request, respData map[string]interface{}, loginPage string) {
-	sessionLock.Lock()
-	defer sessionLock.Unlock()
-
-	content := respData
-	user := content["result"].(map[string]interface{})
-	content["result"].(map[string]interface{})["loginPage"] = loginPage
-
-	// Encrypt the response body if necessary
-	if r.Header.Get("encryption-body") == "a" {
-		r, err := EncryptAES256CBC(toJSON(content["result"]), "cocktail-glasses_encryption_data", "cocktail-glasses")
-		if err != nil {
-			return
-
-		}
-		content["result"] = r
-	} else if r.Header.Get("encryption-body") != "off" {
-	} else {
-		content["result"] = encryptAES(content["result"])
-	}
-
-	sess := make(map[string]interface{})
-	if user["userRole"] != nil {
-		sess["logged"] = true
-		sess["userSeq"] = user["userSeq"]
-		sess["userId"] = user["userId"]
-		sess["userRole"] = user["userRole"]
-		if user["lastServiceSeq"] != nil {
-			sess["userWorkspace"] = user["lastServiceSeq"]
-		}
-		if account := user["account"]; account != nil {
-			accountData := account.(map[string]interface{})
-			sess["accountSeq"] = accountData["accountSeq"]
-			sess["accountCode"] = accountData["accountCode"]
-
-		}
-		/*if USE_REDIS {
-			redisClient.Set(r.Context(), fmt.Sprintf("sess:%s", r.Header.Get("sessionID")), toJSON(sess), 0)
-		}*/
-	} else {
-		sess["logged"] = false
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(content)
-}
 
 func toJSON(data interface{}) string {
 	bytes, _ := json.Marshal(data)
 	return string(bytes)
-}
-
-func encryptAES(data interface{}) string {
-	// Implement AES encryption here
-	return toJSON(data)
 }
 
 // EncryptAES256CBC encrypts data using AES-256-CBC
@@ -199,25 +141,4 @@ func contains(slice []string, item string) bool {
 		}
 	}
 	return false
-}
-
-func encryptSimpleAES(data, key string) (string, error) {
-	// This is a simple example of encryption (not recommended for production)
-	block, err := aes.NewCipher([]byte(key))
-	if err != nil {
-		return "", err
-	}
-
-	ciphertext := make([]byte, aes.BlockSize+len(data))
-	iv := ciphertext[:aes.BlockSize]
-
-	_, err = io.ReadFull(rand.Reader, iv)
-	if err != nil {
-		return "", err
-	}
-
-	stream := cipher.NewCFBEncrypter(block, iv)
-	stream.XORKeyStream(ciphertext[aes.BlockSize:], []byte(data))
-
-	return base64.StdEncoding.EncodeToString(ciphertext), nil
 }

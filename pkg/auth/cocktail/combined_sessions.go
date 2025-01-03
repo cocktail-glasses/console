@@ -1,18 +1,25 @@
 package cocktail
 
 import (
+	"encoding/gob"
 	"fmt"
 	"github.com/cocktailcloud/console/pkg/auth"
 	"net/http"
 	"os"
+	"strings"
 	"sync"
 
 	gorilla "github.com/gorilla/sessions"
 )
 
 const (
-	CocktailAccessTokenCookieName = "cocktail-session-token"
+	CocktailAccessTokenCookieName = "cocktail"
 )
+
+func init() {
+	// gob 에 구조체 등록
+	gob.Register(&auth.User{})
+}
 
 type CombinedSessionStore struct {
 	clientStore *gorilla.CookieStore // FIXME: we need to determine what the default session expiration should be, possibly make it configurable
@@ -37,7 +44,6 @@ func NewSessionStore(authnKey, encryptKey []byte, secureCookies bool, cookiePath
 
 	return &CombinedSessionStore{
 		clientStore: clientStore,
-
 		sessionLock: sync.Mutex{},
 	}
 }
@@ -47,16 +53,36 @@ func (cs *CombinedSessionStore) AddSession(w http.ResponseWriter, r *http.Reques
 	defer cs.sessionLock.Unlock()
 
 	clientSession := cs.getCookieSession(r)
-	clientSession.sessionToken.AddFlash(user)
+	/*userData, err := json.Marshal(user)
+	if err != nil {
+		http.Error(w, "Failed to encode user data", http.StatusInternalServerError)
+		return nil, err
+	}*/
+	gob.Register(user)
+	clientSession.sessionToken.Values["user"] = user
+	paths := []string{"/api", "/builder", "/monitoring-api", "/cluster-api", "/alarm-api", "/metric-api", "/backup-api", "/ws", "/terminal", "/apis/package", "/apm", "/sm,", "/v1alpha1"}
+	var errs []error
+	for _, path := range paths {
+		clientSession.sessionToken.Options.Path = path
+		err := clientSession.save(r, w)
+		if err != nil {
+			errs = append(errs, err)
+		}
+	}
+	if len(errs) > 0 {
+		return user, fmt.Errorf(joinErrors(errs))
+	}
 
-	//clientSession.sessionToken.Values["user-seq"] = user.UserSeq
-	//clientSession.sessionToken.Values["user-id"] = user.UserId
-	//clientSession.sessionToken.Values["user-role"] = user.UserRole
-	//clientSession.sessionToken.Values["account-seq"] = user.AccountSeq
-	//clientSession.sessionToken.Values["account-code"] = user.AccountCode
-	//clientSession.sessionToken.Values["user-workspace"] = user.UserWorkspace
+	return user, nil
+	//return user, clientSession.save(r, w)
+}
 
-	return user, clientSession.save(r, w)
+func joinErrors(errs []error) string {
+	es := make([]string, 0, len(errs))
+	for _, e := range errs {
+		es = append(es, e.Error())
+	}
+	return strings.Join(es, "; ")
 }
 
 func (cs *CombinedSessionStore) getCookieSession(r *http.Request) *session {
@@ -83,29 +109,39 @@ func (cs *CombinedSessionStore) GetSession(w http.ResponseWriter, r *http.Reques
 	// Get always returns a session, even if empty.
 	clientSession := cs.getCookieSession(r)
 
-	user := clientSession.sessionToken.Flashes()
-	custom := user[0].(*auth.User)
+	val := clientSession.sessionToken.Values["user"]
+	if val == nil {
+		fmt.Fprintln(w, "No user information in session")
+		//return
+	}
 
-	return custom, nil
+	user, ok := val.(*auth.User)
+	if !ok {
+		return nil, fmt.Errorf("Failed to decode user information ")
+	}
+
+	return user, nil
 }
 
 func (cs *CombinedSessionStore) DeleteSession(w http.ResponseWriter, r *http.Request) error {
 	cs.sessionLock.Lock()
 	defer cs.sessionLock.Unlock()
 
-	/*	for _, cookie := range r.Cookies() {
-			cookie := cookie
-			if strings.HasPrefix(cookie.Name, CocktailAccessTokenCookieName) {
-				cookie.MaxAge = -1
-				http.SetCookie(w, cookie)
-			}
+	for _, cookie := range r.Cookies() {
+		cookie := cookie
+		if strings.HasPrefix(cookie.Name, CocktailAccessTokenCookieName) {
+			cookie.MaxAge = -1
+			http.SetCookie(w, cookie)
 		}
+	}
 
-		cookieSession := cs.getCookieSession(r)
+	cookieSession := cs.getCookieSession(r)
 
-		if sessionToken, ok := cookieSession.sessionToken.Values["session-token"]; ok {
-			cs.serverStore.DeleteBySessionToken(sessionToken.(string))
-		}*/
+	cookieSession.sessionToken.Options.MaxAge = -1
+	err := cookieSession.sessionToken.Save(r, w)
+	if err != nil {
+		return fmt.Errorf("Failed to delete session: %w ", err)
+	}
 
 	return nil
 }

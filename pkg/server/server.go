@@ -25,7 +25,6 @@ import (
 	"github.com/cocktailcloud/console/pkg/proxy"
 	"github.com/cocktailcloud/console/pkg/serverconfig"
 	"github.com/cocktailcloud/console/pkg/serverutils"
-	"github.com/cocktailcloud/console/pkg/terminal"
 	"github.com/cocktailcloud/console/pkg/utils"
 	"github.com/cocktailcloud/console/pkg/version"
 	graphql "github.com/graph-gophers/graphql-go"
@@ -45,6 +44,15 @@ const (
 const (
 	ssoEndpoint                           = "/sso"
 	apiServerEndpoint                     = "/api/"
+	builderAPIEndpoint                    = "/builder/"
+	monitoringEndpoint                    = "/monitoring-api/"
+	clusterAPIEndpoint                    = "/cluster-api/"
+	alarmAPIEndpoint                      = "/alarm-api/"
+	metricAPIEndpoint                     = "/metric-api/"
+	backupAPIEndpoint                     = "/backup-api/"
+	packageAPIEndpoint                    = "/apis/package/"
+	clusterManagementAPIEndpoint1         = "/sm/"
+	clusterManagementAPIEndpoint2         = "/v1alpha1/"
 	dashboardServerEndpoint               = "/dashboard/env"
 	accountManagementEndpoint             = "/api/accounts_mgmt/"
 	alertManagerProxyEndpoint             = "/api/alertmanager"
@@ -125,7 +133,14 @@ type jsGlobals struct {
 }
 
 type Server struct {
-	APIServerProxyConfig *proxy.Config
+	APIServerProxyConfig            *proxy.Config
+	MonitoringProxyConfig           *proxy.Config
+	ClusterAPIProxyConfig           *proxy.Config
+	AlarmAPIProxyConfig             *proxy.Config
+	MetricAPIProxyConfig            *proxy.Config
+	BackupAPIProxyConfig            *proxy.Config
+	PackageAPIProxyConfig           *proxy.Config
+	ClusterManagementAPIProxyConfig *proxy.Config
 
 	AddPage                            string
 	AuthDisabled                       bool
@@ -279,14 +294,14 @@ func (s *Server) HTTPHandler() (http.Handler, error) {
 		authHandler(k8sProxy.ServeHTTP),
 	))
 
-	terminalProxy := terminal.NewProxy(
+	/*terminalProxy := terminal.NewProxy(
 		s.TerminalProxyTLSConfig,
 		s.K8sProxyConfig.TLSClientConfig,
 		s.K8sProxyConfig.Endpoint)
 
 	handle(terminal.ProxyEndpoint, authHandlerWithUser(terminalProxy.HandleProxy))
 	handleFunc(terminal.AvailableEndpoint, terminalProxy.HandleProxyEnabled)
-	handleFunc(terminal.InstalledNamespaceEndpoint, terminalProxy.HandleTerminalInstalledNamespace)
+	handleFunc(terminal.InstalledNamespaceEndpoint, terminalProxy.HandleTerminalInstalledNamespace)*/
 
 	graphQLSchema, err := ioutil.ReadFile("pkg/graphql/schema.graphql")
 	if err != nil {
@@ -309,16 +324,70 @@ func (s *Server) HTTPHandler() (http.Handler, error) {
 	apiServerProxy := proxy.NewProxy(s.APIServerProxyConfig)
 	handle(apiServerEndpoint, http.StripPrefix(
 		s.BaseURL.Path,
-		authHandler(func(w http.ResponseWriter, r *http.Request) {
-			apiServerProxy.ServeHTTP(w, r)
-		})),
+		authHandler(apiServerProxy.ServeHTTP)),
+	)
+	handle("/terminal/", http.StripPrefix(
+		s.BaseURL.Path,
+		authHandler(apiServerProxy.ServeHTTP)),
 	)
 
-	handle("/ws", http.StripPrefix(
+	/*handle("/ws", http.StripPrefix(
 		s.BaseURL.Path,
 		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			apiServerProxy.ServeHTTP(w, r)
 		})),
+	)*/
+
+	handle(builderAPIEndpoint, http.StripPrefix(
+		s.BaseURL.Path,
+		authHandler(apiServerProxy.ServeHTTP)),
+	)
+
+	monitoringProxy := proxy.NewProxy(s.MonitoringProxyConfig)
+	handle(monitoringEndpoint, http.StripPrefix(
+		s.BaseURL.Path,
+		authHandler(monitoringProxy.ServeHTTP)),
+	)
+
+	clusterAPIProxy := proxy.NewProxy(s.ClusterAPIProxyConfig)
+	handle(clusterAPIEndpoint, http.StripPrefix(
+		s.BaseURL.Path,
+		authHandler(clusterAPIProxy.ServeHTTP)),
+	)
+
+	alarmAPIProxy := proxy.NewProxy(s.AlarmAPIProxyConfig)
+	handle(alarmAPIEndpoint, http.StripPrefix(
+		s.BaseURL.Path,
+		authHandler(alarmAPIProxy.ServeHTTP)),
+	)
+
+	metricAPIProxy := proxy.NewProxy(s.MetricAPIProxyConfig)
+	handle(metricAPIEndpoint, http.StripPrefix(
+		proxy.SingleJoiningSlash(s.BaseURL.Path, metricAPIEndpoint),
+		authHandler(metricAPIProxy.ServeHTTP)),
+	)
+
+	backupAPIProxy := proxy.NewProxy(s.BackupAPIProxyConfig)
+	handle(backupAPIEndpoint, http.StripPrefix(
+		s.BaseURL.Path,
+		authHandler(backupAPIProxy.ServeHTTP)),
+	)
+
+	packageAPIProxy := proxy.NewProxy(s.PackageAPIProxyConfig)
+	handle(packageAPIEndpoint, http.StripPrefix(
+		s.BaseURL.Path,
+		authHandler(packageAPIProxy.ServeHTTP)),
+	)
+
+	clusterManagementAPIProxy1 := proxy.NewProxy(s.ClusterManagementAPIProxyConfig)
+	handle(clusterManagementAPIEndpoint1, http.StripPrefix(
+		s.BaseURL.Path,
+		authHandler(clusterManagementAPIProxy1.ServeHTTP)),
+	)
+	clusterManagementAPIProxy2 := proxy.NewProxy(s.ClusterManagementAPIProxyConfig)
+	handle(clusterManagementAPIEndpoint2, http.StripPrefix(
+		s.BaseURL.Path,
+		authHandler(clusterManagementAPIProxy2.ServeHTTP)),
 	)
 
 	handle("/api/console/monitoring-dashboard-config", authHandler(s.handleMonitoringDashboardConfigmaps))

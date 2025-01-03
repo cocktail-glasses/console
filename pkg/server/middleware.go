@@ -34,14 +34,17 @@ func authMiddlewareWithUser(authenticator auth.Authenticator, csrfVerifier *csrf
 			if rUrl != "/api/auth/publickey" {
 				user, err := authenticator.Authenticate(w, r)
 				if err != nil {
-					klog.V(4).Infof("authentication failed: %v", err)
+					klog.V(4).Infof("authentication failed(%s): %v", rUrl, err)
 					w.WriteHeader(http.StatusUnauthorized)
 					return
 				}
-				r.Header.Set("Authorization", fmt.Sprintf("Bearer %s", user.Token))
-				r.Header.Set("user-id", fmt.Sprintf("%s", user.UserId))
+				//r.Header.Set("Authorization", fmt.Sprintf("Bearer %s", user.Token))
+				//r.Header.Set("Content-Type", "application/json;charset=UTF-8")
+				r.Header.Set("user-id", fmt.Sprintf("%s", user.UserSeq))
 				r.Header.Set("user-role", fmt.Sprintf("%s", user.UserRole))
 				r.Header.Set("account-seq", fmt.Sprintf("%s", user.AccountSeq))
+				r.Header.Set("account-code", fmt.Sprintf("%s", user.AccountCode))
+				r.Header.Set("user-workspace", fmt.Sprintf("%s", user.UserWorkspace))
 
 				h(user, w, r)
 			} else {
