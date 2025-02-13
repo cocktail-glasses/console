@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
+	"github.com/cocktailcloud/console/pkg/auth/sessions"
 	"html/template"
 	"io/ioutil"
 	"net/http"
@@ -227,12 +228,14 @@ func (s *Server) HTTPHandler() (http.Handler, error) {
 
 	handleFunc := func(path string, handler http.HandlerFunc) { handle(path, handler) }
 
-	fn := func(successURL string, w http.ResponseWriter) {
+	fn := func(loginInfo sessions.LoginJSON, successURL string, w http.ResponseWriter) {
 		templateData := struct {
-			LoginSuccessURL   string `json:"loginSuccessURL"`
-			Branding          string `json:"branding"`
-			CustomProductName string `json:"customProductName"`
+			sessions.LoginJSON `json:",inline"`
+			LoginSuccessURL    string `json:"loginSuccessURL"`
+			Branding           string `json:"branding"`
+			CustomProductName  string `json:"customProductName"`
 		}{
+			LoginJSON:         loginInfo,
 			LoginSuccessURL:   successURL,
 			Branding:          s.Branding,
 			CustomProductName: s.CustomProductName,

@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/cocktailcloud/console/pkg/auth"
+	"github.com/cocktailcloud/console/pkg/auth/oauth2"
+	"github.com/cocktailcloud/console/pkg/auth/sessions"
 	"github.com/cocktailcloud/console/pkg/serverutils"
 	"io/ioutil"
 	"k8s.io/klog/v2"
@@ -36,15 +38,8 @@ type CocktailAuthenticator struct {
 	user            *auth.User
 }
 
-type AuthSource int
-
-const (
-	AuthSourceOIDC     AuthSource = 0
-	AuthSourceCocktail AuthSource = 1
-)
-
 type Config struct {
-	AuthSource AuthSource
+	AuthSource oauth2.AuthSource
 
 	IssuerURL              string
 	LogoutRedirectOverride string // overrides the OIDC provider's front-channel logout URL
@@ -212,7 +207,7 @@ func (s *CocktailAuthenticator) Authenticate(w http.ResponseWriter, r *http.Requ
 	return ls, nil
 }
 
-func (s *CocktailAuthenticator) CallbackFunc(fn func(successURL string, w http.ResponseWriter)) func(w http.ResponseWriter, req *http.Request) {
+func (s *CocktailAuthenticator) CallbackFunc(fn func(loginInfo sessions.LoginJSON, successURL string, w http.ResponseWriter)) func(w http.ResponseWriter, req *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) { w.WriteHeader(http.StatusNoContent) }
 }
 
