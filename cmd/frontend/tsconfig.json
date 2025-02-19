@@ -1,0 +1,68 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "lib": ["dom", "dom.iterable", "esnext", "es2020"],
+    // TODO: ccambo, *.js 파일을 대체할 수 있는 방법은?
+    "allowJs": true,
+    "skipLibCheck": true,
+    // TODO: ccambo, 확인 필요함
+    "esModuleInterop": true,
+    // TODO: ccambo, 확인 필요함
+    "allowSyntheticDefaultImports": true,
+    // TODO: ccambo, 확인 필요함
+    "forceConsistentCasingInFileNames": true,
+    "module": "esnext",
+    "outDir": "./dist",
+    // For paths
+    "baseUrl": "./",
+    // uses import
+    "paths": {
+      "@assets/*": ["src/assets/*"],
+      // "*": ["src/*"],
+      "@domains": ["src/domains"], // src/domains 폴더까지만 지정해서 사용하는 방식, 지정한 폴더에 index.ts 파일이 존재해야 하고 하위 폴더와 파일들에 대한 export 정보가 존재해 야 한다.
+      "@domains/*": ["src/domains/*"], // src/domain 폴더 아래의 파일이나 하위 폴더의 파일까지 지정해서 사용하는 방식
+      "@configs": ["src/infrastructure/configs"],
+      "@configs/*": ["src/infrastructure/configs/*"],
+      "@services": ["src/infrastructure/services"],
+      "@services/*": ["src/infrastructure/services/*"],
+      "@interfaces": ["src/infrastructure/interfaces"],
+      "@interfaces/*": ["src/infrastructure/interfaces/*"],
+      "@stores": ["src/ui/stores"],
+      "@stores/*": ["src/ui/stores/*"],
+      "@components/*": ["src/components/*"],
+      "@pages/*": ["src/pages/*"],
+      "@lib/*": ["src/lib/*"],
+      "@helpers/*": ["src/helpers/*"],
+      "@helpers": ["src/helpers"],
+      "@typedefines/*": ["src/typedefines/*"],
+      "@utils/*": ["src/utils/*"],
+      // TODO: ccambo, 검증 대상
+      "redux/*": ["src/redux/*"],
+      "i18n/*": ["src/i18n/*"]
+    },
+    //class-validator
+    "strictPropertyInitialization": false,
+    //Dependency Injection (Inversify), add 'reflect-metadata'
+    "types": ["vite/client", "vite-plugin-svgr/client", "vitest/globals", "reflect-metadata"],
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true, // with class-validator
+    //Bundler mode
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+    "noEmitOnError": true,
+    "jsx": "react-jsx",
+    "sourceMap": true,
+    "removeComments": true,
+    //Linting
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true
+  },
+  "include": ["src"],
+  "exclude": ["./dist", "node_modules"] // 컴파일에서 제외할 폴더들을 지정
+}

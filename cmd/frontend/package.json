@@ -1,0 +1,218 @@
+{
+  "name": "cocktail-glasses",
+  "version": "0.1.0",
+  "private": true,
+  "productName": "Glasses",
+  "engines": {
+    "npm": ">=10.0.0",
+    "node": ">=20.11.1"
+  },
+  "type": "module",
+  "dependencies": {
+    "@apidevtools/json-schema-ref-parser": "11.9.0",
+    "@apidevtools/swagger-parser": "^10.1.1",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@hookform/resolvers": "^3.10.0",
+    "@iconify/icons-mdi": "^1.2.48",
+    "@iconify/react": "^5.2.0",
+    "@monaco-editor/react": "^4.6.0",
+    "@mui/icons-material": "^6.4.3",
+    "@mui/material": "^6.4.3",
+    "@mui/styles": "^6.4.3",
+    "@mui/x-date-pickers": "^7.25.0",
+    "@mui/x-tree-view": "^7.25.0",
+    "@octokit/core": "^3.5.1",
+    "@reduxjs/toolkit": "^2.5.1",
+    "@tanstack/react-query": "^5.66.0",
+    "@testing-library/react": "^16.2.0",
+    "@types/glob": "^8.1.0",
+    "@types/humanize-duration": "^3.27.1",
+    "@types/js-yaml": "^4.0.3",
+    "@types/json-patch": "0.0.30",
+    "@types/lodash": "^4.14.175",
+    "@types/node": "^20.12.11",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@types/react-redux": "^7.1.19",
+    "@types/react-router-dom": "^5.3.3",
+    "@types/react-window": "^1.8.5",
+    "@types/semver": "^7.3.8",
+    "@vitejs/plugin-react": "^4.3.4",
+    "axios": "^1.7.9",
+    "buffer": "^6.0.3",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.1",
+    "cronstrue": "^2.54.0",
+    "cross-env": "^7.0.3",
+    "crypto-browserify": "^3.12.0",
+    "dayjs": "^1.11.12",
+    "github-markdown-css": "^5.6.1",
+    "glob": "^10.4.1",
+    "https-browserify": "^1.0.0",
+    "humanize-duration": "^3.32.1",
+    "i18next": "^24.2.2",
+    "i18next-browser-languagedetector": "^8.0.2",
+    "if-env": "^1.0.4",
+    "inversify": "^6.2.2",
+    "jotai": "^2.11.3",
+    "js-base64": "^3.7.7",
+    "js-yaml": "^4.1.0",
+    "jsonpath-plus": "^10.0.7",
+    "lodash": "^4.17.21",
+    "material-react-table": "^3.1.0",
+    "monaco-editor": "^0.52.2",
+    "notistack": "^3.0.2",
+    "openapi-types": "^9.3.0",
+    "postcss": "^8.4.5",
+    "postcss-flexbugs-fixes": "^5.0.2",
+    "process": "^0.11.10",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-dropzone": "^14.2.3",
+    "react-hook-form": "^7.52.0",
+    "react-hook-form-mui": "^7.5.0",
+    "react-hotkeys-hook": "^4.4.1",
+    "react-i18next": "^14.1.2",
+    "react-jwt": "^1.1.6",
+    "react-markdown": "^8.0.0",
+    "react-redux": "^7.2.5",
+    "react-router": "^6.24.0",
+    "react-router-dom": "^6.24.0",
+    "react-window": "^1.8.7",
+    "recharts": "^2.1.4",
+    "reflect-metadata": "^0.2.2",
+    "semver": "^7.3.5",
+    "spacetime": "^7.6.0",
+    "stream-browserify": "^3.0.0",
+    "stream-http": "^3.2.0",
+    "styled-components": "^6.1.12",
+    "url": "^0.11.0",
+    "util": "^0.12.4",
+    "xterm": "^4.19.0",
+    "xterm-addon-fit": "^0.5.0",
+    "xterm-addon-search": "^0.9.0"
+  },
+  "overrides": {
+    "domain-browser": "npm:dry-uninstall"
+  },
+  "scripts": {
+    "prestart": "npm run make-version",
+    "start": "cross-env REACT_APP_HEADLAMP_BACKEND_TOKEN=headlamp vite",
+    "preview": "vite preview",
+    "prebuild": "npm run make-version",
+    "build": "cross-env PUBLIC_URL=./ NODE_OPTIONS=--max-old-space-size=8096 vite build && npx shx rm -f build/frontend/index.baseUrl.html",
+    "test": "vitest",
+    "lint": "eslint -c package.json --ext .js,.ts,.tsx src/ ../app/electron ../plugins/headlamp-plugin --ignore-pattern ../plugins/headlamp-plugin/template --ignore-pattern ../plugins/headlamp-plugin/lib/",
+    "format": "prettier --config package.json --write src ../app/electron ../app/scripts ../plugins/headlamp-plugin/bin ../plugins/headlamp-plugin/config ../plugins/headlamp-plugin/template ../plugins/headlamp-plugin/test*.js ../plugins/headlamp-plugin/*.json ../plugins/headlamp-plugin/*.js",
+    "format-check": "prettier --config package.json --check src ../app/electron ../app/scripts ../plugins/headlamp-plugin/bin ../plugins/headlamp-plugin/config ../plugins/headlamp-plugin/template ../plugins/headlamp-plugin/test*.js ../plugins/headlamp-plugin/*.json ../plugins/headlamp-plugin/*.js",
+    "i18n": "i18next 'src/**/*.{ts,tsx}' -c ./src/i18n/i18next-parser.config.js",
+    "tsc": "tsc",
+    "make-version": "node ./make-env.js"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "src/**/*.{js,jsx,ts,tsx}": [
+      "eslint -c package.json --fix"
+    ],
+    "src/**/*.{js,jsx,ts,tsx,json,css,scss,md}": [
+      "prettier --config package.json --write"
+    ],
+    "../app/**/*.{ts,tsx}": [
+      "eslint -c package.json --fix"
+    ],
+    "../app/**/*.{js,jsx,ts,tsx,json,css,scss,md}": [
+      "prettier --config package.json --write"
+    ],
+    "../plugins/headlamp-plugin/{bin,lib,template}/**/*.{ts,tsx}": [
+      "eslint -c package.json --fix"
+    ],
+    "../plugins/headlamp-plugin/{bin,lib,template}/**/*.{js,jsx,ts,tsx,json,css,scss,md}": [
+      "prettier --config package.json --write"
+    ],
+    "../plugins/examples/**/*.{ts,tsx}": [
+      "eslint -c package.json --fix --resolve-plugins-relative-to ."
+    ],
+    "../plugins/examples/**/*.{js,jsx,ts,tsx,json,css,scss,md}": [
+      "prettier --config package.json --write"
+    ],
+    "../e2e-tests/**/*.{js,jsx,ts,tsx,json,css,scss,md}": [
+      "prettier --config package.json --write"
+    ],
+    "../e2e-tests/**/*.{ts,tsx}": [
+      "eslint -c package.json --fix --resolve-plugins-relative-to ."
+    ]
+  },
+  "eslintConfig": {
+    "extends": [
+      "prettier",
+      "plugin:jsx-a11y/recommended"
+    ]
+  },
+  "devDependencies": {
+    "@axe-core/react": "^4.3.2",
+    "@eslint/js": "^9.6.0",
+    "@hookform/devtools": "^4.3.1",
+    "@optimize-lodash/rollup-plugin": "^5.0.0",
+    "@rollup/plugin-dynamic-import-vars": "^2.1.2",
+    "@testing-library/jest-dom": "^6.4.5",
+    "@testing-library/user-event": "^14.5.1",
+    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
+    "@types/eslint__js": "^8.42.3",
+    "@types/jsonpath-plus": "^5.0.5",
+    "@types/nock": "^11.1.0",
+    "@types/recharts": "^1.8.29",
+    "@types/redux-mock-store": "^1.0.4",
+    "@typescript-eslint/eslint-plugin": "^7.15.0",
+    "@typescript-eslint/parser": "^7.15.0",
+    "@vitest/coverage-v8": "^1.6.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-jsx-a11y": "^6.9.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "eslint-plugin-react": "7.34.3",
+    "eslint-plugin-react-hooks": "^4.6.2",
+    "eslint-plugin-react-refresh": "^0.4.9",
+    "eslint-plugin-simple-import-sort": "^12.1.0",
+    "eslint-plugin-unused-imports": "^3.2.0",
+    "fetch-mock": "^12.3.0",
+    "http-proxy-middleware": "^2.0.1",
+    "husky": "^4.3.8",
+    "i18next-parser": "^9.1.0",
+    "jsdom": "^24.0.0",
+    "lint-staged": "^10.5.4",
+    "nock": "^14.0.0-beta.6",
+    "prettier": "^3.3.3",
+    "redux-mock-store": "^1.5.4",
+    "resize-observer-polyfill": "^1.5.1",
+    "rollup-plugin-visualizer": "^5.12.0",
+    "terser": "^5.31.3",
+    "typescript": "^5.5.3",
+    "typescript-eslint": "^7.15.0",
+    "vite": "^6.1.0",
+    "vite-plugin-compression2": "^1.3.3",
+    "vite-plugin-imp": "^2.4.0",
+    "vite-plugin-node-polyfills": "^0.23.0",
+    "vite-plugin-svgr": "^4.3.0",
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "^1.6.0",
+    "vm-browserify": "^1.1.2"
+  }
+}
