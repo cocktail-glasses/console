@@ -1,4 +1,4 @@
-import { Cluster } from '@lib/k8s/cluster';
+import { Cluster } from "@lib/k8s/cluster";
 
 /**
  * Determines whether app is running in electron environment.
@@ -10,17 +10,17 @@ import { Cluster } from '@lib/k8s/cluster';
 function isElectron(): boolean {
   // Renderer process
   if (
-    typeof window !== 'undefined' &&
-    typeof window.process === 'object' &&
-    (window.process as any).type === 'renderer'
+    typeof window !== "undefined" &&
+    typeof window.process === "object" &&
+    (window.process as any).type === "renderer"
   ) {
     return true;
   }
 
   // Main process
   if (
-    typeof process !== 'undefined' &&
-    typeof process.versions === 'object' &&
+    typeof process !== "undefined" &&
+    typeof process.versions === "object" &&
     !!(process.versions as any).electron
   ) {
     return true;
@@ -28,9 +28,9 @@ function isElectron(): boolean {
 
   // Detect the user agent when the `nodeIntegration` option is set to true
   if (
-    typeof navigator === 'object' &&
-    typeof navigator.userAgent === 'string' &&
-    navigator.userAgent.indexOf('Electron') >= 0
+    typeof navigator === "object" &&
+    typeof navigator.userAgent === "string" &&
+    navigator.userAgent.indexOf("Electron") >= 0
   ) {
     return true;
   }
@@ -97,12 +97,12 @@ const verboseModDebug: string[] = [];
  * ```
  */
 export function isDebugVerbose(modName: string): boolean {
-  if (verboseModDebug.filter(mod => modName.indexOf(mod) > 0).length > 0) {
+  if (verboseModDebug.filter((mod) => modName.indexOf(mod) > 0).length > 0) {
     return true;
   }
 
   return (
-    import.meta.env.REACT_APP_DEBUG_VERBOSE === 'all' ||
+    import.meta.env.REACT_APP_DEBUG_VERBOSE === "all" ||
     !!(
       import.meta.env.REACT_APP_DEBUG_VERBOSE &&
       import.meta.env.REACT_APP_DEBUG_VERBOSE?.indexOf(modName) !== -1
@@ -135,14 +135,17 @@ function isDockerDesktop(): boolean {
   return true;
 }
 
-export function getFilterValueByNameFromURL(key: string, location: any): string[] {
+export function getFilterValueByNameFromURL(
+  key: string,
+  location: any,
+): string[] {
   const searchParams = new URLSearchParams(location.search);
 
   const filterValue = searchParams.get(key);
   if (!filterValue) {
     return [];
   }
-  return filterValue.split(' ');
+  return filterValue.split(" ");
 }
 
 export function addQuery(
@@ -151,13 +154,13 @@ export function addQuery(
   // history: any,
   navigate: any,
   location: any,
-  tableName = ''
+  tableName = "",
 ) {
   const pathname = location.pathname;
   const searchParams = new URLSearchParams(location.search);
 
-  if (!!tableName) {
-    searchParams.set('tableName', tableName);
+  if (tableName) {
+    searchParams.set("tableName", tableName);
   }
   // Ensure that default values will not show up in the URL
   for (const key in queryObj) {
@@ -194,7 +197,7 @@ function isDevMode(): boolean {
  *
  */
 function getAppUrl(): string {
-  let url = window.location.origin
+  let url = window.location.origin;
   //   exportFunctions.isDevMode() || exportFunctions.isElectron()
   //     ? 'http://localhost:3000'
   //     : window.location.origin;
@@ -203,8 +206,8 @@ function getAppUrl(): string {
   // }
 
   const baseUrl = exportFunctions.getBaseUrl();
-  console.log('getAppUrl baseUrl', baseUrl);
-  url += baseUrl ? baseUrl + '/' : '/';
+  console.log("getAppUrl baseUrl", baseUrl);
+  url += baseUrl ? baseUrl + "/" : "/";
 
   return url;
 }
@@ -224,27 +227,27 @@ declare global {
  * This could be either '' meaning /, or something like '/headlamp'.
  */
 function getBaseUrl(): string {
-  let baseUrl = '';
+  let baseUrl = "";
   if (window?.headlampBaseUrl !== undefined) {
     baseUrl = window.headlampBaseUrl;
   } else {
-    baseUrl = import.meta.env.PUBLIC_URL ? import.meta.env.PUBLIC_URL : '';
+    baseUrl = import.meta.env.PUBLIC_URL ? import.meta.env.PUBLIC_URL : "";
   }
 
-  if (baseUrl === './' || baseUrl === '.' || baseUrl === '/') {
-    baseUrl = '/headlamp';
+  if (baseUrl === "./" || baseUrl === "." || baseUrl === "/") {
+    baseUrl = "/k8s";
   }
   return baseUrl;
 }
 function getAppVersion() {
-  return localStorage.getItem('app_version');
+  return localStorage.getItem("app_version");
 }
 
 function setAppVersion(value: string) {
-  localStorage.setItem('app_version', value);
+  localStorage.setItem("app_version", value);
 }
 
-const recentClustersStorageKey = 'recent_clusters';
+const recentClustersStorageKey = "recent_clusters";
 
 /**
  * Adds the cluster name to the list of recent clusters in localStorage.
@@ -254,8 +257,8 @@ const recentClustersStorageKey = 'recent_clusters';
  */
 function setRecentCluster(cluster: string | Cluster) {
   const recentClusters = getRecentClusters();
-  const clusterName = typeof cluster === 'string' ? cluster : cluster.name;
-  const currentClusters = recentClusters.filter(name => name !== clusterName);
+  const clusterName = typeof cluster === "string" ? cluster : cluster.name;
+  const currentClusters = recentClusters.filter((name) => name !== clusterName);
   const newClusters = [clusterName, ...currentClusters].slice(0, 3);
   localStorage.setItem(recentClustersStorageKey, JSON.stringify(newClusters));
 }
@@ -264,7 +267,8 @@ function setRecentCluster(cluster: string | Cluster) {
  * @returns the list of recent clusters from localStorage.
  */
 function getRecentClusters() {
-  const currentClustersStr = localStorage.getItem(recentClustersStorageKey) || '[]';
+  const currentClustersStr =
+    localStorage.getItem(recentClustersStorageKey) || "[]";
   const recentClusters = JSON.parse(currentClustersStr) as string[];
 
   if (!Array.isArray(recentClusters)) {
@@ -274,7 +278,7 @@ function getRecentClusters() {
   return recentClusters;
 }
 
-const tablesRowsPerPageKey = 'tables_rows_per_page';
+const tablesRowsPerPageKey = "tables_rows_per_page";
 
 function getTablesRowsPerPage(defaultRowsPerPage: number = 5) {
   const perPageStr = localStorage.getItem(tablesRowsPerPageKey);
@@ -315,20 +319,28 @@ function storeClusterSettings(clusterName: string, settings: ClusterSettings) {
   if (!clusterName) {
     return;
   }
-  localStorage.setItem(`cluster_settings.${clusterName}`, JSON.stringify(settings));
+  localStorage.setItem(
+    `cluster_settings.${clusterName}`,
+    JSON.stringify(settings),
+  );
 }
 
 function loadClusterSettings(clusterName: string): ClusterSettings {
   if (!clusterName) {
     return {};
   }
-  const settings = JSON.parse(localStorage.getItem(`cluster_settings.${clusterName}`) || '{}');
+  const settings = JSON.parse(
+    localStorage.getItem(`cluster_settings.${clusterName}`) || "{}",
+  );
   return settings;
 }
 
-function storeTableSettings(tableId: string, columns: { id?: string; show: boolean }[]) {
+function storeTableSettings(
+  tableId: string,
+  columns: { id?: string; show: boolean }[],
+) {
   if (!tableId) {
-    console.debug('storeTableSettings: tableId is empty!', new Error().stack);
+    console.debug("storeTableSettings: tableId is empty!", new Error().stack);
     return;
   }
 
@@ -338,16 +350,21 @@ function storeTableSettings(tableId: string, columns: { id?: string; show: boole
     localStorage.removeItem(`table_settings.${tableId}`);
     return;
   }
-  localStorage.setItem(`table_settings.${tableId}`, JSON.stringify(columnsWithIds));
+  localStorage.setItem(
+    `table_settings.${tableId}`,
+    JSON.stringify(columnsWithIds),
+  );
 }
 
 function loadTableSettings(tableId: string): { id: string; show: boolean }[] {
   if (!tableId) {
-    console.debug('loadTableSettings: tableId is empty!', new Error().stack);
+    console.debug("loadTableSettings: tableId is empty!", new Error().stack);
     return [];
   }
 
-  const settings = JSON.parse(localStorage.getItem(`table_settings.${tableId}`) || '[]');
+  const settings = JSON.parse(
+    localStorage.getItem(`table_settings.${tableId}`) || "[]",
+  );
   return settings;
 }
 

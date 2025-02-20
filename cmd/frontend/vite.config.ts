@@ -21,10 +21,11 @@ export default defineConfig({
     cors: true,
     open: true,
     proxy: {
-      '/headlamp': {
+      '/k8s': {
         target: 'http://localhost:4466',
         changeOrigin: true,
         ws: true,
+        rewrite: (path) => path.replace(/^\/k8s/, ''),
       },
       '/api': {
         target: 'https://blue-dragon.acloud.run',

@@ -7,7 +7,9 @@
 ## Development
 
 ### node 버전 관리
+
 node 버전 관리는 nvm을 사용합니다. 현재 위치에서 다음 명령어를 실행하면 동일한 노드 버전으로 프로젝트 환경을 구성합니다.
+
 ```sh
 nvm use
 ```
@@ -26,9 +28,11 @@ vite.config.ts 설정
 
 ```js
 proxy: {
-  '/headlamp': {
-    target: 'http://localhost:4466', // headlamp backend k8s 화면용
+  '/k8s': {
+    target: 'http://localhost:4466', // k8s api 화면용
     changeOrigin: true,
+    ws: true,
+    rewrite: (path) => path.replace(/^\/k8s/, ''),
   },
   '/api': {
     target: 'https://blue-dragon.acloud.run', // cocktail api
@@ -40,6 +44,10 @@ proxy: {
   },
 },
 ```
+
+### k8s proxy
+
+kubectl proxy --port=4466
 
 ### Directory Structure
 
