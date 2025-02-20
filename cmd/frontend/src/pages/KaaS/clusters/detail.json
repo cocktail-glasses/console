@@ -1,0 +1,791 @@
+{
+  "apiVersion": "kamaji.clastix.io/v1alpha1",
+  "kind": "TenantControlPlane",
+  "metadata": {
+    "annotations": {
+      "kamaji.clastix.io/kubeconfig-secret-key": "super-admin.conf",
+      "meta.helm.sh/release-name": "tenant-control-plane-apps",
+      "meta.helm.sh/release-namespace": "tenant-root"
+    },
+    "creationTimestamp": "2024-07-28T05:26:58Z",
+    "finalizers": [
+      "finalizer.kamaji.clastix.io",
+      "finalizer.kamaji.clastix.io/soot"
+    ],
+    "generation": 3,
+    "labels": {
+      "app.kubernetes.io/managed-by": "Helm",
+      "helm.toolkit.fluxcd.io/name": "tenant-control-plane-apps",
+      "helm.toolkit.fluxcd.io/namespace": "tenant-root",
+      "tenant.clastix.io": "tenant-root"
+    },
+    "managedFields": [
+      {
+        "apiVersion": "kamaji.clastix.io/v1alpha1",
+        "fieldsType": "FieldsV1",
+        "fieldsV1": {
+          "f:spec": {
+            "f:addons": {
+              "f:konnectivity": {
+                "f:server": {
+                  "f:port": {}
+                }
+              }
+            }
+          }
+        },
+        "manager": "kubectl-edit",
+        "operation": "Update",
+        "time": "2024-07-28T05:32:47Z"
+      },
+      {
+        "apiVersion": "kamaji.clastix.io/v1alpha1",
+        "fieldsType": "FieldsV1",
+        "fieldsV1": {
+          "f:metadata": {
+            "f:annotations": {
+              ".": {},
+              "f:kamaji.clastix.io/kubeconfig-secret-key": {},
+              "f:meta.helm.sh/release-name": {},
+              "f:meta.helm.sh/release-namespace": {}
+            },
+            "f:labels": {
+              ".": {},
+              "f:app.kubernetes.io/managed-by": {},
+              "f:helm.toolkit.fluxcd.io/name": {},
+              "f:helm.toolkit.fluxcd.io/namespace": {},
+              "f:tenant.clastix.io": {}
+            }
+          },
+          "f:spec": {
+            ".": {},
+            "f:addons": {
+              ".": {},
+              "f:coreDNS": {},
+              "f:konnectivity": {
+                ".": {},
+                "f:agent": {
+                  ".": {},
+                  "f:image": {},
+                  "f:tolerations": {},
+                  "f:version": {}
+                },
+                "f:server": {
+                  ".": {},
+                  "f:image": {},
+                  "f:resources": {
+                    ".": {},
+                    "f:requests": {
+                      ".": {},
+                      "f:cpu": {},
+                      "f:memory": {}
+                    }
+                  },
+                  "f:version": {}
+                }
+              },
+              "f:kubeProxy": {}
+            },
+            "f:controlPlane": {
+              ".": {},
+              "f:deployment": {
+                ".": {},
+                "f:additionalMetadata": {
+                  ".": {},
+                  "f:labels": {
+                    ".": {},
+                    "f:tenant.clastix.io": {}
+                  }
+                },
+                "f:additionalVolumeMounts": {
+                  ".": {},
+                  "f:apiServer": {},
+                  "f:controllerManager": {},
+                  "f:scheduler": {}
+                },
+                "f:additionalVolumes": {},
+                "f:extraArgs": {
+                  ".": {},
+                  "f:apiServer": {}
+                },
+                "f:registrySettings": {
+                  ".": {},
+                  "f:apiServerImage": {},
+                  "f:controllerManagerImage": {},
+                  "f:registry": {},
+                  "f:schedulerImage": {}
+                },
+                "f:replicas": {},
+                "f:resources": {
+                  ".": {},
+                  "f:apiServer": {
+                    ".": {},
+                    "f:limits": {},
+                    "f:requests": {
+                      ".": {},
+                      "f:cpu": {},
+                      "f:memory": {}
+                    }
+                  },
+                  "f:controllerManager": {
+                    ".": {},
+                    "f:requests": {
+                      ".": {},
+                      "f:cpu": {},
+                      "f:memory": {}
+                    }
+                  },
+                  "f:scheduler": {
+                    ".": {},
+                    "f:requests": {
+                      ".": {},
+                      "f:cpu": {},
+                      "f:memory": {}
+                    }
+                  }
+                },
+                "f:serviceAccountName": {},
+                "f:strategy": {
+                  ".": {},
+                  "f:rollingUpdate": {
+                    ".": {},
+                    "f:maxSurge": {},
+                    "f:maxUnavailable": {}
+                  },
+                  "f:type": {}
+                }
+              },
+              "f:service": {
+                ".": {},
+                "f:additionalMetadata": {
+                  ".": {},
+                  "f:labels": {
+                    ".": {},
+                    "f:tenant.cocktailcloud.io": {}
+                  }
+                },
+                "f:serviceType": {}
+              }
+            },
+            "f:dataStore": {},
+            "f:kubernetes": {
+              ".": {},
+              "f:admissionControllers": {},
+              "f:kubelet": {
+                ".": {},
+                "f:cgroupfs": {},
+                "f:preferredAddressTypes": {}
+              },
+              "f:version": {}
+            },
+            "f:networkProfile": {
+              ".": {},
+              "f:address": {},
+              "f:certSANs": {},
+              "f:dnsServiceIPs": {},
+              "f:podCidr": {},
+              "f:port": {},
+              "f:serviceCidr": {}
+            }
+          }
+        },
+        "manager": "helm-controller",
+        "operation": "Update",
+        "time": "2024-08-03T02:36:48Z"
+      },
+      {
+        "apiVersion": "kamaji.clastix.io/v1alpha1",
+        "fieldsType": "FieldsV1",
+        "fieldsV1": {
+          "f:metadata": {
+            "f:finalizers": {
+              ".": {},
+              "v:\"finalizer.kamaji.clastix.io\"": {},
+              "v:\"finalizer.kamaji.clastix.io/soot\"": {}
+            }
+          },
+          "f:spec": {
+            "f:controlPlane": {
+              "f:deployment": {
+                "f:podAdditionalMetadata": {},
+                "f:resources": {
+                  "f:apiServer": {
+                    "f:limits": {
+                      "f:cpu": {},
+                      "f:memory": {}
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "manager": "kamaji",
+        "operation": "Update",
+        "time": "2025-01-22T03:23:05Z"
+      },
+      {
+        "apiVersion": "kamaji.clastix.io/v1alpha1",
+        "fieldsType": "FieldsV1",
+        "fieldsV1": {
+          "f:status": {
+            ".": {},
+            "f:addons": {
+              ".": {},
+              "f:coreDNS": {
+                ".": {},
+                "f:enabled": {},
+                "f:lastUpdate": {}
+              },
+              "f:konnectivity": {
+                ".": {},
+                "f:agent": {
+                  ".": {},
+                  "f:lastUpdate": {},
+                  "f:name": {},
+                  "f:namespace": {}
+                },
+                "f:certificate": {
+                  ".": {},
+                  "f:checksum": {},
+                  "f:lastUpdate": {},
+                  "f:secretName": {}
+                },
+                "f:clusterrolebinding": {
+                  ".": {},
+                  "f:name": {}
+                },
+                "f:configMap": {
+                  ".": {},
+                  "f:checksum": {},
+                  "f:name": {}
+                },
+                "f:enabled": {},
+                "f:kubeconfig": {
+                  ".": {},
+                  "f:checksum": {},
+                  "f:lastUpdate": {},
+                  "f:secretName": {}
+                },
+                "f:sa": {
+                  ".": {},
+                  "f:name": {},
+                  "f:namespace": {}
+                },
+                "f:service": {
+                  ".": {},
+                  "f:loadBalancer": {},
+                  "f:name": {},
+                  "f:namespace": {},
+                  "f:port": {}
+                }
+              },
+              "f:kubeProxy": {
+                ".": {},
+                "f:enabled": {},
+                "f:lastUpdate": {}
+              }
+            },
+            "f:certificates": {
+              ".": {},
+              "f:apiServer": {
+                ".": {},
+                "f:checksum": {},
+                "f:lastUpdate": {},
+                "f:secretName": {}
+              },
+              "f:apiServerKubeletClient": {
+                ".": {},
+                "f:checksum": {},
+                "f:lastUpdate": {},
+                "f:secretName": {}
+              },
+              "f:ca": {
+                ".": {},
+                "f:checksum": {},
+                "f:lastUpdate": {},
+                "f:secretName": {}
+              },
+              "f:frontProxyCA": {
+                ".": {},
+                "f:checksum": {},
+                "f:lastUpdate": {},
+                "f:secretName": {}
+              },
+              "f:frontProxyClient": {
+                ".": {},
+                "f:checksum": {},
+                "f:lastUpdate": {},
+                "f:secretName": {}
+              },
+              "f:sa": {
+                ".": {},
+                "f:checksum": {},
+                "f:lastUpdate": {},
+                "f:secretName": {}
+              }
+            },
+            "f:controlPlaneEndpoint": {},
+            "f:kubeadmPhase": {
+              ".": {},
+              "f:bootstrapToken": {
+                ".": {},
+                "f:checksum": {},
+                "f:lastUpdate": {}
+              }
+            },
+            "f:kubeadmconfig": {
+              ".": {},
+              "f:checksum": {},
+              "f:configmapName": {},
+              "f:lastUpdate": {}
+            },
+            "f:kubeconfig": {
+              ".": {},
+              "f:admin": {
+                ".": {},
+                "f:checksum": {},
+                "f:lastUpdate": {},
+                "f:secretName": {}
+              },
+              "f:controllerManager": {
+                ".": {},
+                "f:checksum": {},
+                "f:lastUpdate": {},
+                "f:secretName": {}
+              },
+              "f:scheduler": {
+                ".": {},
+                "f:checksum": {},
+                "f:lastUpdate": {},
+                "f:secretName": {}
+              }
+            },
+            "f:kubernetesResources": {
+              ".": {},
+              "f:deployment": {
+                ".": {},
+                "f:availableReplicas": {},
+                "f:conditions": {
+                  ".": {},
+                  "k:{\"type\":\"Available\"}": {
+                    ".": {},
+                    "f:lastTransitionTime": {},
+                    "f:lastUpdateTime": {},
+                    "f:message": {},
+                    "f:reason": {},
+                    "f:status": {},
+                    "f:type": {}
+                  },
+                  "k:{\"type\":\"Progressing\"}": {
+                    ".": {},
+                    "f:lastTransitionTime": {},
+                    "f:lastUpdateTime": {},
+                    "f:message": {},
+                    "f:reason": {},
+                    "f:status": {},
+                    "f:type": {}
+                  }
+                },
+                "f:lastUpdate": {},
+                "f:name": {},
+                "f:namespace": {},
+                "f:observedGeneration": {},
+                "f:readyReplicas": {},
+                "f:replicas": {},
+                "f:selector": {},
+                "f:updatedReplicas": {}
+              },
+              "f:service": {
+                ".": {},
+                "f:loadBalancer": {},
+                "f:name": {},
+                "f:namespace": {},
+                "f:port": {}
+              },
+              "f:version": {
+                ".": {},
+                "f:status": {},
+                "f:version": {}
+              }
+            },
+            "f:storage": {
+              ".": {},
+              "f:certificate": {
+                ".": {},
+                "f:checksum": {},
+                "f:lastUpdate": {},
+                "f:secretName": {}
+              },
+              "f:config": {
+                ".": {},
+                "f:checksum": {},
+                "f:secretName": {}
+              },
+              "f:dataStoreName": {},
+              "f:driver": {},
+              "f:setup": {
+                ".": {},
+                "f:checksum": {},
+                "f:lastUpdate": {},
+                "f:schema": {},
+                "f:user": {}
+              }
+            }
+          }
+        },
+        "manager": "kamaji",
+        "operation": "Update",
+        "subresource": "status",
+        "time": "2025-02-20T10:17:16Z"
+      }
+    ],
+    "name": "tenant-control-plane-apps",
+    "namespace": "tenant-root",
+    "resourceVersion": "180050655",
+    "uid": "5dff631c-dfdb-4c5c-8ef6-a1ff7b89483c"
+  },
+  "spec": {
+    "addons": {
+      "coreDNS": {},
+      "konnectivity": {
+        "agent": {
+          "image": "registry.k8s.io/kas-network-proxy/proxy-agent",
+          "tolerations": [
+            {
+              "key": "CriticalAddonsOnly",
+              "operator": "Exists"
+            }
+          ],
+          "version": "v0.0.32"
+        },
+        "server": {
+          "image": "registry.k8s.io/kas-network-proxy/proxy-server",
+          "port": 30644,
+          "resources": {
+            "requests": {
+              "cpu": "100m",
+              "memory": "128Mi"
+            }
+          },
+          "version": "v0.0.32"
+        }
+      },
+      "kubeProxy": {}
+    },
+    "controlPlane": {
+      "deployment": {
+        "additionalMetadata": {
+          "labels": {
+            "tenant.clastix.io": "tenant-root"
+          }
+        },
+        "additionalVolumeMounts": {
+          "apiServer": [
+            {
+              "mountPath": "/etc/kubernetes/audit",
+              "name": "audit-policy",
+              "readOnly": true
+            },
+            {
+              "mountPath": "/var/log/kubernetes",
+              "name": "k8s-audit",
+              "subPath": "apiServer"
+            }
+          ],
+          "controllerManager": [
+            {
+              "mountPath": "/etc/kubernetes/audit",
+              "name": "audit-policy",
+              "readOnly": true
+            },
+            {
+              "mountPath": "/var/log/kubernetes",
+              "name": "k8s-audit",
+              "subPath": "apiServer"
+            }
+          ],
+          "scheduler": [
+            {
+              "mountPath": "/etc/kubernetes/audit",
+              "name": "audit-policy",
+              "readOnly": true
+            },
+            {
+              "mountPath": "/var/log/kubernetes",
+              "name": "k8s-audit",
+              "subPath": "apiServer"
+            }
+          ]
+        },
+        "additionalVolumes": [
+          {
+            "name": "audit-policy",
+            "secret": {
+              "defaultMode": 420,
+              "secretName": "tenant-control-plane-apps-audit-policy"
+            }
+          },
+          {
+            "name": "k8s-audit",
+            "persistentVolumeClaim": {
+              "claimName": "tenant-control-plane-apps-k8s-audit-pvc"
+            }
+          }
+        ],
+        "extraArgs": {
+          "apiServer": [
+            "--apiserver-count=1",
+            "--audit-log-maxage=7",
+            "--audit-log-maxbackup=10",
+            "--audit-log-maxsize=100",
+            "--audit-log-path=/var/log/kubernetes/kubernetes-audit.log",
+            "--audit-policy-file=/etc/kubernetes/audit/audit-policy.yaml",
+            "--audit-webhook-config-file=/etc/kubernetes/audit/audit-webhook",
+            "--kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname",
+            "--default-not-ready-toleration-seconds=30",
+            "--default-unreachable-toleration-seconds=30",
+            "--enable-admission-plugins=NodeRestriction",
+            "--service-node-port-range=30000-32767"
+          ]
+        },
+        "podAdditionalMetadata": {},
+        "registrySettings": {
+          "apiServerImage": "kube-apiserver",
+          "controllerManagerImage": "kube-controller-manager",
+          "registry": "registry.k8s.io",
+          "schedulerImage": "kube-scheduler"
+        },
+        "replicas": 3,
+        "resources": {
+          "apiServer": {
+            "limits": {
+              "cpu": "1",
+              "memory": "4Gi"
+            },
+            "requests": {
+              "cpu": "250m",
+              "memory": "512Mi"
+            }
+          },
+          "controllerManager": {
+            "requests": {
+              "cpu": "125m",
+              "memory": "256Mi"
+            }
+          },
+          "scheduler": {
+            "requests": {
+              "cpu": "125m",
+              "memory": "256Mi"
+            }
+          }
+        },
+        "serviceAccountName": "default",
+        "strategy": {
+          "rollingUpdate": {
+            "maxSurge": "100%",
+            "maxUnavailable": 0
+          },
+          "type": "RollingUpdate"
+        }
+      },
+      "service": {
+        "additionalMetadata": {
+          "labels": {
+            "tenant.cocktailcloud.io": "tenant-root"
+          }
+        },
+        "serviceType": "NodePort"
+      }
+    },
+    "dataStore": "tenant-root",
+    "kubernetes": {
+      "admissionControllers": ["ResourceQuota", "LimitRanger"],
+      "kubelet": {
+        "cgroupfs": "systemd",
+        "preferredAddressTypes": ["InternalIP", "ExternalIP"]
+      },
+      "version": "v1.30.2"
+    },
+    "networkProfile": {
+      "address": "192.168.88.48",
+      "certSANs": [
+        "tenant-control-plane-apps.tenant-root.svc",
+        "*.cocktailcloud.io"
+      ],
+      "dnsServiceIPs": ["10.96.0.10"],
+      "podCidr": "10.244.0.0/16",
+      "port": 30643,
+      "serviceCidr": "10.96.0.0/16"
+    }
+  },
+  "status": {
+    "addons": {
+      "coreDNS": {
+        "enabled": true,
+        "lastUpdate": "2024-07-28T05:29:50Z"
+      },
+      "konnectivity": {
+        "agent": {
+          "lastUpdate": "2024-07-28T05:32:48Z",
+          "name": "konnectivity-agent",
+          "namespace": "kube-system"
+        },
+        "certificate": {
+          "checksum": "e6e521c5830bb6a5d41033eb395bc6e8",
+          "lastUpdate": "2024-07-28T05:28:09Z",
+          "secretName": "tenant-control-plane-apps-konnectivity-certificate"
+        },
+        "clusterrolebinding": {
+          "name": "system:konnectivity-server"
+        },
+        "configMap": {
+          "checksum": "e8b426b27a2452d0137b14cfbbd10a0d",
+          "name": "tenant-control-plane-apps-konnectivity-egress-selector-configuration"
+        },
+        "enabled": true,
+        "kubeconfig": {
+          "checksum": "9a66db188b23b5560507ce0c04328ff6",
+          "lastUpdate": "2024-07-28T05:28:10Z",
+          "secretName": "tenant-control-plane-apps-konnectivity-kubeconfig"
+        },
+        "sa": {
+          "name": "konnectivity-agent",
+          "namespace": "kube-system"
+        },
+        "service": {
+          "loadBalancer": {},
+          "name": "tenant-control-plane-apps",
+          "namespace": "tenant-root",
+          "port": 30644
+        }
+      },
+      "kubeProxy": {
+        "enabled": true,
+        "lastUpdate": "2024-07-28T05:29:51Z"
+      }
+    },
+    "certificates": {
+      "apiServer": {
+        "checksum": "13ade13f26dc80bacafdc1175689ed9b",
+        "lastUpdate": "2024-07-28T05:27:17Z",
+        "secretName": "tenant-control-plane-apps-api-server-certificate"
+      },
+      "apiServerKubeletClient": {
+        "checksum": "1e32f842200ab493ebcbf5edd4de6b9f",
+        "lastUpdate": "2024-07-28T05:27:20Z",
+        "secretName": "tenant-control-plane-apps-api-server-kubelet-client-certificate"
+      },
+      "ca": {
+        "checksum": "b6827bda464a75606ea028b6d2279a85",
+        "lastUpdate": "2024-07-28T05:27:01Z",
+        "secretName": "tenant-control-plane-apps-ca"
+      },
+      "frontProxyCA": {
+        "checksum": "45fa1b745f59fb7b93784517d3afdd3b",
+        "lastUpdate": "2024-07-28T05:27:04Z",
+        "secretName": "tenant-control-plane-apps-front-proxy-ca-certificate"
+      },
+      "frontProxyClient": {
+        "checksum": "09dfa805f98c0103dd0c5006457a3c10",
+        "lastUpdate": "2024-07-28T05:27:25Z",
+        "secretName": "tenant-control-plane-apps-front-proxy-client-certificate"
+      },
+      "sa": {
+        "checksum": "066c62bdbfc00098ac3b2b994510b68b",
+        "lastUpdate": "2024-07-28T05:27:06Z",
+        "secretName": "tenant-control-plane-apps-sa-certificate"
+      }
+    },
+    "controlPlaneEndpoint": "192.168.88.48:30643",
+    "kubeadmPhase": {
+      "bootstrapToken": {
+        "checksum": "82517bc88998f13aa13762648ad8a36b",
+        "lastUpdate": "2024-08-03T02:36:54Z"
+      }
+    },
+    "kubeadmconfig": {
+      "checksum": "4b18a38534dffe7ba2a7bdcd0cb9cd01",
+      "configmapName": "tenant-control-plane-apps-kubeadmconfig",
+      "lastUpdate": "2024-07-28T05:26:58Z"
+    },
+    "kubeconfig": {
+      "admin": {
+        "checksum": "797d0691fc2913556241adf3e095a1e6",
+        "lastUpdate": "2024-07-28T05:27:49Z",
+        "secretName": "tenant-control-plane-apps-admin-kubeconfig"
+      },
+      "controllerManager": {
+        "checksum": "df14746ca2827364b3fc8d6e3d3eb493",
+        "lastUpdate": "2024-07-28T05:27:54Z",
+        "secretName": "tenant-control-plane-apps-controller-manager-kubeconfig"
+      },
+      "scheduler": {
+        "checksum": "df14746ca2827364b3fc8d6e3d3eb493",
+        "lastUpdate": "2024-07-28T05:27:56Z",
+        "secretName": "tenant-control-plane-apps-scheduler-kubeconfig"
+      }
+    },
+    "kubernetesResources": {
+      "deployment": {
+        "availableReplicas": 3,
+        "conditions": [
+          {
+            "lastTransitionTime": "2024-07-28T05:28:10Z",
+            "lastUpdateTime": "2024-07-31T04:43:53Z",
+            "message": "ReplicaSet \"tenant-control-plane-apps-847875c4fc\" has successfully progressed.",
+            "reason": "NewReplicaSetAvailable",
+            "status": "True",
+            "type": "Progressing"
+          },
+          {
+            "lastTransitionTime": "2025-02-20T10:17:13Z",
+            "lastUpdateTime": "2025-02-20T10:17:13Z",
+            "message": "Deployment has minimum availability.",
+            "reason": "MinimumReplicasAvailable",
+            "status": "True",
+            "type": "Available"
+          }
+        ],
+        "lastUpdate": "2025-02-20T10:17:16Z",
+        "name": "tenant-control-plane-apps",
+        "namespace": "tenant-root",
+        "observedGeneration": 7,
+        "readyReplicas": 3,
+        "replicas": 3,
+        "selector": "kamaji.clastix.io/name=tenant-control-plane-apps",
+        "updatedReplicas": 3
+      },
+      "service": {
+        "loadBalancer": {},
+        "name": "tenant-control-plane-apps",
+        "namespace": "tenant-root",
+        "port": 30643
+      },
+      "version": {
+        "status": "Ready",
+        "version": "v1.30.2"
+      }
+    },
+    "storage": {
+      "certificate": {
+        "checksum": "1202248b97ef9c69c70ed5ed480e9728",
+        "lastUpdate": "2024-07-28T05:27:58Z",
+        "secretName": "tenant-control-plane-apps-datastore-certificate"
+      },
+      "config": {
+        "checksum": "d480f2c83e3654dc6443e411cae9cded",
+        "secretName": "tenant-control-plane-apps-datastore-config"
+      },
+      "dataStoreName": "tenant-root",
+      "driver": "etcd",
+      "setup": {
+        "checksum": "d480f2c83e3654dc6443e411cae9cded",
+        "lastUpdate": "2024-07-28T05:27:56Z",
+        "schema": "tenant_root_tenant_control_plane_apps",
+        "user": "tenant_root_tenant_control_plane_apps"
+      }
+    }
+  }
+}

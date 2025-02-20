@@ -495,4 +495,15 @@ export const Routes: RoutesType[] = [
       },
     ],
   },
+
+  {
+    id: "tenantClusters",
+    routes: [
+      { path: "/kaas/clusters", page: "KaaS/clusters/List", index: true },
+      {
+        path: "/kaas/clusters/:managementNamespace/:name",
+        page: "KaaS/clusters/Detail",
+      },
+    ],
+  },
 ];
