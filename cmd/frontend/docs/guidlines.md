@@ -191,3 +191,66 @@ import { UserService } from '@lib/services';
   }, []);
 ...
 ```
+
+## Kubernetes 모델 추출 & client 생성
+k8s 클러스터 리소스를 모델로 추출하기 위해 openapi-generator를 이용합니다.
+
+### 1. kube api-server proxy
+openapi-generator를 이용하기 위해 클러스터의 openapi 명세를 가져올 수 있어야 합니다. 다음을 실행하여 kube api-server에 프록시합니다.
+```sh
+kubectl proxy
+```
+
+### 2. openapi-generator 실행
+openapi 스펙은 v2, v3가 존재합니다.
+
+- v2: 클러스터 모든 리소스를 통합한 명세를 제공합니다.
+
+- v3: 클러스터 그룹/버전 별로 명세를 제공합니다.
+
+다음을 실행하여 k8s 모델과 client를 생성할 수 있습니다.
+``` sh
+# input: http://localhost:8001/openapi/v2, output: ./gen
+npm run gen 
+
+# input: http://localhost:8001/openapi/v3/apis/kamaji.clastix.io/v1alpha1, output: ./gen
+npm run gen -- version=v3 api=kamaji.clastix.io/v1alpha1
+
+# input: http://cocktail.io/openapi/v3/apis/kamaji.clastix.io/v1alpha1, output: ./gen
+npm run gen -- version=v3 api=kamaji.clastix.io/v1alpha1 url=http://cocktail.io
+
+```
+
+가능한 인자는 다음과 같습니다.
+|인자|설명|기본값|
+|------|---|---|
+|generator| 사용할 제너레이터|typescript-axios|
+|url|입력 소스 url|http://localhost:8001|
+|version|입력 소스 url; [v2\|v3]|v2|
+|api|클러스터 리소스 그룹 버전 ex. kamaji.clastix.io/v1alpha1||
+|output|추출된 결과 디렉터리 경로|./gen|
+
+
+### 3. 모델 & client 추출
+명령을 실행하면 결과 디렉터리가 생성됩니다. 결과 디렉터리에서 `api.ts`, `base.ts`, `common.ts`, `configuration.ts`, `index.ts` 파일을 `src/lib/[model-name]/` 경로에 복사합니다.
+
+> **Note**
+> 추출되는 결과물은 제너레이터에 따라 다릅니다. typescript-axios를 기준으로 작성했습니다.
+
+## kamaji 호출 예제
+
+```typescript
+import { KamajiClastixIoV1alpha1Api as KamajiAPI, Configuration } from '@lib/kamaji'
+import { AxiosError } from 'axios';
+
+const kamajiConf = new Configuration({
+    basePath: 'http://localhost:8001'
+  })
+
+  const kamajiApi = new KamajiAPI(kamajiConf)
+  kamajiApi.listKamajiClastixIoV1alpha1NamespacedTenantControlPlane('tenant-root')
+  .then(res => res.data)
+  .then(res => res.items)
+  .then(res => console.log(res))
+  .catch((e: AxiosError) => console.log(e.message))
+```

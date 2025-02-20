@@ -10,3 +10,4 @@ vendor
 frontend/public/dist
 node_modules/
 build/
+cmd/frontend/gen
