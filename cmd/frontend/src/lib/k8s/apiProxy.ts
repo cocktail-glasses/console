@@ -1621,7 +1621,7 @@ async function connectStreamWithParams(
   //   protocols.push(`base64url.bearer.authorization.k8s.io.${encodedToken}`);
   // }
 
-  const fullPath = "k8s" + path;
+  const fullPath = path;
   console.log("fullPath", fullPath);
   console.log("cluster", cluster);
   let url = "";
