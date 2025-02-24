@@ -90,10 +90,13 @@ export default function KaaSClusterList() {
 
   const [search, setSearch] = useState('');
 
+  const navigate = useNavigate();
+  const handleCreateClick = () => navigate('/kaas/clusters/create');
+
   return (
     <Paper className="main-container">
       <h2>KaaS 클러스터 관리</h2>
-      <ListMenu search={search} handleSearch={setSearch} />
+      <ListMenu search={search} handleSearch={setSearch} handleCreateClick={handleCreateClick} />
       <ListTable tenantControlPlanes={tenantControlPlanes} search={search} isLoading={isLoading} />
     </Paper>
   );
