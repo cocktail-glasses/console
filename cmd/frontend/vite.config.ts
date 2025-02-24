@@ -125,14 +125,18 @@ export default defineConfig({
       external: ['@axe-core/react'],
       output: {
         manualChunks: {
-          'mui-base': ['@mui/base'],
+          // 'mui-base': ['@mui/base'],
           mui: ['@mui/material'],
-          'mui-icon': ['@mui/icons-material'],
           'mui-datepicker': ['@mui/x-date-pickers'],
           'mui-x-tree-view': ['@mui/x-tree-view'],
-          xterm: ['xterm'],
+          'mui-icon': ['@mui/icons-material'],
+          // 'material-react-table': ['material-reactvi-table'],
           'monaco-editor': ['monaco-editor', '@monaco-editor/react'],
+          apidevtools: ['@apidevtools/json-schema-ref-parser', '@apidevtools/swagger-parser'],
+          xterm: ['xterm', 'xterm-addon-fit', 'xterm-addon-search'],
           recharts: ['recharts'],
+          vendor: ['lodash', 'notistack', 'js-base64', 'js-yaml', 'humanize-duration', 'jotai', '@tanstack/react-query', 'material-react-table', 'spacetime']
+          // app: ['src/']
         },
       },
     },

@@ -9,5 +9,6 @@ cypress-a11y-report.json
 vendor
 frontend/public/dist
 node_modules/
-build/
+cmd/frontend/build
 cmd/frontend/gen
+cmd/frontend/stats.html
