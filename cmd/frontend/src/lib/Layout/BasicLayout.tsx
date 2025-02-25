@@ -1,19 +1,19 @@
 // import VersionDialog from '@lib/App/VersionDialog';
-import { Outlet } from 'react-router-dom';
+import { Outlet } from "react-router-dom";
 
-import Box from '@mui/material/Box';
-import Container from '@mui/material/Container';
-import CssBaseline from '@mui/material/CssBaseline';
-import { useTheme } from '@mui/material/styles';
-import { styled } from '@mui/material/styles';
+import Box from "@mui/material/Box";
+import Container from "@mui/material/Container";
+import CssBaseline from "@mui/material/CssBaseline";
+import { useTheme } from "@mui/material/styles";
+import { styled } from "@mui/material/styles";
 
 // import ActionsNotifier from '@components/common/ActionsNotifier';
 // import AlertNotification from '@components/common/AlertNotification';
-import Sidebar, { NavigationTabs } from '@lib/Layout/Sidebar';
-import TopBar from '@lib/Layout/TopBar';
+import Sidebar, { NavigationTabs } from "@lib/Layout/Sidebar";
+import TopBar from "@lib/Layout/TopBar";
 
-const Div = styled('div')``;
-const Main = styled('main')``;
+const Div = styled("div")``;
+const Main = styled("main")``;
 
 export default function Layout() {
   const theme = useTheme();
@@ -21,13 +21,27 @@ export default function Layout() {
   return (
     <Box
       id="layout"
-      sx={{ display: 'flex', [theme.breakpoints.down('sm')]: { display: 'block' }, height: '100vh', width: '100vw' }}
+      sx={{
+        display: "flex",
+        [theme.breakpoints.down("sm")]: { display: "block" },
+        height: "100vh",
+        width: "100vw",
+      }}
+      className={theme.palette.mode}
     >
       {/* <VersionDialog /> */}
       <CssBaseline />
       <TopBar />
       <Sidebar />
-      <Main id="main" sx={{ flexGrow: 1, marginLeft: 'initial', overflowX: 'hidden', overflowY: 'auto' }}>
+      <Main
+        id="main"
+        sx={{
+          flexGrow: 1,
+          marginLeft: "initial",
+          overflowX: "hidden",
+          overflowY: "auto",
+        }}
+      >
         {/* <AlertNotification /> */}
         <Box>
           <Div id="toolbar" sx={theme.mixins.toolbar} />
