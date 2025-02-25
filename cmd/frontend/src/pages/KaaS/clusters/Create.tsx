@@ -19,10 +19,18 @@ import {
   IconButton,
   Link,
   Typography,
+  Paper,
+  InputAdornment,
+  FormHelperText,
 } from "@mui/material";
 import { SelectChangeEvent } from "@mui/material/Select";
-import { head, map } from "lodash";
-import { useState } from "react";
+import flow from "lodash/flow";
+import head from "lodash/head";
+import isEmpty from "lodash/isEmpty";
+import isFunction from "lodash/isFunction";
+import isString from "lodash/isString";
+import map from "lodash/map";
+import { ReactElement, useState } from "react";
 import { useNavigate } from "react-router";
 import {
   Close,
@@ -31,23 +39,65 @@ import {
   Add,
   Delete,
   OpenInNew,
+  VisibilityOff,
+  Visibility,
 } from "@mui/icons-material";
 import "./create.scss";
+import { Controller, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { createFormSchema } from "./formValidation";
 
 interface StepData {
   label: string;
-  content: React.ReactNode;
+  content: ReactElement;
+}
+
+interface FormValue {
+  cluster: ClusterFormValue;
+  settings: SettingsFormValue;
 }
 
 export default function Create() {
+  const {
+    control,
+    watch,
+    getValues,
+    formState: { errors },
+  } = useForm<FormValue>();
+
+  console.log(watch());
+  console.log("root form errors: ", errors);
+
+  const [hasError, setHasError] = useState(false);
+
   const stepDatas: StepData[] = [
     {
       label: "Cluster",
-      content: <ClusterForm />,
+      content: (
+        <Controller
+          name="cluster"
+          control={control}
+          render={({ field: { value, onChange } }) => (
+            <ClusterForm
+              values={value}
+              handleSubmit={onChange}
+              handleError={setHasError}
+            />
+          )}
+        />
+      ),
     },
     {
       label: "Settings",
-      content: <SettingForm />,
+      content: (
+        <Controller
+          name="settings"
+          control={control}
+          render={({ field: { onChange } }) => (
+            <SettingForm handleSubmit={onChange} />
+          )}
+        />
+      ),
     },
     {
       label: "Static Nodes",
@@ -59,7 +109,7 @@ export default function Create() {
     },
     {
       label: "Summary",
-      content: <SummaryForm />,
+      content: <SummaryForm formValue={getValues()} />,
     },
   ];
   const [activeStepIndex, setActiveStep] = useState(0);
@@ -76,13 +126,16 @@ export default function Create() {
   const navigate = useNavigate();
 
   return (
-    <Box sx={{ padding: "50px" }}>
+    <Paper className="main-form">
+      <h2>Create Cluster</h2>
+
       <ProgressStepper
         stepDatas={stepDatas}
         activeStepIndex={activeStepIndex}
       />
 
       <Box>{stepDatas[activeStepIndex].content}</Box>
+      {JSON.stringify(hasError)}
 
       <Box
         sx={{
@@ -93,7 +146,7 @@ export default function Create() {
       >
         <Button
           variant="outlined"
-          color="success"
+          color="secondary"
           size="large"
           startIcon={<Close />}
           onClick={() => navigate("/kaas/clusters")}
@@ -103,7 +156,7 @@ export default function Create() {
         <Box sx={{ display: "flex", gap: "10px" }}>
           <Button
             variant="outlined"
-            color="success"
+            color="info"
             size="large"
             startIcon={<ArrowBack />}
             disabled={!hasBack(activeStepIndex)}
@@ -118,6 +171,7 @@ export default function Create() {
               size="large"
               startIcon={<ArrowForward />}
               onClick={() => handleNext(activeStepIndex)}
+              disabled={hasError}
             >
               Next
             </Button>
@@ -133,7 +187,7 @@ export default function Create() {
           )}
         </Box>
       </Box>
-    </Box>
+    </Paper>
   );
 }
 
@@ -157,9 +211,27 @@ const ProgressStepper: React.FC<ProgressStepperProps> = ({
   );
 };
 
-const ClusterForm = () => {
+interface ClusterFormValue {
+  name: string;
+  sshKeys: string[];
+  cniPlugin: string;
+  cniPluginVersion: string;
+  controlPlaneVersion: string;
+  containerRuntime: string;
+}
+
+interface ClusterFormProps {
+  values?: ClusterFormValue;
+  handleSubmit?: (...event: any[]) => void;
+  handleError?: (...event: any[]) => void;
+}
+
+const ClusterForm: React.FC<ClusterFormProps> = ({
+  values,
+  handleSubmit,
+  handleError,
+}) => {
   // cni plugins
-  const [cniPlugin, setCniPlugin] = useState();
   const ciliumVersions: string[] = ["1.15.3", "1.14.9", "1.13.14"];
 
   // sshkeys
@@ -174,13 +246,10 @@ const ClusterForm = () => {
     },
   };
   const sshKeys: string[] = ["cocktail", "openstack"];
-  const [selectedSSHKeys, setSelectedSSHKeys] = useState<string[]>([]);
-  const handleChange = (event: SelectChangeEvent<typeof selectedSSHKeys>) => {
-    const {
-      target: { value },
-    } = event;
-    setSelectedSSHKeys(typeof value === "string" ? value.split(",") : value);
-  };
+  const handleSSHKeysChange = ({
+    target: { value },
+  }: SelectChangeEvent<string[]>) =>
+    isString(value) ? value.split(",") : value;
 
   // control plane version
   const controlPlaneVersions: string[] = [
@@ -198,6 +267,7 @@ const ClusterForm = () => {
   interface CheckBoxOption {
     label: string;
     value: string;
+    option?: ReactElement;
   }
 
   const admissionPlugins: CheckBoxOption[] = [
@@ -219,12 +289,7 @@ const ClusterForm = () => {
   };
 
   // checkboxes
-  interface CheckBox {
-    label: string;
-    value: string;
-  }
-
-  const features: CheckBox[] = [
+  const features: CheckBoxOption[] = [
     { label: "Audit Logging", value: "auditLoggin" },
     { label: "Disable CSI Driver", value: "disableCSIDriver" },
     { label: "Kubernetes Dashboard", value: "kubernetesDashboard" },
@@ -234,77 +299,141 @@ const ClusterForm = () => {
     { label: "User SSH Key Agent", value: "userSSHKeyAgent" },
   ];
 
+  // forms
+  const {
+    watch,
+    control,
+    formState: { isValid },
+  } = useForm<ClusterFormValue>({
+    defaultValues: {
+      name: values?.name || "",
+      sshKeys: values?.sshKeys || [],
+      cniPlugin: values?.cniPlugin,
+      cniPluginVersion: values?.cniPluginVersion || head(ciliumVersions),
+      controlPlaneVersion:
+        values?.controlPlaneVersion || head(controlPlaneVersions),
+      containerRuntime: values?.containerRuntime || head(containerRuntimes),
+    },
+    mode: "onChange",
+    resolver: zodResolver(createFormSchema),
+  });
+
+  watch((data) => {
+    if (isFunction(handleSubmit)) handleSubmit(data);
+
+    if (isFunction(handleError)) handleError(isValid);
+  });
+
+  console.log(watch());
+
   return (
     <Box sx={{ display: "flex", gap: "25px" }}>
       <Box sx={{ flex: "1" }}>
         <h2>Clusters</h2>
-        <TextField label="Name" variant="outlined" required fullWidth />
+        <Controller
+          name="name"
+          control={control}
+          render={({
+            field: { value, onChange },
+            fieldState: { error, invalid },
+          }) => (
+            <FormControl fullWidth required error={invalid}>
+              <TextField
+                label="Name"
+                variant="outlined"
+                value={value}
+                onChange={onChange}
+              />
+              <FormHelperText>{error?.message}</FormHelperText>
+            </FormControl>
+          )}
+        />
 
         <h2>Network Configuration</h2>
         <Box sx={{ marginBottom: "22px" }}>
-          <ToggleButtonGroup
-            value={cniPlugin}
-            exclusive
-            onChange={(_, selectedCniPlugin) => setCniPlugin(selectedCniPlugin)}
-            className="cni-plugin-group"
-          >
-            <ToggleButton value="cilium" className="cni-plugin">
-              <span className="plugin-image cilium" />
-            </ToggleButton>
+          <Controller
+            name="cniPlugin"
+            control={control}
+            render={({ field: { value, onChange } }) => (
+              <ToggleButtonGroup
+                value={value}
+                exclusive
+                className="cni-plugin-group"
+                onChange={(_, selected) => onChange(selected)}
+              >
+                <ToggleButton value="cilium" className="cni-plugin">
+                  <span className="plugin-image cilium" />
+                </ToggleButton>
 
-            <ToggleButton value="canal" className="cni-plugin">
-              <span className="plugin-image canal" />
-            </ToggleButton>
+                <ToggleButton value="canal" className="cni-plugin">
+                  <span className="plugin-image canal" />
+                </ToggleButton>
 
-            <ToggleButton value="none" className="cni-plugin">
-              None
-            </ToggleButton>
-          </ToggleButtonGroup>
+                <ToggleButton value="none" className="cni-plugin">
+                  None
+                </ToggleButton>
+              </ToggleButtonGroup>
+            )}
+          />
         </Box>
         <Box sx={{ marginBottom: "10px" }}>
-          <FormControl fullWidth>
-            <InputLabel id="cniPluginVersion" variant="outlined">
-              CNI Plugin Version
-            </InputLabel>
-            <Select
-              variant="outlined"
-              labelId="cniPluginVersion"
-              defaultValue={head(ciliumVersions)}
-              label="CNI Plugin Version"
-            >
-              {map(ciliumVersions, (ciliumVersion) => (
-                <MenuItem value={ciliumVersion} key={ciliumVersion}>
-                  {ciliumVersion}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+          <Controller
+            name="cniPluginVersion"
+            control={control}
+            render={({ field: { value, onChange } }) => (
+              <FormControl fullWidth>
+                <InputLabel id="cniPluginVersion" variant="outlined">
+                  CNI Plugin Version
+                </InputLabel>
+                <Select
+                  variant="outlined"
+                  labelId="cniPluginVersion"
+                  value={value}
+                  onChange={onChange}
+                  label="CNI Plugin Version"
+                >
+                  {map(ciliumVersions, (ciliumVersion) => (
+                    <MenuItem value={ciliumVersion} key={ciliumVersion}>
+                      {ciliumVersion}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
+          />
         </Box>
 
         <h2>SSH Keys</h2>
         <Box sx={{ marginBottom: "10px" }}>
-          <FormControl fullWidth>
-            <InputLabel id="sshkeys" variant="outlined">
-              SSH Keys
-            </InputLabel>
-            <Select
-              variant="outlined"
-              labelId="sshkeys"
-              multiple
-              value={selectedSSHKeys}
-              onChange={handleChange}
-              input={<OutlinedInput label="SSH Keys" />}
-              renderValue={(selected) => selected.join(", ")}
-              MenuProps={MenuProps}
-            >
-              {map(sshKeys, (sshKey) => (
-                <MenuItem value={sshKey} key={sshKey}>
-                  <Checkbox checked={selectedSSHKeys.includes(sshKey)} />
-                  <ListItemText primary={sshKey} />
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+          <Controller
+            name="sshKeys"
+            control={control}
+            render={({ field: { value, onChange } }) => (
+              <FormControl fullWidth>
+                <InputLabel id="sshKeys" variant="outlined">
+                  SSH Keys
+                </InputLabel>
+                <Select
+                  aria-label="sshKeys"
+                  labelId="sshKeys"
+                  variant="outlined"
+                  multiple
+                  value={value}
+                  onChange={flow([handleSSHKeysChange, onChange])}
+                  input={<OutlinedInput label="SSH Keys" />}
+                  renderValue={(selected) => selected.join(", ")}
+                  MenuProps={MenuProps}
+                >
+                  {map(sshKeys, (sshKey) => (
+                    <MenuItem value={sshKey} key={sshKey}>
+                      <Checkbox checked={value.includes(sshKey)} />
+                      <ListItemText primary={sshKey} />
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
+          />
         </Box>
         <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
           <Button
@@ -420,14 +549,191 @@ const ClusterForm = () => {
   );
 };
 
-const SettingForm = () => {
+interface SettingsFormProps {
+  values?: SettingsFormValue;
+  handleSubmit?: (...event: any[]) => void;
+}
+
+interface SettingsFormValue {
+  providerPreset: string;
+  domain: string;
+  credentialType: string;
+  userName?: string;
+  password?: string;
+  securityGroup?: string;
+}
+
+const SettingForm: React.FC<SettingsFormProps> = ({ values, handleSubmit }) => {
+  // forms
+  const { watch, control } = useForm<SettingsFormValue>({
+    defaultValues: {
+      providerPreset: values?.providerPreset || "",
+      credentialType: values?.credentialType || "userCredential",
+      securityGroup: "",
+    },
+    mode: "onBlur",
+  });
+
+  watch((data) => {
+    if (isFunction(handleSubmit)) handleSubmit(data);
+  });
+
+  // provider preset
+  const providerPresets: string[] = ["cocktail-preset"];
+
+  // user credential password
+  const [isPasswordShow, setIsPasswordShow] = useState(false);
+
   return (
     <Box sx={{ display: "flex", gap: "25px" }}>
       <Box sx={{ flex: 1 }}>
         <h2>Basic Settings</h2>
+        <Box sx={{ marginBottom: "10px" }}>
+          <Controller
+            name="providerPreset"
+            control={control}
+            render={({ field: { value, onChange } }) => (
+              <FormControl fullWidth>
+                <InputLabel id="providerPreset" variant="outlined" required>
+                  Provider Preset
+                </InputLabel>
+                <Select
+                  variant="outlined"
+                  labelId="providerPreset"
+                  value={value}
+                  onChange={onChange}
+                  label="Provider Preset"
+                  required
+                >
+                  {map(providerPresets, (providerPreset) => (
+                    <MenuItem value={providerPreset} key={providerPreset}>
+                      {providerPreset}
+                    </MenuItem>
+                  ))}
+                </Select>
+                <FormHelperText>
+                  Using provider presets will disable most of the other
+                  provider-related fields.
+                </FormHelperText>
+              </FormControl>
+            )}
+          />
+        </Box>
+        <Box sx={{ marginBottom: "10px" }}>
+          <Controller
+            name="domain"
+            control={control}
+            render={({ field: { value, onChange } }) => (
+              <TextField
+                label="Domain"
+                variant="outlined"
+                required
+                fullWidth
+                value={value}
+                onChange={onChange}
+              />
+            )}
+          />
+        </Box>
+        <Box sx={{ marginBottom: "10px" }}>
+          <Controller
+            name="credentialType"
+            control={control}
+            render={({ field: { value, onChange } }) => (
+              <ToggleButtonGroup
+                color="primary"
+                value={value}
+                exclusive
+                onChange={(_, select) => onChange(select)}
+                aria-label="credentialType"
+              >
+                <ToggleButton value="userCredential">
+                  User Credential
+                </ToggleButton>
+                <ToggleButton value="applicationCredential">
+                  Application Credential
+                </ToggleButton>
+              </ToggleButtonGroup>
+            )}
+          />
+        </Box>
+        <Box sx={{ marginBottom: "10px" }}>
+          <Controller
+            name="userName"
+            control={control}
+            render={({ field: { value, onChange } }) => (
+              <TextField
+                label="Username"
+                variant="outlined"
+                required
+                fullWidth
+                value={value}
+                onChange={onChange}
+              />
+            )}
+          />
+        </Box>
+        <Box sx={{ marginBottom: "10px" }}>
+          <Controller
+            name="password"
+            control={control}
+            render={({ field: { value, onChange } }) => (
+              <FormControl variant="outlined">
+                <InputLabel htmlFor="password" required>
+                  Password
+                </InputLabel>
+                <OutlinedInput
+                  id="password"
+                  type={isPasswordShow ? "text" : "password"}
+                  required
+                  endAdornment={
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setIsPasswordShow((prev) => !prev);
+                        }}
+                        edge="end"
+                      >
+                        {isPasswordShow ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  }
+                  label="Password"
+                  value={value}
+                  onChange={onChange}
+                />
+              </FormControl>
+            )}
+          />
+        </Box>
       </Box>
       <Box sx={{ flex: 1 }}>
         <h2>Advanced Settings</h2>
+        <Box sx={{ marginBottom: "10px" }}>
+          <Controller
+            name="securityGroup"
+            control={control}
+            render={({ field: { value, onChange } }) => (
+              <FormControl fullWidth disabled>
+                <InputLabel id="providerPreset" variant="outlined" disabled>
+                  No Security Groups Available
+                </InputLabel>
+                <Select
+                  variant="outlined"
+                  labelId="providerPreset"
+                  value={value}
+                  onChange={onChange}
+                  label="Provider Preset"
+                  disabled
+                ></Select>
+                <FormHelperText>
+                  Please enter your credentials first.
+                </FormHelperText>
+              </FormControl>
+            )}
+          />
+        </Box>
       </Box>
     </Box>
   );
@@ -452,151 +758,143 @@ const ApplicationsForm = () => {
   );
 };
 
-const SummaryForm = () => {
+interface SummaryFormProps {
+  formValue: FormValue;
+}
+
+const SummaryForm: React.FC<SummaryFormProps> = ({ formValue }) => {
+  interface SummaryGroup extends Array<Step> {}
+  interface SummaryLayout extends Array<SummaryGroup> {}
+
+  const summaryData: SummaryLayout = [
+    [
+      {
+        title: "Cluster",
+        index: 1,
+        sub: [
+          {
+            title: "GENERAL",
+            contents: [
+              ["Name", formValue.cluster.name],
+              ["Version", formValue.cluster.controlPlaneVersion],
+              ["Container Runtime", formValue.cluster.containerRuntime],
+              [
+                "SSH Keys",
+                isEmpty(formValue.cluster.sshKeys)
+                  ? "No assigned keys"
+                  : formValue.cluster.sshKeys.join(", "),
+              ],
+            ],
+          },
+
+          {
+            title: "NETWORK CONFIGURATION",
+            contents: [
+              ["CNI Plugin", formValue.cluster.cniPlugin],
+              ["CNI Plugin Version", formValue.cluster.cniPluginVersion],
+              ["Proxy Mode", "ebpf"],
+              ["Expose Strategy", "NodePort"],
+              ["Allowed IP Ranges for Node Ports", undefined],
+              ["Services CIDR", "10.240.16.0/20"],
+              ["Node CIDR Mask Size", "24"],
+            ],
+          },
+
+          {
+            title: "SPECIFICATION",
+            contents: [["User SSH Key Agent", undefined]],
+          },
+
+          {
+            title: "ADMISSION PLUGINS",
+            contents: [["User SSH Key Agent", undefined]],
+          },
+        ],
+      },
+      {
+        title: "Settings",
+        index: 2,
+        contents: [["Preset", "cocktail-preset"]],
+      },
+      {
+        title: "Static Nodes",
+        index: 3,
+      },
+    ],
+    [
+      {
+        title: "Applications",
+        index: 4,
+      },
+    ],
+  ];
+
   return (
     <Box className="summary">
-      <Box className="group">
-        <Box className="step">
-          <Typography className="header counter-1" gutterBottom>
-            Cluster
-          </Typography>
-
-          <Box sx={{ paddingBottom: "24px" }}>
-            <Typography variant="subtitle1" sx={{ marginBottom: "14px" }}>
-              GENERAL
-            </Typography>
-
-            <Box className="content">
-              <Box className="item">
-                <Typography className="label" variant="caption" gutterBottom>
-                  Name
-                </Typography>
-                <Typography variant="body1" gutterBottom>
-                  nostalgic-wozniak
-                </Typography>
-              </Box>
-
-              <Box className="item">
-                <Typography className="label" variant="caption" gutterBottom>
-                  Version
-                </Typography>
-                <Typography variant="body1" gutterBottom>
-                  1.29.4
-                </Typography>
-              </Box>
-
-              <Box className="item">
-                <Typography className="label" variant="caption" gutterBottom>
-                  Container Runtime
-                </Typography>
-                <Typography variant="body1" gutterBottom>
-                  containerd
-                </Typography>
-              </Box>
-
-              <Box className="item">
-                <Typography className="label" variant="caption" gutterBottom>
-                  SSH Keys
-                </Typography>
-                <Typography variant="body1" gutterBottom>
-                  No assigned keys
-                </Typography>
-              </Box>
-            </Box>
-          </Box>
-
-          <Box sx={{ paddingBottom: "24px" }}>
-            <Typography variant="subtitle1" sx={{ marginBottom: "14px" }}>
-              NETWORK CONFIGURATION
-            </Typography>
-
-            <Box className="content">
-              <Box className="item">
-                <Typography className="label" variant="caption" gutterBottom>
-                  CNI Plugin
-                </Typography>
-                <Typography variant="body1" gutterBottom>
-                  cilium
-                </Typography>
-              </Box>
-
-              <Box className="item">
-                <Typography className="label" variant="caption" gutterBottom>
-                  CNI Plugin Version
-                </Typography>
-                <Typography variant="body1" gutterBottom>
-                  1.15.3
-                </Typography>
-              </Box>
-
-              <Box className="item">
-                <Typography className="label" variant="caption" gutterBottom>
-                  Proxy Mode
-                </Typography>
-                <Typography variant="body1" gutterBottom>
-                  ebpf
-                </Typography>
-              </Box>
-
-              <Box className="item">
-                <Typography className="label" variant="caption" gutterBottom>
-                  Expose Strategy
-                </Typography>
-                <Typography variant="body1" gutterBottom>
-                  NodePort
-                </Typography>
-              </Box>
-
-              <Box className="item">
-                <Typography className="label" variant="caption" gutterBottom>
-                  Expose Strategy
-                </Typography>
-                <Typography variant="body1" gutterBottom>
-                  NodePort
-                </Typography>
-              </Box>
-
-              <Box className="item">
-                <Typography className="label" variant="caption" gutterBottom>
-                  Allowed IP Ranges for Node Ports
-                </Typography>
-                <Typography variant="body1" gutterBottom></Typography>
-              </Box>
-
-              <Box className="item">
-                <Typography className="label" variant="caption" gutterBottom>
-                  Services CIDR
-                </Typography>
-                <Typography variant="body1" gutterBottom>
-                  10.240.16.0/20
-                </Typography>
-              </Box>
-
-              <Box className="item">
-                <Typography className="label" variant="caption" gutterBottom>
-                  Node CIDR Mask Size
-                </Typography>
-                <Typography variant="body1" gutterBottom>
-                  24
-                </Typography>
-              </Box>
-            </Box>
-          </Box>
+      {map(summaryData, (group, groupIndex) => (
+        <Box className="group" key={groupIndex}>
+          {map(group, (step) => (
+            <SummaryStep key={step.title} stepData={step} />
+          ))}
         </Box>
-
-        <Box className="step">
-          <Typography className="header counter-2">Settings</Typography>
-        </Box>
-
-        <Box className="step">
-          <Typography className="header counter-3">Static Nodes</Typography>
-        </Box>
-      </Box>
-      <Box className="group">
-        <Box className="step">
-          <Typography className="header counter-4">Applications</Typography>
-        </Box>
-      </Box>
+      ))}
     </Box>
   );
 };
+
+interface Step {
+  title: string;
+  index: number;
+  contents?: any[];
+  sub?: any[];
+}
+
+interface SummaryStepProps {
+  stepData: Step;
+}
+
+const SummaryStep: React.FC<SummaryStepProps> = ({ stepData }) => (
+  <Box className="step">
+    <Typography className={`header counter-${stepData.index}`} gutterBottom>
+      {stepData.title}
+    </Typography>
+
+    {map(stepData.sub, (sub) => (
+      <Box sx={{ paddingBottom: "24px" }} key={sub.title}>
+        <Typography variant="subtitle1" sx={{ marginBottom: "14px" }}>
+          {sub.title}
+        </Typography>
+
+        <Box className="content">
+          {map(sub.contents, (content) => (
+            <SummaryItem
+              key={content[0]}
+              label={content[0]}
+              value={content[1]}
+            />
+          ))}
+        </Box>
+      </Box>
+    ))}
+
+    {map(stepData.contents, (content) => (
+      <SummaryItem key={content[0]} label={content[0]} value={content[1]} />
+    ))}
+  </Box>
+);
+
+interface SummaryItemProp {
+  label: string;
+  value?: any;
+}
+
+const SummaryItem: React.FC<SummaryItemProp> = ({ label, value }) => (
+  <Box className="item">
+    <Typography className="label" variant="caption" gutterBottom>
+      {label}
+    </Typography>
+    <Typography variant="body1" gutterBottom>
+      {value}
+    </Typography>
+  </Box>
+);
