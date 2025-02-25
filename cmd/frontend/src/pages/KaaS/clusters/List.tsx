@@ -12,7 +12,7 @@ import {
   IoClastixKamajiV1alpha1TenantControlPlaneList,
 } from "@lib/kamaji";
 import { useEffect, useState } from "react";
-import _ from "lodash";
+import { chain } from "lodash";
 import { Link } from "react-router-dom";
 
 export default function KaaSClusterList() {
@@ -75,7 +75,7 @@ export default function KaaSClusterList() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {_.chain(tenantControlPlane?.items)
+            {chain(tenantControlPlane?.items)
               .map(tableFields)
               .map((controlPlane, i) => (
                 <TableRow
