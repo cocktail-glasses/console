@@ -1,3 +1,8 @@
+.main-form {
+  padding: 30px;
+  margin-top: 30px;
+}
+
 .cni-plugin-group .cni-plugin {
   width: 118px;
   height: 43px;
@@ -5,8 +10,10 @@
   margin-bottom: 10px;
   border-radius: 4px !important;
 
+  --cni-plugin-border: 1px solid rgba(0, 0, 0, 0.12);
+
   &:not(:first-child) {
-    border-left: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-left: var(--cni-plugin-border);
   }
 
   .plugin-image {
@@ -17,19 +24,21 @@
     filter: grayscale(1);
 
     &.cilium {
+      $cilium-size: 80px;
       background-image: url("/cni_cilium.svg");
-      max-height: 80px;
-      min-height: 80px;
-      max-width: 80px;
-      min-width: 80px;
+      max-height: $cilium-size;
+      min-height: $cilium-size;
+      max-width: $cilium-size;
+      min-width: $cilium-size;
     }
 
     &.canal {
+      $canal-size: 50px;
       background-image: url("/cni_canal.png");
-      max-height: 50px;
-      min-height: 50px;
-      max-width: 50px;
-      min-width: 50px;
+      max-height: $canal-size;
+      min-height: $canal-size;
+      max-width: $canal-size;
+      min-width: $canal-size;
     }
   }
 
@@ -104,5 +113,11 @@
         }
       }
     }
+  }
+}
+
+.dark {
+  .cni-plugin-group .cni-plugin {
+    --cni-plugin-border: 1px solid rgba(255, 255, 255, 0.12);
   }
 }
