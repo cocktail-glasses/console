@@ -12,6 +12,8 @@ import Settings from "@pages/Settings";
 // const UsersDetail = lazy(() => import(`@pages/Users/Detail`))
 // const UsersList = lazy(() => import(`@pages/Users/List`))
 // const Settings = lazy(() => import(`@pages/Settings`))
+import KaaSList from "@pages/KaaS/clusters/List";
+import KaaSDetail from "@pages/KaaS/clusters/Detail";
 
 export interface RoutesType {
   id: string;
@@ -499,10 +501,16 @@ export const Routes: RoutesType[] = [
   {
     id: "tenantClusters",
     routes: [
-      { path: "/kaas/clusters", page: "KaaS/clusters/List", index: true },
+      {
+        path: "/kaas/clusters",
+        page: "KaaS/clusters/List",
+        element: KaaSList,
+        index: true,
+      },
       {
         path: "/kaas/clusters/:managementNamespace/:name",
         page: "KaaS/clusters/Detail",
+        element: KaaSDetail,
       },
     ],
   },
