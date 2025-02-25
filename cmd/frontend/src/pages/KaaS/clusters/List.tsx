@@ -8,38 +8,13 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import {
   KamajiClastixIoV1alpha1Api as KamajiAPI,
-  IoClastixKamajiV1alpha1TenantControlPlane,
   IoClastixKamajiV1alpha1TenantControlPlaneList,
 } from "@lib/kamaji";
 import { useEffect, useState } from "react";
-import { chain } from "lodash";
+import { map } from "lodash";
 import { Link } from "react-router-dom";
 
 export default function KaaSClusterList() {
-  interface TenantControlPlaneFields
-    extends IoClastixKamajiV1alpha1TenantControlPlane {
-    pods: string;
-    dataStorage: string;
-  }
-
-  const tableFields = (
-    cluster: IoClastixKamajiV1alpha1TenantControlPlane,
-  ): TenantControlPlaneFields => {
-    const deployment = cluster.status?.kubernetesResources?.deployment;
-    const availableReplicas = deployment?.availableReplicas || 0;
-    const replicas = deployment?.replicas || "-";
-
-    const storage = cluster.status?.storage;
-    const dataStoreName = storage?.dataStoreName || "";
-    const drivder = storage?.driver || "";
-
-    return {
-      ...cluster,
-      pods: `${availableReplicas}/${replicas}`,
-      dataStorage: `${dataStoreName} (${drivder})`,
-    };
-  };
-
   const [tenantControlPlane, setTenantControlPlane] =
     useState<IoClastixKamajiV1alpha1TenantControlPlaneList>();
   useEffect(() => {
@@ -75,42 +50,46 @@ export default function KaaSClusterList() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {chain(tenantControlPlane?.items)
-              .map(tableFields)
-              .map((controlPlane, i) => (
-                <TableRow
-                  key={`row-${controlPlane.metadata?.name || i}`}
-                  sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-                >
-                  <TableCell component="th" scope="row">
-                    <Link
-                      to={`/kaas/clusters/${controlPlane.metadata?.namespace}/${controlPlane.metadata?.name}`}
-                    >
-                      {controlPlane?.metadata?.name}
-                    </Link>
-                  </TableCell>
-                  <TableCell align="right" onClick={() => console.log("sdf")}>
-                    {controlPlane?.metadata?.namespace}
-                  </TableCell>
-                  <TableCell align="right">
-                    {controlPlane?.status?.kubernetesResources?.version?.status}
-                  </TableCell>
-                  <TableCell align="right">{controlPlane.pods}</TableCell>
-                  <TableCell align="right">
-                    {controlPlane.status?.controlPlaneEndpoint}
-                  </TableCell>
-                  <TableCell align="right">
-                    {controlPlane.spec?.kubernetes.version}
-                  </TableCell>
-                  <TableCell align="right">
-                    {controlPlane.dataStorage}
-                  </TableCell>
-                  <TableCell align="right">
-                    {controlPlane.metadata?.creationTimestamp}
-                  </TableCell>
-                </TableRow>
-              ))
-              .value()}
+            {map(tenantControlPlane?.items, (controlPlane, i) => (
+              <TableRow
+                key={`row-${controlPlane.metadata?.name || i}`}
+                sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+              >
+                <TableCell component="th" scope="row">
+                  <Link
+                    to={`/kaas/clusters/${controlPlane.metadata?.namespace}/${controlPlane.metadata?.name}`}
+                  >
+                    {controlPlane?.metadata?.name}
+                  </Link>
+                </TableCell>
+                <TableCell align="right">
+                  {controlPlane?.metadata?.namespace}
+                </TableCell>
+                <TableCell align="right">
+                  {controlPlane?.status?.kubernetesResources?.version?.status}
+                </TableCell>
+                <TableCell align="right">
+                  {controlPlane.status?.kubernetesResources?.deployment
+                    ?.availableReplicas || 0}
+                  /
+                  {controlPlane.status?.kubernetesResources?.deployment
+                    ?.replicas || "-"}
+                </TableCell>
+                <TableCell align="right">
+                  {controlPlane.status?.controlPlaneEndpoint}
+                </TableCell>
+                <TableCell align="right">
+                  {controlPlane.spec?.kubernetes.version}
+                </TableCell>
+                <TableCell align="right">
+                  {controlPlane.status?.storage?.dataStoreName} (
+                  {controlPlane.status?.storage?.driver})
+                </TableCell>
+                <TableCell align="right">
+                  {controlPlane.metadata?.creationTimestamp}
+                </TableCell>
+              </TableRow>
+            ))}
           </TableBody>
         </Table>
       </TableContainer>
