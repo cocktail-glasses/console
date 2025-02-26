@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { Suspense } from "react";
 import { useTranslation } from "react-i18next";
 import {
   createBrowserRouter,
@@ -63,29 +63,16 @@ function make(t: (...args: any[]) => any) {
     const p = menus[menu.parent || menu.id];
     e.routes.forEach((r) => {
       // const Element = lazy(() => import(`../pages/${r.page}`))
-      if (r.element) {
-        const Element = r.element;
-        const route: RouteObject = {
-          path: r.path,
-          element: (
-            <AuthRoute menu={menu} sub={p.sub}>
-              <Element {...r.props} />
-            </AuthRoute>
-          ),
-        };
-        routes.push(route);
-      } else {
-        const Element = lazy(() => import(`@pages/${r.page}`));
-        const route: RouteObject = {
-          path: r.path,
-          element: (
-            <AuthRoute menu={menu} sub={p.sub}>
-              <Element {...r.props} />
-            </AuthRoute>
-          ),
-        };
-        routes.push(route);
-      }
+      const Element = r.element;
+      const route: RouteObject = {
+        path: r.path,
+        element: (
+          <AuthRoute menu={menu} sub={p.sub}>
+            <Element {...r.props} />
+          </AuthRoute>
+        ),
+      };
+      routes.push(route);
     });
   });
   return { r: routes, g: Groups, m: Object.values(menus) };

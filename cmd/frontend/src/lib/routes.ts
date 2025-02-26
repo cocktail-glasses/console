@@ -1,4 +1,3 @@
-import React from "react";
 import DaemonSet from "./k8s/daemonSet";
 import Deployment from "./k8s/deployment";
 import Job from "./k8s/job";
@@ -8,12 +7,80 @@ import StatefulSet from "./k8s/statefulSet";
 import Home from "@pages/Home";
 import { UsersDetail, UsersList } from "@pages/Users";
 import Settings from "@pages/Settings";
-// const Home = lazy(() => import(`@pages/Home`))
-// const UsersDetail = lazy(() => import(`@pages/Users/Detail`))
-// const UsersList = lazy(() => import(`@pages/Users/List`))
-// const Settings = lazy(() => import(`@pages/Settings`))
+
 import KaaSList from "@pages/KaaS/clusters/List";
 import KaaSDetail from "@pages/KaaS/clusters/Detail";
+
+import Clusters from "@pages/Clusters/Clusters";
+
+import k8sClusterOverview from "@pages/K8s/cluster/Overview";
+import k8sNamespaceList from "@pages/K8s/namespace/List";
+import k8sNamespaceDetails from "@pages/K8s/namespace/Details";
+import k8sNodeList from "@pages/K8s/node/List";
+import k8sNodeDetails from "@pages/K8s/node/Details";
+import k8sCrdList from "@pages/K8s/crd/List";
+import k8sCrdDetails from "@pages/K8s/crd/Details";
+import k8sCrdCustomResourceList from "@pages/K8s/crd/CustomResourceList";
+import k8sCrdCustomResourceDetails from "@pages/K8s/crd/CustomResourceDetails";
+import k8sWorkloadOverview from "@pages/K8s/workload/Overview";
+import k8sWorkloadDetails from "@pages/K8s/workload/Details";
+import k8sPodList from "@pages/K8s/pod/List";
+import k8sPodDetails from "@pages/K8s/pod/Details";
+import k8sDeploymentsList from "@pages/K8s/deployments/List";
+import k8sStatefulsetList from "@pages/K8s/statefulset/List";
+import k8sStatefulsetDetails from "@pages/K8s/statefulset/Details";
+import k8sDaemonsetList from "@pages/K8s/daemonset/List";
+import k8sDaemonsetDetails from "@pages/K8s/daemonset/Details";
+import k8sReplicasetList from "@pages/K8s/replicaset/List";
+import k8sJobList from "@pages/K8s/job/List";
+import k8sCronjobList from "@pages/K8s/cronjob/List";
+import k8sCronjobDetails from "@pages/K8s/cronjob/Details";
+import k8sStorageClaimList from "@pages/K8s/storage/ClaimList";
+import k8sStorageClaimDetails from "@pages/K8s/storage/ClaimDetails";
+import k8sStorageVolumeList from "@pages/K8s/storage/VolumeList";
+import k8sStorageVolumeDetails from "@pages/K8s/storage/VolumeDetails";
+import k8sStorageClassList from "@pages/K8s/storage/ClassList";
+import k8sStorageClassDetails from "@pages/K8s/storage/ClassDetails";
+import k8sServiceList from "@pages/K8s/service/List";
+import k8sServiceDetails from "@pages/K8s/service/Details";
+import k8sEndpointsList from "@pages/K8s/endpoints/List";
+import k8sEndpointsDetails from "@pages/K8s/endpoints/Details";
+import k8sIngressList from "@pages/K8s/ingress/List";
+import k8sIngressDetails from "@pages/K8s/ingress/Details";
+import k8sIngressClassList from "@pages/K8s/ingress/ClassList";
+import k8sIngressClassDetails from "@pages/K8s/ingress/ClassDetails";
+import k8sNetworkpolicyList from "@pages/K8s/networkpolicy/List";
+import k8sNetworkpolicyDetails from "@pages/K8s/networkpolicy/Details";
+import k8sServiceaccountList from "@pages/K8s/serviceaccount/List";
+import k8sServiceaccountDetails from "@pages/K8s/serviceaccount/Details";
+import k8sRoleList from "@pages/K8s/role/List";
+import k8sRoleDetails from "@pages/K8s/role/Details";
+import k8sRoleBindingList from "@pages/K8s/role/BindingList";
+import k8sRoleBindingDetails from "@pages/K8s/role/BindingDetails";
+import k8sConfigmapList from "@pages/K8s/configmap/List";
+import k8sConfigmapDetails from "@pages/K8s/configmap/Details";
+import k8sSecretList from "@pages/K8s/secret/List";
+import k8sSecretDetails from "@pages/K8s/secret/Details";
+import k8sHorizontalPodAutoscalerList from "@pages/K8s/horizontalPodAutoscaler/List";
+import k8sHorizontalPodAutoscalerDetails from "@pages/K8s/horizontalPodAutoscaler/Details";
+import k8sVerticalPodAutoscalerList from "@pages/K8s/verticalPodAutoscaler/List";
+import k8sVerticalPodAutoscalerDetails from "@pages/K8s/verticalPodAutoscaler/Details";
+import k8sPodDisruptionBudgetList from "@pages/K8s/podDisruptionBudget/List";
+import k8sPodDisruptionBudgetDetails from "@pages/K8s/podDisruptionBudget/Details";
+import k8sResourceQuotaList from "@pages/K8s/resourceQuota/List";
+import k8sResourceQuotaDetails from "@pages/K8s/resourceQuota/Details";
+import k8sLimitRangeList from "@pages/K8s/limitRange/List";
+import k8sLimitRangeDetails from "@pages/K8s/limitRange/Details";
+import k8sPriorityClassList from "@pages/K8s/priorityClass/List";
+import k8sPriorityClassDetails from "@pages/K8s/priorityClass/Details";
+import k8sRuntimeClassList from "@pages/K8s/runtimeClass/List";
+import k8sRuntimeClassDetails from "@pages/K8s/runtimeClass/Details";
+import k8sLeaseList from "@pages/K8s/lease/List";
+import k8sLeaseDetails from "@pages/K8s/lease/List";
+import k8sWebhookconfigurationMutatingWebhookConfigList from "@pages/K8s/webhookconfiguration/MutatingWebhookConfigList";
+import k8sWebhookconfigurationMutatingWebhookConfigDetails from "@pages/K8s/webhookconfiguration/MutatingWebhookConfigDetails";
+import k8sWebhookconfigurationValidatingWebhookConfigList from "@pages/K8s/webhookconfiguration/ValidatingWebhookConfigList";
+import k8sWebhookconfigurationValidatingWebhookConfigDetails from "@pages/K8s/webhookconfiguration/ValidatingWebhookConfigDetails";
 
 export interface RoutesType {
   id: string;
@@ -24,7 +91,7 @@ export interface Route {
   path: string;
   page: string;
   // element?: React.LazyExoticComponent<() => JSX.Element | null>;
-  element?: React.ElementType | null;
+  element?: any;
   index?: boolean;
   props?: any;
 }
@@ -54,43 +121,81 @@ export const Routes: RoutesType[] = [
   //k8s
   {
     id: "clusters",
-    routes: [{ path: "/clusters", page: "Clusters/Clusters", index: true }],
+    routes: [
+      {
+        path: "/clusters",
+        page: "Clusters/Clusters",
+        element: Clusters,
+        index: true,
+      },
+    ],
   },
   {
     id: "cluster",
     routes: [
-      { path: "/clusters/cluster", page: "K8s/cluster/Overview", index: true },
+      {
+        path: "/clusters/cluster",
+        page: "K8s/cluster/Overview",
+        element: k8sClusterOverview,
+        index: true,
+      },
     ],
   },
   {
     id: "namespaces",
     routes: [
-      { path: "/clusters/namespaces", page: "K8s/namespace/List", index: true },
+      {
+        path: "/clusters/namespaces",
+        page: "K8s/namespace/List",
+        element: k8sNamespaceList,
+        index: true,
+      },
       {
         path: "/clusters/:cluster/namespace/:name",
         page: "K8s/namespace/Details",
+        element: k8sNamespaceDetails,
       },
     ],
   },
   {
     id: "nodes",
     routes: [
-      { path: "/clusters/nodes", page: "K8s/node/List", index: true },
-      { path: "/clusters/:cluster/node/:name", page: "K8s/node/Details" },
+      {
+        path: "/clusters/nodes",
+        page: "K8s/node/List",
+        element: k8sNodeList,
+        index: true,
+      },
+      {
+        path: "/clusters/:cluster/node/:name",
+        page: "K8s/node/Details",
+        element: k8sNodeDetails,
+      },
     ],
   },
   {
     id: "crds",
     routes: [
-      { path: "/clusters/crds", page: "K8s/crd/List", index: true },
-      { path: "/clusters/crds/:name", page: "K8s/crd/Details" },
+      {
+        path: "/clusters/crds",
+        page: "K8s/crd/List",
+        element: k8sCrdList,
+        index: true,
+      },
+      {
+        path: "/clusters/crds/:name",
+        page: "K8s/crd/Details",
+        element: k8sCrdDetails,
+      },
       {
         path: "/clusters/customresources/:crd",
         page: "K8s/crd/CustomResourceList",
+        element: k8sCrdCustomResourceList,
       },
       {
         path: "/clusters/customresources/:crd/:namespace/:crName",
         page: "K8s/crd/CustomResourceDetails",
+        element: k8sCrdCustomResourceDetails,
       },
     ],
   },
@@ -100,6 +205,7 @@ export const Routes: RoutesType[] = [
       {
         path: "/clusters/workloads",
         page: "K8s/workload/Overview",
+        element: k8sWorkloadOverview,
         index: true,
       },
     ],
@@ -107,10 +213,16 @@ export const Routes: RoutesType[] = [
   {
     id: "pods",
     routes: [
-      { path: "/clusters/pods", page: "K8s/pod/List", index: true },
+      {
+        path: "/clusters/pods",
+        page: "K8s/pod/List",
+        element: k8sPodList,
+        index: true,
+      },
       {
         path: "/clusters/:cluster/pod/:namespace/:name",
         page: "K8s/pod/Details",
+        element: k8sPodDetails,
       },
     ],
   },
@@ -120,11 +232,13 @@ export const Routes: RoutesType[] = [
       {
         path: "/clusters/deployments",
         page: "K8s/deployments/List",
+        element: k8sDeploymentsList,
         index: true,
       },
       {
         path: "/clusters/:cluster/deployment/:namespace/:name",
         page: "K8s/workload/Details",
+        element: k8sWorkloadDetails,
         props: { workloadKind: Deployment },
       },
     ],
@@ -135,11 +249,13 @@ export const Routes: RoutesType[] = [
       {
         path: "/clusters/statefulsets",
         page: "K8s/statefulset/List",
+        element: k8sStatefulsetList,
         index: true,
       },
       {
         path: "/clusters/:cluster/statefulset/:namespace/:name",
         page: "K8s/statefulset/Details",
+        element: k8sStatefulsetDetails,
         props: { workloadKind: StatefulSet },
       },
     ],
@@ -147,10 +263,16 @@ export const Routes: RoutesType[] = [
   {
     id: "daemonSets",
     routes: [
-      { path: "/clusters/daemonsets", page: "K8s/daemonset/List", index: true },
+      {
+        path: "/clusters/daemonsets",
+        page: "K8s/daemonset/List",
+        element: k8sDaemonsetList,
+        index: true,
+      },
       {
         path: "/clusters/:cluster/daemonset/:namespace/:name",
         page: "K8s/daemonset/Details",
+        element: k8sDaemonsetDetails,
         props: { workloadKind: DaemonSet },
       },
     ],
@@ -161,11 +283,13 @@ export const Routes: RoutesType[] = [
       {
         path: "/clusters/replicasets",
         page: "K8s/replicaset/List",
+        element: k8sReplicasetList,
         index: true,
       },
       {
         path: "/clusters/:cluster/replicaset/:namespace/:name",
         page: "K8s/workload/Details",
+        element: k8sWorkloadDetails,
         props: { workloadKind: ReplicaSet },
       },
     ],
@@ -173,10 +297,16 @@ export const Routes: RoutesType[] = [
   {
     id: "jobs",
     routes: [
-      { path: "/clusters/jobs", page: "K8s/job/List", index: true },
+      {
+        path: "/clusters/jobs",
+        page: "K8s/job/List",
+        element: k8sJobList,
+        index: true,
+      },
       {
         path: "/clusters/:cluster/job/:namespace/:name",
         page: "K8s/workload/Details",
+        element: k8sWorkloadDetails,
         props: { workloadKind: Job },
       },
     ],
@@ -184,10 +314,16 @@ export const Routes: RoutesType[] = [
   {
     id: "cronJobs",
     routes: [
-      { path: "/clusters/cronjobs", page: "K8s/cronjob/List", index: true },
+      {
+        path: "/clusters/cronjobs",
+        page: "K8s/cronjob/List",
+        element: k8sCronjobList,
+        index: true,
+      },
       {
         path: "/clusters/:cluster/cronjob/:namespace/:name",
         page: "K8s/cronjob/Details",
+        element: k8sCronjobDetails,
       },
     ],
   },
@@ -198,11 +334,13 @@ export const Routes: RoutesType[] = [
       {
         path: "/clusters/storage/persistentvolumeclaims",
         page: "K8s/storage/ClaimList",
+        element: k8sStorageClaimList,
         index: true,
       },
       {
         path: "/clusters/:cluster/persistentvolumeclaim/:namespace/:name",
         page: "K8s/storage/ClaimDetails",
+        element: k8sStorageClaimDetails,
       },
     ],
   },
@@ -212,11 +350,13 @@ export const Routes: RoutesType[] = [
       {
         path: "/clusters/storage/persistentvolumes",
         page: "K8s/storage/VolumeList",
+        element: k8sStorageVolumeList,
         index: true,
       },
       {
         path: "/clusters/:cluster/persistentvolume/:name",
         page: "K8s/storage/VolumeDetails",
+        element: k8sStorageVolumeDetails,
       },
     ],
   },
@@ -226,11 +366,13 @@ export const Routes: RoutesType[] = [
       {
         path: "/clusters/storage/classes",
         page: "K8s/storage/ClassList",
+        element: k8sStorageClassList,
         index: true,
       },
       {
         path: "/clusters/:cluster/storageclass/:name",
         page: "K8s/storage/ClassDetails",
+        element: k8sStorageClassDetails,
       },
     ],
   },
@@ -238,30 +380,48 @@ export const Routes: RoutesType[] = [
   {
     id: "services",
     routes: [
-      { path: "/clusters/services", page: "K8s/service/List", index: true },
+      {
+        path: "/clusters/services",
+        page: "K8s/service/List",
+        element: k8sServiceList,
+        index: true,
+      },
       {
         path: "/clusters/:cluster/service/:namespace/:name",
         page: "K8s/service/Details",
+        element: k8sServiceDetails,
       },
     ],
   },
   {
     id: "endpoints",
     routes: [
-      { path: "/clusters/endpoints", page: "K8s/endpoints/List", index: true },
+      {
+        path: "/clusters/endpoints",
+        page: "K8s/endpoints/List",
+        element: k8sEndpointsList,
+        index: true,
+      },
       {
         path: "/clusters/:cluster/endpoint/:namespace/:name",
         page: "K8s/endpoints/Details",
+        element: k8sEndpointsDetails,
       },
     ],
   },
   {
     id: "ingresses",
     routes: [
-      { path: "/clusters/ingresses", page: "K8s/ingress/List", index: true },
+      {
+        path: "/clusters/ingresses",
+        page: "K8s/ingress/List",
+        element: k8sIngressList,
+        index: true,
+      },
       {
         path: "/clusters/:cluster/ingress/:namespace/:name",
         page: "K8s/ingress/Details",
+        element: k8sIngressDetails,
       },
     ],
   },
@@ -271,11 +431,13 @@ export const Routes: RoutesType[] = [
       {
         path: "/clusters/ingressclasses",
         page: "K8s/ingress/ClassList",
+        element: k8sIngressClassList,
         index: true,
       },
       {
         path: "/clusters/:cluster/ingressclass/:name",
         page: "K8s/ingress/ClassDetails",
+        element: k8sIngressClassDetails,
       },
     ],
   },
@@ -285,11 +447,13 @@ export const Routes: RoutesType[] = [
       {
         path: "/clusters/networkPolicies",
         page: "K8s/networkpolicy/List",
+        element: k8sNetworkpolicyList,
         index: true,
       },
       {
         path: "/clusters/:cluster/networkPolicy/:namespace/:name",
         page: "K8s/networkpolicy/Details",
+        element: k8sNetworkpolicyDetails,
       },
     ],
   },
@@ -301,24 +465,33 @@ export const Routes: RoutesType[] = [
         path: "/clusters/serviceaccounts",
         page: "K8s/serviceaccount/List",
         index: true,
+        element: k8sServiceaccountList,
       },
       {
         path: "/clusters/:cluster/serviceaccount/:namespace/:name",
         page: "K8s/serviceaccount/Details",
+        element: k8sServiceaccountDetails,
       },
     ],
   },
   {
     id: "roles",
     routes: [
-      { path: "/clusters/roles", page: "K8s/role/List", index: true },
+      {
+        path: "/clusters/roles",
+        page: "K8s/role/List",
+        element: k8sRoleList,
+        index: true,
+      },
       {
         path: "/clusters/:cluster/role/:namespace/:name",
         page: "K8s/role/Details",
+        element: k8sRoleDetails,
       },
       {
         path: "/clusters/:cluster/clusterrole/:name",
         page: "K8s/role/Details",
+        element: k8sRoleDetails,
       },
     ],
   },
@@ -328,15 +501,18 @@ export const Routes: RoutesType[] = [
       {
         path: "/clusters/roleBindings",
         page: "K8s/role/BindingList",
+        element: k8sRoleBindingList,
         index: true,
       },
       {
         path: "/clusters/roleBindings/:namespace/:name",
         page: "K8s/role/BindingDetails",
+        element: k8sRoleBindingDetails,
       },
       {
         path: "/clusters/clusterrolebinding/:name",
         page: "K8s/role/BindingDetails",
+        element: k8sRoleBindingDetails,
       },
     ],
   },
@@ -344,20 +520,32 @@ export const Routes: RoutesType[] = [
   {
     id: "configMaps",
     routes: [
-      { path: "/clusters/configmaps", page: "K8s/configmap/List", index: true },
+      {
+        path: "/clusters/configmaps",
+        page: "K8s/configmap/List",
+        element: k8sConfigmapList,
+        index: true,
+      },
       {
         path: "/clusters/:cluster/configmap/:namespace/:name",
         page: "K8s/configmap/Details",
+        element: k8sConfigmapDetails,
       },
     ],
   },
   {
     id: "secrets",
     routes: [
-      { path: "/clusters/secrets", page: "K8s/secret/List", index: true },
+      {
+        path: "/clusters/secrets",
+        page: "K8s/secret/List",
+        element: k8sSecretList,
+        index: true,
+      },
       {
         path: "/clusters/:cluster/secret/:namespace/:name",
         page: "K8s/secret/Details",
+        element: k8sSecretDetails,
       },
     ],
   },
@@ -367,11 +555,13 @@ export const Routes: RoutesType[] = [
       {
         path: "/clusters/horizontalpodautoscalers",
         page: "K8s/horizontalPodAutoscaler/List",
+        element: k8sHorizontalPodAutoscalerList,
         index: true,
       },
       {
         path: "/clusters/:cluster/horizontalpodautoscaler/:namespace/:name",
         page: "K8s/horizontalPodAutoscaler/Details",
+        element: k8sHorizontalPodAutoscalerDetails,
       },
     ],
   },
@@ -381,11 +571,13 @@ export const Routes: RoutesType[] = [
       {
         path: "/clusters/verticalpodautoscalers",
         page: "K8s/verticalPodAutoscaler/List",
+        element: k8sVerticalPodAutoscalerList,
         index: true,
       },
       {
         path: "/clusters/:cluster/verticalpodautoscaler/:namespace/:name",
         page: "K8s/verticalPodAutoscaler/Details",
+        element: k8sVerticalPodAutoscalerDetails,
       },
     ],
   },
@@ -395,11 +587,13 @@ export const Routes: RoutesType[] = [
       {
         path: "/clusters/poddisruptionbudgets",
         page: "K8s/podDisruptionBudget/List",
+        element: k8sPodDisruptionBudgetList,
         index: true,
       },
       {
         path: "/clusters/:cluster/poddisruptionbudget/:namespace/:name",
         page: "K8s/podDisruptionBudget/Details",
+        element: k8sPodDisruptionBudgetDetails,
       },
     ],
   },
@@ -409,11 +603,13 @@ export const Routes: RoutesType[] = [
       {
         path: "/clusters/resourcequotas",
         page: "K8s/resourceQuota/List",
+        element: k8sResourceQuotaList,
         index: true,
       },
       {
         path: "/clusters/:cluster/resourcequota/:namespace/:name",
         page: "K8s/resourceQuota/Details",
+        element: k8sResourceQuotaDetails,
       },
     ],
   },
@@ -423,11 +619,13 @@ export const Routes: RoutesType[] = [
       {
         path: "/clusters/limitranges",
         page: "K8s/limitRange/List",
+        element: k8sLimitRangeList,
         index: true,
       },
       {
         path: "/clusters/:cluster/limitrange/:namespace/:name",
         page: "K8s/limitRange/Details",
+        element: k8sLimitRangeDetails,
       },
     ],
   },
@@ -437,11 +635,13 @@ export const Routes: RoutesType[] = [
       {
         path: "/clusters/priorityclasses",
         page: "K8s/priorityClass/List",
+        element: k8sPriorityClassList,
         index: true,
       },
       {
         path: "/clusters/:cluster/priorityclass/:name",
         page: "K8s/priorityClass/Details",
+        element: k8sPriorityClassDetails,
       },
     ],
   },
@@ -451,21 +651,29 @@ export const Routes: RoutesType[] = [
       {
         path: "/clusters/runtimeclasses",
         page: "K8s/runtimeClass/List",
+        element: k8sRuntimeClassList,
         index: true,
       },
       {
         path: "/clusters/:cluster/runtimeclass/:name",
         page: "K8s/runtimeClass/Details",
+        element: k8sRuntimeClassDetails,
       },
     ],
   },
   {
     id: "leases",
     routes: [
-      { path: "/clusters/leases", page: "K8s/lease/List", index: true },
+      {
+        path: "/clusters/leases",
+        page: "K8s/lease/List",
+        element: k8sLeaseList,
+        index: true,
+      },
       {
         path: "/clusters/:cluster/lease/:namespace/:name",
         page: "K8s/lease/Details",
+        element: k8sLeaseDetails,
       },
     ],
   },
@@ -475,11 +683,13 @@ export const Routes: RoutesType[] = [
       {
         path: "/clusters/mutatingwebhookconfigurations",
         page: "K8s/webhookconfiguration/MutatingWebhookConfigList",
+        element: k8sWebhookconfigurationMutatingWebhookConfigList,
         index: true,
       },
       {
         path: "/clusters/:cluster/mutatingwebhookconfiguration/:name",
         page: "K8s/webhookconfiguration/MutatingWebhookConfigDetails",
+        element: k8sWebhookconfigurationMutatingWebhookConfigDetails,
       },
     ],
   },
@@ -489,15 +699,16 @@ export const Routes: RoutesType[] = [
       {
         path: "/clusters/validatingwebhookconfigurations",
         page: "K8s/webhookconfiguration/ValidatingWebhookConfigList",
+        element: k8sWebhookconfigurationValidatingWebhookConfigList,
         index: true,
       },
       {
         path: "/clusters/:cluster/validatingwebhookconfiguration/:name",
         page: "K8s/webhookconfiguration/ValidatingWebhookConfigDetails",
+        element: k8sWebhookconfigurationValidatingWebhookConfigDetails,
       },
     ],
   },
-
   {
     id: "tenantClusters",
     routes: [
@@ -511,6 +722,11 @@ export const Routes: RoutesType[] = [
         path: "/kaas/clusters/:managementNamespace/:name",
         page: "KaaS/clusters/Detail",
         element: KaaSDetail,
+      },
+      { path: "/kaas/clusters", page: "KaaS/clusters/List", index: true },
+      {
+        path: "/kaas/clusters/:managementNamespace/:name",
+        page: "KaaS/clusters/Detail",
       },
     ],
   },

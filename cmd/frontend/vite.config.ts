@@ -22,7 +22,7 @@ export default defineConfig({
     open: true,
     proxy: {
       '/k8s': {
-        target: 'http://localhost:4466',
+        target: 'http://127.0.0.1:8001',
         changeOrigin: true,
         ws: true,
         rewrite: (path) => path.replace(/^\/k8s/, ''),
@@ -120,6 +120,7 @@ export default defineConfig({
     commonjsOptions: {
       transformMixedEsModules: true,
     },
+    modulePreload: false,
     rollupOptions: {
       // Exclude @axe-core from production bundle
       external: ['@axe-core/react'],
@@ -135,8 +136,7 @@ export default defineConfig({
           apidevtools: ['@apidevtools/json-schema-ref-parser', '@apidevtools/swagger-parser'],
           xterm: ['xterm', 'xterm-addon-fit', 'xterm-addon-search'],
           recharts: ['recharts'],
-          vendor: ['lodash', 'notistack', 'js-base64', 'js-yaml', 'humanize-duration', 'jotai', '@tanstack/react-query', 'material-react-table', 'spacetime']
-          // app: ['src/']
+          vendor: ['lodash', 'notistack', 'js-base64', 'js-yaml', 'humanize-duration', 'jotai', '@tanstack/react-query', 'material-react-table', 'spacetime', 'dayjs', 'class-transformer', 'class-validator', 'yaml']
         },
       },
     },

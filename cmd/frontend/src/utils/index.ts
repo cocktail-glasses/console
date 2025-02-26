@@ -9,10 +9,10 @@ export type StartsWith<T, b extends string> = T extends `${b}${infer f}`
   ? T
   : never;
 
-export const lazyExportLoader = async (path: string, componentName: string) => {
-  const module = await import(path);
-  return { default: module[componentName] };
-};
+// export const lazyExportLoader = async (path: string, componentName: string) => {
+//   const module = await import(path);
+//   return { default: module[componentName] };
+// };
 
 export const setNestedValue = (obj: any, path: string, value: any) => {
   const keys = path.split(",");
