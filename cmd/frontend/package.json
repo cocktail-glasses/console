@@ -25,6 +25,7 @@
     "@octokit/core": "^3.5.1",
     "@reduxjs/toolkit": "^2.5.1",
     "@tanstack/react-query": "^5.66.0",
+    "@tanstack/react-table": "^8.21.2",
     "@testing-library/react": "^16.2.0",
     "@types/glob": "^8.1.0",
     "@types/humanize-duration": "^3.27.1",
@@ -90,7 +91,8 @@
     "util": "^0.12.4",
     "xterm": "^4.19.0",
     "xterm-addon-fit": "^0.5.0",
-    "xterm-addon-search": "^0.9.0"
+    "xterm-addon-search": "^0.9.0",
+    "zod": "^3.24.2"
   },
   "overrides": {
     "domain-browser": "npm:dry-uninstall"
@@ -205,6 +207,7 @@
     "redux-mock-store": "^1.5.4",
     "resize-observer-polyfill": "^1.5.1",
     "rollup-plugin-visualizer": "^5.12.0",
+    "sass-embedded": "^1.85.1",
     "terser": "^5.31.3",
     "typescript": "^5.5.3",
     "typescript-eslint": "^7.15.0",
