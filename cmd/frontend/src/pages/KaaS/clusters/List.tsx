@@ -1,5 +1,10 @@
-import { useEffect, useState, Dispatch, SetStateAction } from "react";
+import { useEffect, useState, Dispatch, SetStateAction, useMemo } from "react";
+import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
+
+import { zodResolver } from "@hookform/resolvers/zod";
+
+import { Add, DeleteOutline, Close, Search } from "@mui/icons-material";
 import {
   Box,
   Button,
@@ -22,23 +27,22 @@ import {
   TableHead,
   TableRow,
 } from "@mui/material";
+
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+
+import toLower from "lodash/toLower";
+
+import { DotStatus } from "./component/DotStatus";
+import "./list.scss";
+import { getDeleteClusterSchema } from "./schemas";
+import { getDotStatus } from "./utils";
+
 import {
   KamajiClastixIoV1alpha1Api as KamajiAPI,
   IoClastixKamajiV1alpha1TenantControlPlaneList,
   IoClastixKamajiV1alpha1TenantControlPlane,
 } from "@lib/kamaji";
-import { Add, DeleteOutline, Close, Search } from "@mui/icons-material";
-import eq from "lodash/eq";
-import toLower from "lodash/toLower";
-import cond from "lodash/cond";
-import constant from "lodash/constant";
-import curry from "lodash/curry";
-import stubTrue from "lodash/stubTrue";
-import dayjs from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { getDeleteClusterSchema } from "./schemas";
 import {
   CellContext,
   createColumnHelper,
@@ -47,7 +51,6 @@ import {
   getFilteredRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import "./list.scss";
 
 export default function KaaSClusterList() {
   const [tenantControlPlane, setTenantControlPlane] =
@@ -117,17 +120,6 @@ interface ListTableProp {
 }
 
 const ListTable: React.FC<ListTableProp> = ({ tenantControlPlane, search }) => {
-  const getDotStatus = (status?: string) => {
-    const equal = curry(eq);
-
-    return cond([
-      [equal("loading"), constant(DotStatusEnum.WARNING)],
-      [equal("ready"), constant(DotStatusEnum.SUCCESS)],
-      [equal("error"), constant(DotStatusEnum.ERROR)],
-      [stubTrue, constant(DotStatusEnum.DEFAULT)],
-    ])(status);
-  };
-
   dayjs.extend(relativeTime);
 
   // delete cluster dialog
@@ -203,26 +195,32 @@ const ListTable: React.FC<ListTableProp> = ({ tenantControlPlane, search }) => {
 
   const columnHelper =
     createColumnHelper<IoClastixKamajiV1alpha1TenantControlPlane>();
-  const columns = [
-    columnHelper.accessor("metadata.name", { header: "Name", cell: nameCell }),
-    columnHelper.accessor("metadata.namespace", { header: "Namespace" }),
-    columnHelper.accessor("status.kubernetesResources.version.status", {
-      header: "Status",
-      cell: statusCell,
-    }),
-    columnHelper.accessor(podsAccessor, { header: "Pods" }),
-    columnHelper.accessor("status.controlPlaneEndpoint", {
-      header: "Endpoints",
-    }),
-    columnHelper.accessor("spec.kubernetes.version", { header: "Version" }),
-    columnHelper.accessor(dataStorageAccessor, {
-      header: "dataStorage (driver)",
-    }),
-    columnHelper.accessor("metadata.creationTimestamp", {
-      header: "Age",
-      cell: ageCell,
-    }),
-  ];
+  const columns = useMemo(
+    () => [
+      columnHelper.accessor("metadata.name", {
+        header: "Name",
+        cell: nameCell,
+      }),
+      columnHelper.accessor("metadata.namespace", { header: "Namespace" }),
+      columnHelper.accessor("status.kubernetesResources.version.status", {
+        header: "Status",
+        cell: statusCell,
+      }),
+      columnHelper.accessor(podsAccessor, { header: "Pods" }),
+      columnHelper.accessor("status.controlPlaneEndpoint", {
+        header: "Endpoints",
+      }),
+      columnHelper.accessor("spec.kubernetes.version", { header: "Version" }),
+      columnHelper.accessor(dataStorageAccessor, {
+        header: "dataStorage (driver)",
+      }),
+      columnHelper.accessor("metadata.creationTimestamp", {
+        header: "Age",
+        cell: ageCell,
+      }),
+    ],
+    [],
+  );
 
   const table = useReactTable({
     data: tenantControlPlane?.items || [],
@@ -280,23 +278,6 @@ const ListTable: React.FC<ListTableProp> = ({ tenantControlPlane, search }) => {
     </TableContainer>
   );
 };
-
-enum DotStatusEnum {
-  SUCCESS = "success",
-  WARNING = "warning",
-  ERROR = "error",
-  DEFAULT = "default",
-}
-
-const DotStatus = ({
-  status = DotStatusEnum.DEFAULT,
-}: {
-  status?: DotStatusEnum;
-}) => (
-  <div className="dot-status-container">
-    <div className={`dot-status ${status}`} />
-  </div>
-);
 
 interface DeleteClusterDialogProp {
   isOpen: boolean;

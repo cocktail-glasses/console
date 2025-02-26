@@ -1,0 +1,32 @@
+.dot-status-container {
+  display: flex;
+  align-items: center;
+
+  .dot-status {
+    --dot-status-size: 16px;
+    width: var(--dot-status-size);
+    height: var(--dot-status-size);
+    border-radius: 50%;
+    margin-right: 8px;
+
+    &.size-sm {
+      --dot-status-size: 14px;
+    }
+
+    &.success {
+      background-color: #1dc67f;
+    }
+
+    &.warning {
+      background-color: #ffc107;
+    }
+
+    &.error {
+      background-color: #f44336;
+    }
+
+    &.default {
+      background-color: #6b7280;
+    }
+  }
+}
