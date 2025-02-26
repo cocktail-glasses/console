@@ -109,7 +109,7 @@ export default defineConfig({
   //   setupFiles: ['./src/setupTests.ts'],
   // },
   build: {
-    outDir: 'build',
+    // outDir: 'build',
     minify: 'terser',
     terserOptions: {
       compress: {
