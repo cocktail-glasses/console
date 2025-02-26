@@ -35,6 +35,7 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 import isUndefined from 'lodash/isUndefined';
 import toLower from 'lodash/toLower';
 
+import './common.scss';
 import { DotStatus } from './component/DotStatus';
 import './list.scss';
 import { getDeleteClusterSchema } from './schemas';

@@ -42,6 +42,7 @@ import {
   VisibilityOff,
   Visibility,
 } from "@mui/icons-material";
+import "./common.scss";
 import "./create.scss";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -126,7 +127,7 @@ export default function Create() {
   const navigate = useNavigate();
 
   return (
-    <Paper className="main-form">
+    <Paper className="main-form main-container">
       <h2>Create Cluster</h2>
 
       <ProgressStepper
