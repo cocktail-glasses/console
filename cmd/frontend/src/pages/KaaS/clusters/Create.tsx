@@ -561,6 +561,8 @@ interface SettingsFormValue {
   userName?: string;
   password?: string;
   securityGroup?: string;
+  network?: string;
+  subnetId?: string;
 }
 
 const SettingForm: React.FC<SettingsFormProps> = ({ values, handleSubmit }) => {
@@ -716,7 +718,7 @@ const SettingForm: React.FC<SettingsFormProps> = ({ values, handleSubmit }) => {
             control={control}
             render={({ field: { value, onChange } }) => (
               <FormControl fullWidth disabled>
-                <InputLabel id="providerPreset" variant="outlined" disabled>
+                <InputLabel id="providerPreset" variant="outlined">
                   No Security Groups Available
                 </InputLabel>
                 <Select
@@ -724,11 +726,86 @@ const SettingForm: React.FC<SettingsFormProps> = ({ values, handleSubmit }) => {
                   labelId="providerPreset"
                   value={value}
                   onChange={onChange}
-                  label="Provider Preset"
-                  disabled
+                  label="No Security Groups Available"
                 ></Select>
                 <FormHelperText>
                   Please enter your credentials first.
+                </FormHelperText>
+              </FormControl>
+            )}
+          />
+        </Box>
+        <Box sx={{ marginBottom: "10px" }}>
+          <Controller
+            name="network"
+            control={control}
+            render={({ field: { value, onChange } }) => (
+              <FormControl fullWidth disabled>
+                <InputLabel id="network" variant="outlined">
+                  No Networks Available
+                </InputLabel>
+                <Select
+                  variant="outlined"
+                  labelId="network"
+                  value={value}
+                  onChange={onChange}
+                  label="No Networks Available"
+                ></Select>
+                <FormHelperText>
+                  Please enter your credentials first.
+                </FormHelperText>
+              </FormControl>
+            )}
+          />
+        </Box>
+        <Box sx={{ marginBottom: "10px" }}>
+          <Controller
+            name="subnetId"
+            control={control}
+            render={({ field: { value, onChange } }) => (
+              <FormControl fullWidth disabled>
+                <InputLabel htmlFor="subnetId" variant="outlined">
+                  No IPv4 Subnet IDs Available
+                </InputLabel>
+                <Select
+                  variant="outlined"
+                  id="subnetId"
+                  value={value}
+                  onChange={onChange}
+                  label="No IPv4 Subnet IDs Available"
+                ></Select>
+                <FormHelperText>
+                  Please enter your credentials and network first.
+                </FormHelperText>
+              </FormControl>
+            )}
+          />
+        </Box>
+        <Box sx={{ marginBottom: "10px" }}>
+          <FormControlLabel
+            control={<Checkbox name="enableIngressHostname" />}
+            label="Enable Ingress Hostname"
+            key="enableIngressHostname"
+          />
+        </Box>
+        <Box sx={{ marginBottom: "10px" }}>
+          <Controller
+            name="userName"
+            control={control}
+            render={({ field: { value, onChange } }) => (
+              <FormControl fullWidth disabled>
+                <TextField
+                  label="Ingress Hostname Suffix"
+                  variant="outlined"
+                  fullWidth
+                  value={value}
+                  onChange={onChange}
+                  disabled
+                />
+                <FormHelperText>
+                  Set a specific suffix for the hostnames used for the PROXY
+                  protocol workaround that is enabled by EnableIngressHostname.
+                  The suffix is set to nip.io by default.
                 </FormHelperText>
               </FormControl>
             )}
