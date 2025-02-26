@@ -1,18 +1,53 @@
-import { Box, Button, Container, TextField } from "@mui/material";
-import AccountCircle from "@mui/icons-material/AccountCircle";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
+import { useEffect, useState, Dispatch, SetStateAction } from "react";
+import { Link } from "react-router-dom";
+import {
+  Box,
+  Button,
+  Checkbox,
+  Dialog,
+  DialogTitle,
+  DialogActions,
+  DialogContent,
+  FormControlLabel,
+  IconButton,
+  Paper,
+  TextField,
+  InputAdornment,
+  Typography,
+  Divider,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+} from "@mui/material";
 import {
   KamajiClastixIoV1alpha1Api as KamajiAPI,
   IoClastixKamajiV1alpha1TenantControlPlaneList,
+  IoClastixKamajiV1alpha1TenantControlPlane,
 } from "@lib/kamaji";
-import { useEffect, useState } from "react";
-import { map } from "lodash";
-import { Link } from "react-router-dom";
+import { Add, DeleteOutline, Close, Search } from "@mui/icons-material";
+import eq from "lodash/eq";
+import toLower from "lodash/toLower";
+import cond from "lodash/cond";
+import constant from "lodash/constant";
+import curry from "lodash/curry";
+import stubTrue from "lodash/stubTrue";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { getDeleteClusterSchema } from "./schemas";
+import {
+  CellContext,
+  createColumnHelper,
+  flexRender,
+  getCoreRowModel,
+  getFilteredRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
+import "./list.scss";
 
 export default function KaaSClusterList() {
   const [tenantControlPlane, setTenantControlPlane] =
@@ -25,74 +60,328 @@ export default function KaaSClusterList() {
       .then((tcl) => setTenantControlPlane(tcl));
   }, []);
 
+  const [search, setSearch] = useState("");
+
   return (
-    <Container>
+    <Paper className="main-container">
       <h2>KaaS 클러스터 관리</h2>
-      <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-        <Box sx={{ display: "flex", alignItems: "flex-end" }}>
-          <AccountCircle sx={{ color: "action.active", mr: 1, my: 0.5 }} />
-          <TextField id="input-with-sx" label="With sx" variant="standard" />
-        </Box>
-        <Button variant="contained">Create Cluster</Button>
-      </Box>
-      <TableContainer>
-        <Table sx={{ minWidth: 650 }} aria-label="simple table">
-          <TableHead>
-            <TableRow>
-              <TableCell>Name</TableCell>
-              <TableCell align="right">Namespace</TableCell>
-              <TableCell align="right">Status</TableCell>
-              <TableCell align="right">Pods</TableCell>
-              <TableCell align="right">Endpoints</TableCell>
-              <TableCell align="right">Version</TableCell>
-              <TableCell align="right">dataStorage (driver)</TableCell>
-              <TableCell align="right">Age</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {map(tenantControlPlane?.items, (controlPlane, i) => (
-              <TableRow
-                key={`row-${controlPlane.metadata?.name || i}`}
-                sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-              >
-                <TableCell component="th" scope="row">
-                  <Link
-                    to={`/kaas/clusters/${controlPlane.metadata?.namespace}/${controlPlane.metadata?.name}`}
-                  >
-                    {controlPlane?.metadata?.name}
-                  </Link>
-                </TableCell>
-                <TableCell align="right">
-                  {controlPlane?.metadata?.namespace}
-                </TableCell>
-                <TableCell align="right">
-                  {controlPlane?.status?.kubernetesResources?.version?.status}
-                </TableCell>
-                <TableCell align="right">
-                  {controlPlane.status?.kubernetesResources?.deployment
-                    ?.availableReplicas || 0}
-                  /
-                  {controlPlane.status?.kubernetesResources?.deployment
-                    ?.replicas || "-"}
-                </TableCell>
-                <TableCell align="right">
-                  {controlPlane.status?.controlPlaneEndpoint}
-                </TableCell>
-                <TableCell align="right">
-                  {controlPlane.spec?.kubernetes.version}
-                </TableCell>
-                <TableCell align="right">
-                  {controlPlane.status?.storage?.dataStoreName} (
-                  {controlPlane.status?.storage?.driver})
-                </TableCell>
-                <TableCell align="right">
-                  {controlPlane.metadata?.creationTimestamp}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </Container>
+      <ListMenu search={search} handleSearch={setSearch} />
+      <ListTable tenantControlPlane={tenantControlPlane} search={search} />
+    </Paper>
   );
 }
+
+interface ListMenuProp {
+  search?: string;
+  handleSearch: Dispatch<SetStateAction<string>>;
+  handleCreateClick?: () => void;
+}
+
+const ListMenu: React.FC<ListMenuProp> = ({
+  search,
+  handleSearch,
+  handleCreateClick,
+}) => {
+  return (
+    <Box className="menu-container">
+      <TextField
+        variant="outlined"
+        size="small"
+        placeholder="Search"
+        value={search}
+        onChange={(e) => handleSearch(e.target.value)}
+        slotProps={{
+          input: {
+            startAdornment: (
+              <InputAdornment position="start">
+                <Search />
+              </InputAdornment>
+            ),
+          },
+        }}
+      />
+      <Button
+        variant="contained"
+        onClick={handleCreateClick}
+        startIcon={<Add />}
+      >
+        Create Cluster
+      </Button>
+    </Box>
+  );
+};
+
+interface ListTableProp {
+  tenantControlPlane?: IoClastixKamajiV1alpha1TenantControlPlaneList;
+  search?: string;
+}
+
+const ListTable: React.FC<ListTableProp> = ({ tenantControlPlane, search }) => {
+  const getDotStatus = (status?: string) => {
+    const equal = curry(eq);
+
+    return cond([
+      [equal("loading"), constant(DotStatusEnum.WARNING)],
+      [equal("ready"), constant(DotStatusEnum.SUCCESS)],
+      [equal("error"), constant(DotStatusEnum.ERROR)],
+      [stubTrue, constant(DotStatusEnum.DEFAULT)],
+    ])(status);
+  };
+
+  dayjs.extend(relativeTime);
+
+  // delete cluster dialog
+  const [isOpenDialog, setIsOpenDialog] = useState(false);
+  const [cluster, setCluster] =
+    useState<IoClastixKamajiV1alpha1TenantControlPlane>();
+  const handleDialogOpen = (
+    cluster: IoClastixKamajiV1alpha1TenantControlPlane,
+  ) => {
+    setCluster(cluster);
+    setIsOpenDialog(true);
+  };
+  const handleDialogClose = () => {
+    setIsOpenDialog(false);
+  };
+
+  const handleDeleteCluster = (deleteClusterOptions: DeleteClusterForm) => {
+    console.log("delete cluster ", cluster, deleteClusterOptions);
+    handleDialogClose();
+  };
+
+  // tanstack-table example
+  const nameCell = (
+    info: CellContext<
+      IoClastixKamajiV1alpha1TenantControlPlane,
+      string | undefined
+    >,
+  ) => {
+    const metadata = info.row.original.metadata;
+
+    return (
+      <Link to={`/kaas/clusters/${metadata?.namespace}/${metadata?.name}`}>
+        {metadata?.name}
+      </Link>
+    );
+  };
+
+  const statusCell = (
+    info: CellContext<
+      IoClastixKamajiV1alpha1TenantControlPlane,
+      string | undefined
+    >,
+  ) => {
+    const status = info.getValue();
+    return (
+      <Box sx={{ display: "flex" }}>
+        <DotStatus status={getDotStatus(toLower(status))} />
+        {status}
+      </Box>
+    );
+  };
+
+  const ageCell = (
+    info: CellContext<
+      IoClastixKamajiV1alpha1TenantControlPlane,
+      string | undefined
+    >,
+  ) => dayjs(info.getValue()).fromNow();
+
+  const podsAccessor = (row: IoClastixKamajiV1alpha1TenantControlPlane) => {
+    const deployment = row.status?.kubernetesResources?.deployment;
+
+    return `${deployment?.availableReplicas || 0} / ${deployment?.replicas || "-"}`;
+  };
+
+  const dataStorageAccessor = (
+    row: IoClastixKamajiV1alpha1TenantControlPlane,
+  ) => {
+    const storage = row.status?.storage;
+
+    return `${storage?.dataStoreName} (${storage?.driver})`;
+  };
+
+  const columnHelper =
+    createColumnHelper<IoClastixKamajiV1alpha1TenantControlPlane>();
+  const columns = [
+    columnHelper.accessor("metadata.name", { header: "Name", cell: nameCell }),
+    columnHelper.accessor("metadata.namespace", { header: "Namespace" }),
+    columnHelper.accessor("status.kubernetesResources.version.status", {
+      header: "Status",
+      cell: statusCell,
+    }),
+    columnHelper.accessor(podsAccessor, { header: "Pods" }),
+    columnHelper.accessor("status.controlPlaneEndpoint", {
+      header: "Endpoints",
+    }),
+    columnHelper.accessor("spec.kubernetes.version", { header: "Version" }),
+    columnHelper.accessor(dataStorageAccessor, {
+      header: "dataStorage (driver)",
+    }),
+    columnHelper.accessor("metadata.creationTimestamp", {
+      header: "Age",
+      cell: ageCell,
+    }),
+  ];
+
+  const table = useReactTable({
+    data: tenantControlPlane?.items || [],
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+  });
+
+  useEffect(() => {
+    table.setGlobalFilter(search);
+  }, [table, search]);
+
+  return (
+    <TableContainer className="table">
+      <Table aria-label="tenant-control-plane table">
+        <TableHead>
+          {table.getHeaderGroups().map((headerGroup) => (
+            <TableRow key={headerGroup.id}>
+              {headerGroup.headers.map((header) => (
+                <TableCell key={header.id}>
+                  {flexRender(
+                    header.column.columnDef.header,
+                    header.getContext(),
+                  )}
+                </TableCell>
+              ))}
+              {/* empty for action */}
+              <TableCell></TableCell>
+            </TableRow>
+          ))}
+        </TableHead>
+        <TableBody>
+          {table.getRowModel().rows.map((row) => (
+            <TableRow className="row" key={row.id}>
+              {row.getVisibleCells().map((cell) => (
+                <TableCell key={cell.id}>
+                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                </TableCell>
+              ))}
+              <TableCell>
+                <IconButton onClick={() => handleDialogOpen(row.original)}>
+                  <DeleteOutline className="action-icon" />
+                </IconButton>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+      <DeleteClusterDialog
+        isOpen={isOpenDialog}
+        handleClose={handleDialogClose}
+        clusterName={cluster?.metadata?.name || ""}
+        handleDelete={handleDeleteCluster}
+      />
+    </TableContainer>
+  );
+};
+
+enum DotStatusEnum {
+  SUCCESS = "success",
+  WARNING = "warning",
+  ERROR = "error",
+  DEFAULT = "default",
+}
+
+const DotStatus = ({
+  status = DotStatusEnum.DEFAULT,
+}: {
+  status?: DotStatusEnum;
+}) => (
+  <div className="dot-status-container">
+    <div className={`dot-status ${status}`} />
+  </div>
+);
+
+interface DeleteClusterDialogProp {
+  isOpen: boolean;
+  handleClose: () => void;
+  handleDelete: (deleteClusterOptions: DeleteClusterForm) => void;
+  clusterName: string;
+}
+
+interface DeleteClusterForm {
+  clusterName: string;
+  cleanupLoadBalancers: boolean;
+  cleanupVolumes: boolean;
+}
+
+const DeleteClusterDialog: React.FC<DeleteClusterDialogProp> = ({
+  isOpen,
+  handleClose,
+  handleDelete,
+  clusterName,
+}) => {
+  const {
+    register,
+    formState: { isValid },
+    getValues,
+    reset,
+  } = useForm<DeleteClusterForm>({
+    defaultValues: {
+      clusterName: "",
+    },
+    resolver: zodResolver(getDeleteClusterSchema(clusterName)),
+  });
+
+  useEffect(() => {
+    reset();
+  }, [isOpen, reset]);
+
+  return (
+    <Dialog open={isOpen} onClose={handleClose} className="dialog">
+      <DialogTitle>Delete Cluster</DialogTitle>
+      <IconButton
+        aria-label="close"
+        className="close-btn"
+        onClick={handleClose}
+      >
+        <Close />
+      </IconButton>
+      <DialogContent className="content">
+        <Typography variant="body1">
+          {`Delete `}
+          <strong>{clusterName}</strong>
+          {` cluster permanently?`}
+        </Typography>
+
+        <Box sx={{ marginTop: "8px", marginBottom: "15px !important" }}>
+          <TextField
+            variant="outlined"
+            label="Cluster Name"
+            required
+            fullWidth
+            {...register("clusterName")}
+          />
+        </Box>
+
+        <FormControlLabel
+          control={<Checkbox {...register("cleanupLoadBalancers")} />}
+          label="Cleanup connected Load Balancers"
+        />
+        <FormControlLabel
+          control={<Checkbox {...register("cleanupVolumes")} />}
+          label="Cleanup connected volumes (dynamically provisioned PVs and PVCs)"
+        />
+      </DialogContent>
+      <Divider />
+      <DialogActions className="action-group">
+        <Button
+          className="action-button"
+          variant="contained"
+          size="large"
+          startIcon={<DeleteOutline fontSize="large" />}
+          onClick={() => handleDelete(getValues())}
+          disabled={!isValid}
+        >
+          Delete Cluster
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+};
