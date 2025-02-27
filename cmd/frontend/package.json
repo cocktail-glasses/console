@@ -99,9 +99,9 @@
   "scripts": {
     "prestart": "npm run make-version",
     "start": "cross-env REACT_APP_HEADLAMP_BACKEND_TOKEN=headlamp vite",
-    "preview": "vite preview",
+    "preview": "OUT_DIR=build vite preview",
     "prebuild": "npm run make-version",
-    "build": "cross-env PUBLIC_URL=./ NODE_OPTIONS=--max-old-space-size=8096 vite build && npx shx rm -f build/frontend/index.baseUrl.html",
+    "build": "cross-env PUBLIC_URL=./ OUT_DIR=build NODE_OPTIONS=--max-old-space-size=8096 vite build && npx shx rm -f build/frontend/index.baseUrl.html",
     "build-prod": "cross-env PUBLIC_URL=static NODE_OPTIONS=--max-old-space-size=8096 vite build && npx shx rm -f build/frontend/index.baseUrl.html",
     "test": "vitest",
     "lint": "eslint -c package.json --ext .js,.ts,.tsx src/ ../app/electron ../plugins/headlamp-plugin --ignore-pattern ../plugins/headlamp-plugin/template --ignore-pattern ../plugins/headlamp-plugin/lib/",

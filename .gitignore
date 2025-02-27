@@ -8,6 +8,6 @@ cypress-a11y-report.json
 /gopath
 vendor
 node_modules/
-cmd/frontend/dist
+cmd/frontend/build
 cmd/frontend/gen
 cmd/frontend/stats.html
