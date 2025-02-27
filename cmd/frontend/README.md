@@ -19,7 +19,9 @@ nvm use
 ```sh
 npm install        # package 설치
 npm run start      # node server 실행
-npm run buil       # package 빌드
+npm run build      # package 빌드
+npm run preview    # 빌드 된 내용 확인
+npm run build-prod # 상용 빌드 (경로에 static 추가됨)
 ```
 
 ### 칵테일 접속 정보
@@ -29,7 +31,7 @@ vite.config.ts 설정
 ```js
 proxy: {
   '/k8s': {
-    target: 'http://localhost:4466', // k8s api 화면용
+    target: 'http://localhost:8001', // k8s api 화면용
     changeOrigin: true,
     ws: true,
     rewrite: (path) => path.replace(/^\/k8s/, ''),
@@ -47,13 +49,14 @@ proxy: {
 
 ### k8s proxy
 
-kubectl proxy --port=4466
+kubectl proxy
 
 ### Directory Structure
 
 ```
 .
 ├── build/                      # Built artifacts get put here (e.g. webpack.output)
+├── dist/                       # 상용 빌드 코드
 ├── public                      # Static assets
 │   ├── fonts/                  # web fonts
 ├── src                         # The source code of the application
