@@ -1,14 +1,14 @@
-import { Trans, useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from "react-i18next";
 
-import Grid from '@mui/material/Grid';
-import Link from '@mui/material/Link';
-import Typography from '@mui/material/Typography';
-import { styled } from '@mui/material/styles';
+import Grid from "@mui/material/Grid2";
+import Link from "@mui/material/Link";
+import Typography from "@mui/material/Typography";
+import { styled } from "@mui/material/styles";
 
-import headlampBrokenImage from '@assets/headlamp-broken.svg';
+import headlampBrokenImage from "@assets/headlamp-broken.svg";
 
-const WidthImg = styled('img')({
-  width: '100%',
+const WidthImg = styled("img")({
+  width: "100%",
 });
 
 export interface ErrorComponentProps {
@@ -26,8 +26,8 @@ export interface ErrorComponentProps {
 export default function ErrorComponent(props: ErrorComponentProps) {
   const { t } = useTranslation();
   const {
-    title = t('Uh-oh! Something went wrong.'),
-    message = '',
+    title = t("Uh-oh! Something went wrong."),
+    message = "",
     withTypography = true,
     graphic = headlampBrokenImage,
   } = props;
@@ -38,20 +38,30 @@ export default function ErrorComponent(props: ErrorComponentProps) {
       direction="column"
       alignItems="center"
       justifyContent="center"
-      sx={{ textAlign: 'center' }}
+      sx={{ textAlign: "center" }}
     >
-      <Grid item xs={12}>
-        {typeof graphic === 'string' ? <WidthImg src={graphic} alt="" /> : graphic}
+      <Grid size={{ xs: 12 }}>
+        {typeof graphic === "string" ? (
+          <WidthImg src={graphic} alt="" />
+        ) : (
+          graphic
+        )}
         {withTypography ? (
-          <Typography variant="h1" sx={{ fontSize: '2.125rem', lineHeight: 1.2, fontWeight: 400 }}>
+          <Typography
+            variant="h1"
+            sx={{ fontSize: "2.125rem", lineHeight: 1.2, fontWeight: 400 }}
+          >
             {title}
           </Typography>
         ) : (
           title
         )}
         {withTypography ? (
-          <Typography variant="h2" sx={{ fontSize: '1.25rem', lineHeight: 3.6, fontWeight: 500 }}>
-            {!!message ? (
+          <Typography
+            variant="h2"
+            sx={{ fontSize: "1.25rem", lineHeight: 3.6, fontWeight: 500 }}
+          >
+            {message ? (
               message
             ) : (
               <Trans t={t}>

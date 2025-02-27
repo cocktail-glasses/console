@@ -1,26 +1,26 @@
-import { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router-dom';
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useLocation } from "react-router-dom";
 
-import Grid from '@mui/material/Grid';
+import Grid from "@mui/material/Grid2";
 
-import { WorkloadCircleChart } from './Charts';
+import { WorkloadCircleChart } from "./Charts";
 
-import Link from '@components/common/Link';
-import { PageGrid, ResourceLink } from '@components/common/Resource';
-import ResourceListView from '@components/common/Resource/ResourceListView';
-import { SectionBox } from '@components/common/SectionBox';
-import { useCluster } from '@lib/k8s';
-import { ApiError } from '@lib/k8s/apiProxy';
-import { KubeObject, Workload } from '@lib/k8s/cluster';
-import CronJob from '@lib/k8s/cronJob';
-import DaemonSet from '@lib/k8s/daemonSet';
-import Deployment from '@lib/k8s/deployment';
-import Job from '@lib/k8s/job';
-import Pod from '@lib/k8s/pod';
-import ReplicaSet from '@lib/k8s/replicaSet';
-import StatefulSet from '@lib/k8s/statefulSet';
-import { getReadyReplicas, getTotalReplicas } from '@lib/util';
+import Link from "@components/common/Link";
+import { PageGrid, ResourceLink } from "@components/common/Resource";
+import ResourceListView from "@components/common/Resource/ResourceListView";
+import { SectionBox } from "@components/common/SectionBox";
+import { useCluster } from "@lib/k8s";
+import { ApiError } from "@lib/k8s/apiProxy";
+import { KubeObject, Workload } from "@lib/k8s/cluster";
+import CronJob from "@lib/k8s/cronJob";
+import DaemonSet from "@lib/k8s/daemonSet";
+import Deployment from "@lib/k8s/deployment";
+import Job from "@lib/k8s/job";
+import Pod from "@lib/k8s/pod";
+import ReplicaSet from "@lib/k8s/replicaSet";
+import StatefulSet from "@lib/k8s/statefulSet";
+import { getReadyReplicas, getTotalReplicas } from "@lib/util";
 
 interface WorkloadDict {
   [key: string]: Workload[];
@@ -29,7 +29,7 @@ interface WorkloadDict {
 export default function Overview() {
   const [workloadsData, setWorkloadsData] = useState<WorkloadDict>({});
   const location = useLocation();
-  const { t } = useTranslation('glossary');
+  const { t } = useTranslation("glossary");
   const cluster = useCluster();
 
   useEffect(() => {
@@ -67,7 +67,7 @@ export default function Overview() {
 
     // Get all items except the pods since those shouldn't be shown in the table (only the chart).
     for (const [key, items] of Object.entries(workloadsData)) {
-      if (key === 'Pod') {
+      if (key === "Pod") {
         continue;
       }
       joint = joint.concat(items);
@@ -75,7 +75,15 @@ export default function Overview() {
     return joint;
   }
 
-  const workloads: KubeObject[] = [Pod, Deployment, StatefulSet, DaemonSet, ReplicaSet, Job, CronJob];
+  const workloads: KubeObject[] = [
+    Pod,
+    Deployment,
+    StatefulSet,
+    DaemonSet,
+    ReplicaSet,
+    Job,
+    CronJob,
+  ];
 
   workloads.forEach((workloadClass: KubeObject) => {
     workloadClass.useApiList(
@@ -83,9 +91,11 @@ export default function Overview() {
         setWorkloads({ [workloadClass.className]: items });
       },
       (err: ApiError) => {
-        console.error(`Workloads list: Failed to get list for ${workloadClass.className}: ${err}`);
+        console.error(
+          `Workloads list: Failed to get list for ${workloadClass.className}: ${err}`,
+        );
         setWorkloads({ [workloadClass.className]: [] });
-      }
+      },
     );
   });
 
@@ -97,38 +107,48 @@ export default function Overview() {
   return (
     <PageGrid>
       <SectionBox py={2} mt={1}>
-        <Grid container justifyContent="flex-start" alignItems="flex-start" spacing={2}>
+        <Grid
+          container
+          justifyContent="flex-start"
+          alignItems="flex-start"
+          spacing={2}
+        >
           {workloads.map((workload) => (
-            <Grid item lg={3} md={4} xs={6} key={workload.name}>
+            <Grid size={{ lg: 3, md: 4, xs: 6 }} key={workload.name}>
               <WorkloadCircleChart
                 workloadData={workloadsData[workload.name] || null}
                 // @todo: Use a plural from from the class itself when we have it
                 title={ChartLink(workload)}
-                partialLabel={t('translation|Failed')}
-                totalLabel={t('translation|Running')}
+                partialLabel={t("translation|Failed")}
+                totalLabel={t("translation|Running")}
               />
             </Grid>
           ))}
         </Grid>
       </SectionBox>
       <ResourceListView
-        title={t('Workloads')}
+        title={t("Workloads")}
         columns={[
-          'kind',
+          "kind",
           {
-            id: 'name',
-            label: t('translation|Name'),
+            id: "name",
+            label: t("translation|Name"),
             getValue: (item) => item.metadata.name,
-            render: (item) => <ResourceLink resource={item as KubeObject} state={{ backLink: { ...location } }} />,
+            render: (item) => (
+              <ResourceLink
+                resource={item as KubeObject}
+                state={{ backLink: { ...location } }}
+              />
+            ),
           },
-          'namespace',
+          "namespace",
           {
-            id: 'pods',
-            label: t('Pods'),
+            id: "pods",
+            label: t("Pods"),
             getValue: (item) => item && getPods(item),
             sort: sortByReplicas,
           },
-          'age',
+          "age",
         ]}
         data={getJointItems()}
         headerProps={{
