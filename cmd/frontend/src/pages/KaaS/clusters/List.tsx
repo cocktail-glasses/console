@@ -21,6 +21,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  CircularProgress,
 } from "@mui/material";
 import {
   KamajiClastixIoV1alpha1Api as KamajiAPI,
@@ -50,14 +51,17 @@ import {
 import "./list.scss";
 
 export default function KaaSClusterList() {
+  const [isLoading, setIsLoading] = useState(false);
   const [tenantControlPlane, setTenantControlPlane] =
     useState<IoClastixKamajiV1alpha1TenantControlPlaneList>();
   useEffect(() => {
+    setIsLoading(true);
     const kamajiAPI = new KamajiAPI(undefined, "http://localhost:4466");
     kamajiAPI
       .listKamajiClastixIoV1alpha1NamespacedTenantControlPlane("tenant-root")
       .then((res) => res.data)
-      .then((tcl) => setTenantControlPlane(tcl));
+      .then((tcl) => setTenantControlPlane(tcl))
+      .finally(() => setIsLoading(false));
   }, []);
 
   const [search, setSearch] = useState("");
@@ -66,7 +70,11 @@ export default function KaaSClusterList() {
     <Paper className="main-container">
       <h2>KaaS 클러스터 관리</h2>
       <ListMenu search={search} handleSearch={setSearch} />
-      <ListTable tenantControlPlane={tenantControlPlane} search={search} />
+      <ListTable
+        tenantControlPlane={tenantControlPlane}
+        search={search}
+        isLoading={isLoading}
+      />
     </Paper>
   );
 }
@@ -114,9 +122,14 @@ const ListMenu: React.FC<ListMenuProp> = ({
 interface ListTableProp {
   tenantControlPlane?: IoClastixKamajiV1alpha1TenantControlPlaneList;
   search?: string;
+  isLoading?: boolean;
 }
 
-const ListTable: React.FC<ListTableProp> = ({ tenantControlPlane, search }) => {
+const ListTable: React.FC<ListTableProp> = ({
+  tenantControlPlane,
+  search,
+  isLoading,
+}) => {
   const getDotStatus = (status?: string) => {
     const equal = curry(eq);
 
@@ -255,6 +268,13 @@ const ListTable: React.FC<ListTableProp> = ({ tenantControlPlane, search }) => {
           ))}
         </TableHead>
         <TableBody>
+          {isLoading && (
+            <TableRow className="row">
+              <TableCell colSpan={columns.length} align="center">
+                <CircularProgress />
+              </TableCell>
+            </TableRow>
+          )}
           {table.getRowModel().rows.map((row) => (
             <TableRow className="row" key={row.id}>
               {row.getVisibleCells().map((cell) => (
