@@ -1,16 +1,16 @@
-import { Fragment, useMemo } from 'react';
-import { generatePath } from 'react-router';
+import { Fragment, useMemo } from "react";
+import { generatePath } from "react-router";
 
-import Collapse from '@mui/material/Collapse';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import { useTheme } from '@mui/material/styles';
+import Collapse from "@mui/material/Collapse";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import { useTheme } from "@mui/material/styles";
 
-import ListItemLink from './ListItemLink';
-import { SidebarItemProps } from './SidebarInterface';
+import ListItemLink from "./ListItemLink";
+import { SidebarItemProps } from "./SidebarInterface";
 
 // import { createRouteURL, getRoute } from '@lib/router';
-import { getCluster, getClusterPrefixedPath } from '@lib/util';
+import { getCluster, getClusterPrefixedPath } from "@lib/util";
 
 export default function SidebarItem(props: SidebarItemProps) {
   const {
@@ -34,7 +34,9 @@ export default function SidebarItem(props: SidebarItemProps) {
 
   let fullURL = url;
   if (fullURL && useClusterURL && getCluster()) {
-    fullURL = generatePath(getClusterPrefixedPath(url), { cluster: getCluster()! });
+    fullURL = generatePath(getClusterPrefixedPath(url), {
+      cluster: getCluster()!,
+    });
   }
 
   // if (!fullURL) {
@@ -85,77 +87,77 @@ export default function SidebarItem(props: SidebarItemProps) {
   return hide ? null : (
     <Fragment>
       <ListItemLink
-        selected={isSelected}
-        pathname={fullURL || ''}
-        primary={fullWidth ? label : ''}
+        // selected={isSelected}
+        pathname={fullURL || ""}
+        primary={fullWidth ? label : ""}
         containerProps={{
           sx: {
             color: theme.palette.sidebarLink.color,
-            borderRadius: '4px',
-            marginRight: '5px',
+            borderRadius: "4px",
+            marginRight: "5px",
             marginLeft: theme.spacing(5),
-            marginBottom: '1px',
+            marginBottom: "1px",
 
-            '& *': {
-              fontSize: '.875rem',
-              textTransform: 'none',
+            "& *": {
+              fontSize: ".875rem",
+              textTransform: "none",
             },
-            '& .MuiListItem-root': {
-              paddingTop: '4px',
-              paddingBottom: '4px',
+            "& .MuiListItem-root": {
+              paddingTop: "4px",
+              paddingBottom: "4px",
             },
-            '& .MuiListItem-button:hover': {
-              backgroundColor: 'unset',
+            "& .MuiListItem-button:hover": {
+              backgroundColor: "unset",
             },
-            '&:hover': {
+            "&:hover": {
               backgroundColor: theme.palette.sidebarLink.hover.backgroundColor,
 
-              '& svg': {
+              "& svg": {
                 color: theme.palette.sidebarLink.hover.color,
               },
             },
-            '& a.Mui-focusVisible': {
+            "& a.Mui-focusVisible": {
               backgroundColor: theme.palette.sidebarLink.hover.backgroundColor,
             },
-            '& svg': {
+            "& svg": {
               color: theme.palette.sidebarLink.color,
             },
-            '& .MuiListItemIcon-root': {
+            "& .MuiListItemIcon-root": {
               minWidth: 0,
-              alignSelf: fullWidth && hasSubtitle ? 'stretch' : 'auto',
+              alignSelf: fullWidth && hasSubtitle ? "stretch" : "auto",
               paddingTop: fullWidth && hasSubtitle ? theme.spacing(1) : 0,
-              marginRight: fullWidth ? '8px' : '0',
+              marginRight: fullWidth ? "8px" : "0",
             },
-            '& .MuiListItemText-secondary': {
-              fontSize: '.85rem',
-              fontStyle: 'italic',
-              whiteSpace: 'nowrap',
-              textOverflow: 'ellipsis',
-              overflowWrap: 'anywhere',
-              overflow: 'hidden',
+            "& .MuiListItemText-secondary": {
+              fontSize: ".85rem",
+              fontStyle: "italic",
+              whiteSpace: "nowrap",
+              textOverflow: "ellipsis",
+              overflowWrap: "anywhere",
+              overflow: "hidden",
               color: theme.palette.sidebarLink.color,
             },
 
             ...(!hasParent && {
               color: theme.palette.sidebarLink.main.color,
-              marginLeft: '5px',
-              marginRight: '5px',
-              borderRadius: '4px',
+              marginLeft: "5px",
+              marginRight: "5px",
+              borderRadius: "4px",
 
-              '& .MuiListItem-root': {
-                paddingTop: hasSubtitle ? '0' : '7px',
-                paddingBottom: hasSubtitle ? '0' : '7px',
-                paddingLeft: '16px',
-                minHeight: !fullWidth ? '56px' : 'unset',
+              "& .MuiListItem-root": {
+                paddingTop: hasSubtitle ? "0" : "7px",
+                paddingBottom: hasSubtitle ? "0" : "7px",
+                paddingLeft: "16px",
+                minHeight: !fullWidth ? "48px" : "unset",
               },
 
-              '& *': {
-                fontSize: '1rem',
+              "& *": {
+                fontSize: "1rem",
               },
 
-              '&:hover, &:active': {
+              "&:hover, &:active": {
                 color: theme.palette.sidebarLink.main.color,
-                '& svg': {
+                "& svg": {
                   color: theme.palette.sidebarLink.main.color,
                 },
               },
@@ -163,41 +165,43 @@ export default function SidebarItem(props: SidebarItemProps) {
 
             ...(!hasParent &&
               isSelected && {
-                '& svg': {
+                "& svg": {
                   color: theme.palette.sidebarLink.main.selected.color,
                 },
-                '&:hover, &:active': {
+                "&:hover, &:active": {
                   color: theme.palette.sidebarLink.main.selected.color,
-                  '& svg': {
+                  "& svg": {
                     color: theme.palette.sidebarLink.main.selected.color,
                   },
                 },
-                '&, & *': {
+                "&, & *": {
                   color: theme.palette.sidebarLink.main.selected.color,
                 },
                 backgroundColor: `${theme.palette.sidebarLink.main.selected.backgroundColor}!important`,
-                '& .MuiListItemText-secondary': {
-                  fontSize: '.85rem',
-                  fontStyle: 'italic',
-                  whiteSpace: 'nowrap',
-                  textOverflow: 'ellipsis',
-                  textTransform: 'none',
-                  overflowWrap: 'anywhere',
-                  overflow: 'hidden',
+                "& .MuiListItemText-secondary": {
+                  fontSize: ".85rem",
+                  fontStyle: "italic",
+                  whiteSpace: "nowrap",
+                  textOverflow: "ellipsis",
+                  textTransform: "none",
+                  overflowWrap: "anywhere",
+                  overflow: "hidden",
                   color: theme.palette.sidebarLink.main.selected.color,
                 },
-                '& a.Mui-focusVisible': {
-                  backgroundColor: theme.palette.sidebarLink.selected.backgroundColor,
+                "& a.Mui-focusVisible": {
+                  backgroundColor:
+                    theme.palette.sidebarLink.selected.backgroundColor,
                 },
               }),
 
             ...(hasParent &&
               isSelected && {
-                fontWeight: 'bold',
-                '& .Mui-selected': {
-                  background: theme.palette.sidebarLink.selected.backgroundColor,
-                  '& *': {
-                    fontWeight: 'bold',
+                fontWeight: "bold",
+                "& .Mui-selected": {
+                  background:
+                    theme.palette.sidebarLink.selected.backgroundColor,
+                  "& *": {
+                    fontWeight: "bold",
                     color: theme.palette.sidebarLink.selected.color,
                   },
                 },
@@ -217,20 +221,26 @@ export default function SidebarItem(props: SidebarItemProps) {
             padding: 0,
           }}
         >
-          <Collapse in={fullWidth && expanded} sx={{ width: '100%' }}>
+          <Collapse in={fullWidth && expanded} sx={{ width: "100%" }}>
             <List
               component="ul"
               disablePadding
               sx={{
-                '& .MuiListItem-root': {
-                  fontSize: '.875rem',
-                  paddingTop: '2px',
-                  paddingBottom: '2px',
+                "& .MuiListItem-root": {
+                  fontSize: ".875rem",
+                  paddingTop: "2px",
+                  paddingBottom: "2px",
                 },
               }}
             >
               {subList.map((item: SidebarItemProps) => (
-                <SidebarItem key={item.name} selectedName={selectedName} hasParent search={search} {...item} />
+                <SidebarItem
+                  key={item.name}
+                  selectedName={selectedName}
+                  hasParent
+                  search={search}
+                  {...item}
+                />
               ))}
             </List>
           </Collapse>

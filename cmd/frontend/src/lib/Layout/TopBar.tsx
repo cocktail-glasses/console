@@ -430,6 +430,7 @@ function PureTopBar({
         enableColorOnDark
       >
         <Toolbar
+          variant="dense"
           sx={{
             [theme.breakpoints.down("sm")]: {
               paddingLeft: 0,
