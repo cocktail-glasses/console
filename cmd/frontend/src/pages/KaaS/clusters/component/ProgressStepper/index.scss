@@ -1,0 +1,13 @@
+.progress-stepper-container {
+  .step {
+    &.fit-width {
+      &:first-child {
+        padding-left: 0px;
+      }
+
+      &:last-child {
+        padding-right: 0px;
+      }
+    }
+  }
+}

@@ -39,13 +39,6 @@
   border-color: rgba(255, 255, 255, 0.12);
 }
 
-.description-item {
-  --caption-color: #7e868f;
-  .caption {
-    color: var(--caption-color);
-  }
-}
-
 .table {
   margin-top: 30px;
 
@@ -192,10 +185,4 @@
 
 .margin-right-5 {
   margin-right: 5px;
-}
-
-.dark {
-  .description-item {
-    --caption-color: #b8b8b8;
-  }
 }

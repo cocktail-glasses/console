@@ -73,6 +73,7 @@ import k8sWebhookconfigurationValidatingWebhookConfigDetails from "@pages/K8s/we
 import k8sWebhookconfigurationValidatingWebhookConfigList from "@pages/K8s/webhookconfiguration/ValidatingWebhookConfigList";
 import k8sWorkloadDetails from "@pages/K8s/workload/Details";
 import k8sWorkloadOverview from "@pages/K8s/workload/Overview";
+import KaaSCreate from "@pages/KaaS/clusters/Create";
 import KaaSDetail from "@pages/KaaS/clusters/Detail";
 import KaaSList from "@pages/KaaS/clusters/List";
 import Settings from "@pages/Settings";
@@ -720,15 +721,9 @@ export const Routes: RoutesType[] = [
         element: KaaSDetail,
       },
       {
-        path: "/kaas/clusters",
-        page: "KaaS/clusters/List",
-        element: KaaSList,
-        index: true,
-      },
-      {
-        path: "/kaas/clusters/:managementNamespace/:name",
-        page: "KaaS/clusters/Detail",
-        element: KaaSDetail,
+        path: "/kaas/clusters/create",
+        page: "KaaS/clusters/Create",
+        element: KaaSCreate,
       },
     ],
   },
