@@ -65,7 +65,7 @@ export default function Detail() {
   useEffect(() => {
     if (isEmpty(name) || isEmpty(managementNamespace)) return;
 
-    const kamajiAPI = new KamajiAPI(undefined, 'http://localhost:4466');
+    const kamajiAPI = new KamajiAPI(undefined, '/k8s');
     kamajiAPI
       .readKamajiClastixIoV1alpha1NamespacedTenantControlPlane(name!, managementNamespace!)
       .then((res) => res.data)

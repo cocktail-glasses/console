@@ -59,9 +59,9 @@ export default function KaaSClusterList() {
   const [tenantControlPlane, setTenantControlPlane] = useState<IoClastixKamajiV1alpha1TenantControlPlaneList>();
   useEffect(() => {
     setIsLoading(true);
-    const kamajiAPI = new KamajiAPI(undefined, 'http://localhost:4466');
+    const kamajiAPI = new KamajiAPI(undefined, '/k8s');
     kamajiAPI
-      .listKamajiClastixIoV1alpha1NamespacedTenantControlPlane('tenant-root')
+      .listKamajiClastixIoV1alpha1TenantControlPlaneForAllNamespaces()
       .then((res) => res.data)
       .then((tcl) => setTenantControlPlane(tcl))
       .finally(() => setIsLoading(false));
