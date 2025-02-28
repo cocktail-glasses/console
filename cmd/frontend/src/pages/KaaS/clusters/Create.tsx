@@ -1,3 +1,10 @@
+import { ReactElement, useEffect, useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import { useNavigate } from 'react-router';
+
+import { zodResolver } from '@hookform/resolvers/zod';
+
+import { Close, ArrowBack, ArrowForward, Add, Delete, OpenInNew, VisibilityOff, Visibility } from '@mui/icons-material';
 import {
   Box,
   Button,
@@ -8,8 +15,6 @@ import {
   OutlinedInput,
   Select,
   Step,
-  StepLabel,
-  Stepper,
   TextField,
   ToggleButton,
   ToggleButtonGroup,
@@ -22,36 +27,34 @@ import {
   Paper,
   InputAdornment,
   FormHelperText,
-} from "@mui/material";
-import { SelectChangeEvent } from "@mui/material/Select";
-import flow from "lodash/flow";
-import head from "lodash/head";
-import isEmpty from "lodash/isEmpty";
-import isFunction from "lodash/isFunction";
-import isString from "lodash/isString";
-import map from "lodash/map";
-import { ReactElement, useState } from "react";
-import { useNavigate } from "react-router";
-import {
-  Close,
-  ArrowBack,
-  ArrowForward,
-  Add,
-  Delete,
-  OpenInNew,
-  VisibilityOff,
-  Visibility,
-} from "@mui/icons-material";
-import "./common.scss";
-import "./create.scss";
-import { Controller, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { createFormSchema } from "./formValidation";
+  Stack,
+  Dialog,
+  DialogContent,
+  Card,
+  CardContent,
+  CardMedia,
+} from '@mui/material';
+import { SelectChangeEvent } from '@mui/material/Select';
 
-interface StepData {
-  label: string;
-  content: ReactElement;
-}
+import { concat, filter, includes, range, reduce } from 'lodash';
+import flow from 'lodash/flow';
+import head from 'lodash/head';
+import isEmpty from 'lodash/isEmpty';
+import isFunction from 'lodash/isFunction';
+import isString from 'lodash/isString';
+import map from 'lodash/map';
+
+import './common.scss';
+import ProgressStepper from './component/ProgressStepper/ProgressStepper';
+import Searchbar from './component/Searchbar/Searchbar';
+import './create.scss';
+import { createFormSchema } from './formValidation';
+
+import { DialogTitle } from '@components/common';
+import Argo from 'public/app_argo.svg';
+import CertManager from 'public/app_cert-manager.svg';
+import Falco from 'public/app_falco.svg';
+import Flux2 from 'public/app_flux2.svg';
 
 interface FormValue {
   cluster: ClusterFormValue;
@@ -67,62 +70,53 @@ export default function Create() {
   } = useForm<FormValue>();
 
   console.log(watch());
-  console.log("root form errors: ", errors);
+  console.log('root form errors: ', errors);
 
   const [hasError, setHasError] = useState(false);
 
-  const stepDatas: StepData[] = [
+  const stepDatas = [
     {
-      label: "Cluster",
+      label: 'Cluster',
       content: (
         <Controller
           name="cluster"
           control={control}
           render={({ field: { value, onChange } }) => (
-            <ClusterForm
-              values={value}
-              handleSubmit={onChange}
-              handleError={setHasError}
-            />
+            <ClusterForm values={value} handleSubmit={onChange} handleError={setHasError} />
           )}
         />
       ),
     },
     {
-      label: "Settings",
+      label: 'Settings',
       content: (
         <Controller
           name="settings"
           control={control}
-          render={({ field: { onChange } }) => (
-            <SettingForm handleSubmit={onChange} />
-          )}
+          render={({ field: { onChange } }) => <SettingForm handleSubmit={onChange} />}
         />
       ),
     },
     {
-      label: "Static Nodes",
+      label: 'Static Nodes',
       content: <StaticNodeForm />,
     },
     {
-      label: "Applications",
+      label: 'Applications',
       content: <ApplicationsForm />,
     },
     {
-      label: "Summary",
+      label: 'Summary',
       content: <SummaryForm formValue={getValues()} />,
     },
   ];
   const [activeStepIndex, setActiveStep] = useState(0);
 
   const hasBack = (currentStepIndex: number) => currentStepIndex > 0;
-  const hasNext = (currentStepIndex: number, totalStepSize: number) =>
-    currentStepIndex < totalStepSize - 1;
-  const handleBack = (currentStepIndex: number) =>
-    hasBack(currentStepIndex) && setActiveStep((prev) => prev - 1);
+  const hasNext = (currentStepIndex: number, totalStepSize: number) => currentStepIndex < totalStepSize - 1;
+  const handleBack = (currentStepIndex: number) => hasBack(currentStepIndex) && setActiveStep((prev) => prev - 1);
   const handleNext = (currentStepIndex: number) =>
-    hasNext(currentStepIndex, stepDatas.length) &&
-    setActiveStep((prev) => prev + 1);
+    hasNext(currentStepIndex, stepDatas.length) && setActiveStep((prev) => prev + 1);
 
   const navigate = useNavigate();
 
@@ -130,19 +124,16 @@ export default function Create() {
     <Paper className="main-form main-container">
       <h2>Create Cluster</h2>
 
-      <ProgressStepper
-        stepDatas={stepDatas}
-        activeStepIndex={activeStepIndex}
-      />
+      <ProgressStepper stepDatas={stepDatas} activeStepIndex={activeStepIndex} />
 
       <Box>{stepDatas[activeStepIndex].content}</Box>
-      {JSON.stringify(hasError)}
+      {/* {JSON.stringify(hasError)} */}
 
       <Box
         sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          marginTop: "30px",
+          display: 'flex',
+          justifyContent: 'space-between',
+          marginTop: '30px',
         }}
       >
         <Button
@@ -150,11 +141,11 @@ export default function Create() {
           color="secondary"
           size="large"
           startIcon={<Close />}
-          onClick={() => navigate("/kaas/clusters")}
+          onClick={() => navigate('/kaas/clusters')}
         >
           Cancel
         </Button>
-        <Box sx={{ display: "flex", gap: "10px" }}>
+        <Box sx={{ display: 'flex', gap: '10px' }}>
           <Button
             variant="outlined"
             color="info"
@@ -177,12 +168,7 @@ export default function Create() {
               Next
             </Button>
           ) : (
-            <Button
-              variant="contained"
-              size="large"
-              startIcon={<Add />}
-              onClick={() => handleNext(activeStepIndex)}
-            >
+            <Button variant="contained" size="large" startIcon={<Add />} onClick={() => handleNext(activeStepIndex)}>
               Create Cluster
             </Button>
           )}
@@ -191,26 +177,6 @@ export default function Create() {
     </Paper>
   );
 }
-
-interface ProgressStepperProps {
-  stepDatas: StepData[];
-  activeStepIndex: number;
-}
-
-const ProgressStepper: React.FC<ProgressStepperProps> = ({
-  stepDatas,
-  activeStepIndex,
-}) => {
-  return (
-    <Stepper activeStep={activeStepIndex}>
-      {map(stepDatas, (stepData) => (
-        <Step key={stepData.label}>
-          <StepLabel>{stepData.label}</StepLabel>
-        </Step>
-      ))}
-    </Stepper>
-  );
-};
 
 interface ClusterFormValue {
   name: string;
@@ -227,13 +193,9 @@ interface ClusterFormProps {
   handleError?: (...event: any[]) => void;
 }
 
-const ClusterForm: React.FC<ClusterFormProps> = ({
-  values,
-  handleSubmit,
-  handleError,
-}) => {
+const ClusterForm: React.FC<ClusterFormProps> = ({ values, handleSubmit, handleError }) => {
   // cni plugins
-  const ciliumVersions: string[] = ["1.15.3", "1.14.9", "1.13.14"];
+  const ciliumVersions: string[] = ['1.15.3', '1.14.9', '1.13.14'];
 
   // sshkeys
   const ITEM_HEIGHT = 48;
@@ -246,23 +208,15 @@ const ClusterForm: React.FC<ClusterFormProps> = ({
       },
     },
   };
-  const sshKeys: string[] = ["cocktail", "openstack"];
-  const handleSSHKeysChange = ({
-    target: { value },
-  }: SelectChangeEvent<string[]>) =>
-    isString(value) ? value.split(",") : value;
+  const sshKeys: string[] = ['cocktail', 'openstack'];
+  const handleSSHKeysChange = ({ target: { value } }: SelectChangeEvent<string[]>) =>
+    isString(value) ? value.split(',') : value;
 
   // control plane version
-  const controlPlaneVersions: string[] = [
-    "1.30.0",
-    "1.29.4",
-    "1.29.2",
-    "1.29.1",
-    "1.29.0",
-  ];
+  const controlPlaneVersions: string[] = ['1.30.0', '1.29.4', '1.29.2', '1.29.1', '1.29.0'];
 
   // container runtime
-  const containerRuntimes: string[] = ["containerd"];
+  const containerRuntimes: string[] = ['containerd'];
 
   // admission plugins
   interface CheckBoxOption {
@@ -272,32 +226,26 @@ const ClusterForm: React.FC<ClusterFormProps> = ({
   }
 
   const admissionPlugins: CheckBoxOption[] = [
-    { label: "Event Rate Limit", value: "eventRateLimit" },
-    { label: "Pod Node Selector", value: "podNodeSelector" },
+    { label: 'Event Rate Limit', value: 'eventRateLimit' },
+    { label: 'Pod Node Selector', value: 'podNodeSelector' },
   ];
-  const [selectedAdmissionPlugins, setSelectedAdmissionPlugins] = useState<
-    string[]
-  >([]);
-  const handleAdmissionPlugins = (
-    event: SelectChangeEvent<typeof selectedAdmissionPlugins>,
-  ) => {
+  const [selectedAdmissionPlugins, setSelectedAdmissionPlugins] = useState<string[]>([]);
+  const handleAdmissionPlugins = (event: SelectChangeEvent<typeof selectedAdmissionPlugins>) => {
     const {
       target: { value },
     } = event;
-    setSelectedAdmissionPlugins(
-      typeof value === "string" ? value.split(",") : value,
-    );
+    setSelectedAdmissionPlugins(typeof value === 'string' ? value.split(',') : value);
   };
 
   // checkboxes
   const features: CheckBoxOption[] = [
-    { label: "Audit Logging", value: "auditLoggin" },
-    { label: "Disable CSI Driver", value: "disableCSIDriver" },
-    { label: "Kubernetes Dashboard", value: "kubernetesDashboard" },
-    { label: "OPA Integration", value: "opaIntegration" },
-    { label: "User Cluster Logging", value: "userClusterLogging" },
-    { label: "User Cluster Monitoring", value: "userClusterMonitoring" },
-    { label: "User SSH Key Agent", value: "userSSHKeyAgent" },
+    { label: 'Audit Logging', value: 'auditLoggin' },
+    { label: 'Disable CSI Driver', value: 'disableCSIDriver' },
+    { label: 'Kubernetes Dashboard', value: 'kubernetesDashboard' },
+    { label: 'OPA Integration', value: 'opaIntegration' },
+    { label: 'User Cluster Logging', value: 'userClusterLogging' },
+    { label: 'User Cluster Monitoring', value: 'userClusterMonitoring' },
+    { label: 'User SSH Key Agent', value: 'userSSHKeyAgent' },
   ];
 
   // forms
@@ -307,15 +255,14 @@ const ClusterForm: React.FC<ClusterFormProps> = ({
     formState: { isValid },
   } = useForm<ClusterFormValue>({
     defaultValues: {
-      name: values?.name || "",
+      name: values?.name || '',
       sshKeys: values?.sshKeys || [],
       cniPlugin: values?.cniPlugin,
       cniPluginVersion: values?.cniPluginVersion || head(ciliumVersions),
-      controlPlaneVersion:
-        values?.controlPlaneVersion || head(controlPlaneVersions),
+      controlPlaneVersion: values?.controlPlaneVersion || head(controlPlaneVersions),
       containerRuntime: values?.containerRuntime || head(containerRuntimes),
     },
-    mode: "onChange",
+    mode: 'onChange',
     resolver: zodResolver(createFormSchema),
   });
 
@@ -328,30 +275,22 @@ const ClusterForm: React.FC<ClusterFormProps> = ({
   console.log(watch());
 
   return (
-    <Box sx={{ display: "flex", gap: "25px" }}>
-      <Box sx={{ flex: "1" }}>
+    <Box sx={{ display: 'flex', gap: '25px' }}>
+      <Box sx={{ flex: '1' }}>
         <h2>Clusters</h2>
         <Controller
           name="name"
           control={control}
-          render={({
-            field: { value, onChange },
-            fieldState: { error, invalid },
-          }) => (
+          render={({ field: { value, onChange }, fieldState: { error, invalid } }) => (
             <FormControl fullWidth required error={invalid}>
-              <TextField
-                label="Name"
-                variant="outlined"
-                value={value}
-                onChange={onChange}
-              />
+              <TextField label="Name" variant="outlined" value={value} onChange={onChange} />
               <FormHelperText>{error?.message}</FormHelperText>
             </FormControl>
           )}
         />
 
         <h2>Network Configuration</h2>
-        <Box sx={{ marginBottom: "22px" }}>
+        <Box sx={{ marginBottom: '22px' }}>
           <Controller
             name="cniPlugin"
             control={control}
@@ -377,7 +316,7 @@ const ClusterForm: React.FC<ClusterFormProps> = ({
             )}
           />
         </Box>
-        <Box sx={{ marginBottom: "10px" }}>
+        <Box sx={{ marginBottom: '10px' }}>
           <Controller
             name="cniPluginVersion"
             control={control}
@@ -405,7 +344,7 @@ const ClusterForm: React.FC<ClusterFormProps> = ({
         </Box>
 
         <h2>SSH Keys</h2>
-        <Box sx={{ marginBottom: "10px" }}>
+        <Box sx={{ marginBottom: '10px' }}>
           <Controller
             name="sshKeys"
             control={control}
@@ -422,7 +361,7 @@ const ClusterForm: React.FC<ClusterFormProps> = ({
                   value={value}
                   onChange={flow([handleSSHKeysChange, onChange])}
                   input={<OutlinedInput label="SSH Keys" />}
-                  renderValue={(selected) => selected.join(", ")}
+                  renderValue={(selected) => selected.join(', ')}
                   MenuProps={MenuProps}
                 >
                   {map(sshKeys, (sshKey) => (
@@ -436,21 +375,16 @@ const ClusterForm: React.FC<ClusterFormProps> = ({
             )}
           />
         </Box>
-        <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-          <Button
-            variant="outlined"
-            color="success"
-            size="large"
-            startIcon={<Add />}
-          >
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <Button variant="outlined" color="success" size="large" startIcon={<Add />}>
             Add SSH Key
           </Button>
         </Box>
       </Box>
 
-      <Box sx={{ flex: "1" }}>
+      <Box sx={{ flex: '1' }}>
         <h2>Specification</h2>
-        <Box sx={{ display: "flex", gap: "10px", marginBottom: "30px" }}>
+        <Box sx={{ display: 'flex', gap: '10px', marginBottom: '30px' }}>
           <FormControl fullWidth>
             <InputLabel id="controlPlaneVersion" variant="outlined" required>
               Control Plane Version
@@ -491,7 +425,7 @@ const ClusterForm: React.FC<ClusterFormProps> = ({
           </FormControl>
         </Box>
 
-        <Box sx={{ marginBottom: "30px" }}>
+        <Box sx={{ marginBottom: '30px' }}>
           <FormControl fullWidth>
             <InputLabel id="admissionPlugins" variant="outlined">
               Admission Plugins
@@ -503,19 +437,12 @@ const ClusterForm: React.FC<ClusterFormProps> = ({
               value={selectedAdmissionPlugins}
               onChange={handleAdmissionPlugins}
               input={<OutlinedInput label="Admission Plugins" />}
-              renderValue={(selected) => selected.join(", ")}
+              renderValue={(selected) => selected.join(', ')}
               MenuProps={MenuProps}
             >
               {map(admissionPlugins, (admissionPlugin) => (
-                <MenuItem
-                  value={admissionPlugin.value}
-                  key={admissionPlugin.value}
-                >
-                  <Checkbox
-                    checked={selectedAdmissionPlugins.includes(
-                      admissionPlugin.value,
-                    )}
-                  />
+                <MenuItem value={admissionPlugin.value} key={admissionPlugin.value}>
+                  <Checkbox checked={selectedAdmissionPlugins.includes(admissionPlugin.value)} />
                   <ListItemText primary={admissionPlugin.label} />
                 </MenuItem>
               ))}
@@ -523,21 +450,17 @@ const ClusterForm: React.FC<ClusterFormProps> = ({
           </FormControl>
         </Box>
 
-        <Box sx={{ marginBottom: "30px" }}>
+        <Box sx={{ marginBottom: '30px' }}>
           <FormGroup>
             {map(features, (feature) => (
-              <FormControlLabel
-                control={<Checkbox name={feature.value} />}
-                label={feature.label}
-                key={feature.value}
-              />
+              <FormControlLabel control={<Checkbox name={feature.value} />} label={feature.label} key={feature.value} />
             ))}
           </FormGroup>
         </Box>
 
-        <Box sx={{ marginBottom: "30px" }}>
+        <Box sx={{ marginBottom: '30px' }}>
           <h2>Labels</h2>
-          <Box sx={{ display: "flex", gap: "10px" }}>
+          <Box sx={{ display: 'flex', gap: '10px' }}>
             <TextField label="Key" variant="outlined" fullWidth />
             <TextField label="Value" variant="outlined" fullWidth />
             <IconButton aria-label="delete" size="large" disabled>
@@ -570,11 +493,11 @@ const SettingForm: React.FC<SettingsFormProps> = ({ values, handleSubmit }) => {
   // forms
   const { watch, control } = useForm<SettingsFormValue>({
     defaultValues: {
-      providerPreset: values?.providerPreset || "",
-      credentialType: values?.credentialType || "userCredential",
-      securityGroup: "",
+      providerPreset: values?.providerPreset || '',
+      credentialType: values?.credentialType || 'userCredential',
+      securityGroup: '',
     },
-    mode: "onBlur",
+    mode: 'onBlur',
   });
 
   watch((data) => {
@@ -582,16 +505,16 @@ const SettingForm: React.FC<SettingsFormProps> = ({ values, handleSubmit }) => {
   });
 
   // provider preset
-  const providerPresets: string[] = ["cocktail-preset"];
+  const providerPresets: string[] = ['cocktail-preset'];
 
   // user credential password
   const [isPasswordShow, setIsPasswordShow] = useState(false);
 
   return (
-    <Box sx={{ display: "flex", gap: "25px" }}>
+    <Box sx={{ display: 'flex', gap: '25px' }}>
       <Box sx={{ flex: 1 }}>
         <h2>Basic Settings</h2>
-        <Box sx={{ marginBottom: "10px" }}>
+        <Box sx={{ marginBottom: '10px' }}>
           <Controller
             name="providerPreset"
             control={control}
@@ -615,30 +538,22 @@ const SettingForm: React.FC<SettingsFormProps> = ({ values, handleSubmit }) => {
                   ))}
                 </Select>
                 <FormHelperText>
-                  Using provider presets will disable most of the other
-                  provider-related fields.
+                  Using provider presets will disable most of the other provider-related fields.
                 </FormHelperText>
               </FormControl>
             )}
           />
         </Box>
-        <Box sx={{ marginBottom: "10px" }}>
+        <Box sx={{ marginBottom: '10px' }}>
           <Controller
             name="domain"
             control={control}
             render={({ field: { value, onChange } }) => (
-              <TextField
-                label="Domain"
-                variant="outlined"
-                required
-                fullWidth
-                value={value}
-                onChange={onChange}
-              />
+              <TextField label="Domain" variant="outlined" required fullWidth value={value} onChange={onChange} />
             )}
           />
         </Box>
-        <Box sx={{ marginBottom: "10px" }}>
+        <Box sx={{ marginBottom: '10px' }}>
           <Controller
             name="credentialType"
             control={control}
@@ -650,33 +565,22 @@ const SettingForm: React.FC<SettingsFormProps> = ({ values, handleSubmit }) => {
                 onChange={(_, select) => onChange(select)}
                 aria-label="credentialType"
               >
-                <ToggleButton value="userCredential">
-                  User Credential
-                </ToggleButton>
-                <ToggleButton value="applicationCredential">
-                  Application Credential
-                </ToggleButton>
+                <ToggleButton value="userCredential">User Credential</ToggleButton>
+                <ToggleButton value="applicationCredential">Application Credential</ToggleButton>
               </ToggleButtonGroup>
             )}
           />
         </Box>
-        <Box sx={{ marginBottom: "10px" }}>
+        <Box sx={{ marginBottom: '10px' }}>
           <Controller
             name="userName"
             control={control}
             render={({ field: { value, onChange } }) => (
-              <TextField
-                label="Username"
-                variant="outlined"
-                required
-                fullWidth
-                value={value}
-                onChange={onChange}
-              />
+              <TextField label="Username" variant="outlined" required fullWidth value={value} onChange={onChange} />
             )}
           />
         </Box>
-        <Box sx={{ marginBottom: "10px" }}>
+        <Box sx={{ marginBottom: '10px' }}>
           <Controller
             name="password"
             control={control}
@@ -687,7 +591,7 @@ const SettingForm: React.FC<SettingsFormProps> = ({ values, handleSubmit }) => {
                 </InputLabel>
                 <OutlinedInput
                   id="password"
-                  type={isPasswordShow ? "text" : "password"}
+                  type={isPasswordShow ? 'text' : 'password'}
                   required
                   endAdornment={
                     <InputAdornment position="end">
@@ -713,7 +617,7 @@ const SettingForm: React.FC<SettingsFormProps> = ({ values, handleSubmit }) => {
       </Box>
       <Box sx={{ flex: 1 }}>
         <h2>Advanced Settings</h2>
-        <Box sx={{ marginBottom: "10px" }}>
+        <Box sx={{ marginBottom: '10px' }}>
           <Controller
             name="securityGroup"
             control={control}
@@ -729,14 +633,12 @@ const SettingForm: React.FC<SettingsFormProps> = ({ values, handleSubmit }) => {
                   onChange={onChange}
                   label="No Security Groups Available"
                 ></Select>
-                <FormHelperText>
-                  Please enter your credentials first.
-                </FormHelperText>
+                <FormHelperText>Please enter your credentials first.</FormHelperText>
               </FormControl>
             )}
           />
         </Box>
-        <Box sx={{ marginBottom: "10px" }}>
+        <Box sx={{ marginBottom: '10px' }}>
           <Controller
             name="network"
             control={control}
@@ -752,14 +654,12 @@ const SettingForm: React.FC<SettingsFormProps> = ({ values, handleSubmit }) => {
                   onChange={onChange}
                   label="No Networks Available"
                 ></Select>
-                <FormHelperText>
-                  Please enter your credentials first.
-                </FormHelperText>
+                <FormHelperText>Please enter your credentials first.</FormHelperText>
               </FormControl>
             )}
           />
         </Box>
-        <Box sx={{ marginBottom: "10px" }}>
+        <Box sx={{ marginBottom: '10px' }}>
           <Controller
             name="subnetId"
             control={control}
@@ -775,21 +675,19 @@ const SettingForm: React.FC<SettingsFormProps> = ({ values, handleSubmit }) => {
                   onChange={onChange}
                   label="No IPv4 Subnet IDs Available"
                 ></Select>
-                <FormHelperText>
-                  Please enter your credentials and network first.
-                </FormHelperText>
+                <FormHelperText>Please enter your credentials and network first.</FormHelperText>
               </FormControl>
             )}
           />
         </Box>
-        <Box sx={{ marginBottom: "10px" }}>
+        <Box sx={{ marginBottom: '10px' }}>
           <FormControlLabel
             control={<Checkbox name="enableIngressHostname" />}
             label="Enable Ingress Hostname"
             key="enableIngressHostname"
           />
         </Box>
-        <Box sx={{ marginBottom: "10px" }}>
+        <Box sx={{ marginBottom: '10px' }}>
           <Controller
             name="userName"
             control={control}
@@ -804,9 +702,8 @@ const SettingForm: React.FC<SettingsFormProps> = ({ values, handleSubmit }) => {
                   disabled
                 />
                 <FormHelperText>
-                  Set a specific suffix for the hostnames used for the PROXY
-                  protocol workaround that is enabled by EnableIngressHostname.
-                  The suffix is set to nip.io by default.
+                  Set a specific suffix for the hostnames used for the PROXY protocol workaround that is enabled by
+                  EnableIngressHostname. The suffix is set to nip.io by default.
                 </FormHelperText>
               </FormControl>
             )}
@@ -822,17 +719,154 @@ const StaticNodeForm = () => {
 };
 
 const ApplicationsForm = () => {
+  const [stepIndex, setStepIndex] = useState(0);
+
+  const handleSelectApplication = (application: string) => {
+    setStepIndex((prev) => prev + 1);
+    console.log(application);
+  };
+
+  const installApplicationStep = [
+    { label: 'Select Application', content: <SelectApplicationContent onSelect={handleSelectApplication} /> },
+    { label: 'Settings', content: <></> },
+    { label: 'Application Values', content: <></> },
+  ];
+
+  const [isOpen, setIsOpen] = useState(false);
+  useEffect(() => {
+    if (isOpen) setStepIndex(0);
+  }, [isOpen]);
+
   return (
-    <Box>
-      <h2>Applications to Install</h2>
-      <p>
-        No application selected to install on cluster creation,{" "}
-        <Link sx={{ display: "inline-flex", alignItems: "center" }}>
-          learn more about Applicaitons
-          <OpenInNew sx={{ fontSize: 15 }} />
+    <Stack>
+      <Typography variant="h6">Applications to Install</Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+        <p>
+          No application selected to install on cluster creation,{' '}
+          <Link sx={{ display: 'inline-flex', alignItems: 'center' }}>
+            learn more about Applicaitons
+            <OpenInNew sx={{ fontSize: 15 }} />
+          </Link>
+        </p>
+        <Button
+          variant="outlined"
+          startIcon={<Add />}
+          onClick={() => setIsOpen(true)}
+          sx={{ minHeight: '42px', maxHeight: '42px', textTransform: 'none' }}
+        >
+          Add Application
+        </Button>
+      </Box>
+
+      <Dialog open={isOpen} sx={{ padding: '10px', '& .MuiDialog-paper': { maxWidth: '660px', minWidth: '660px' } }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingRight: '20px' }}>
+          <DialogTitle>Add Application</DialogTitle>
+          <Close sx={{ cursor: 'pointer' }} onClick={() => setIsOpen(false)} />
+        </Box>
+        <DialogContent>
+          <Stack>
+            <ProgressStepper stepDatas={installApplicationStep} activeStepIndex={stepIndex} fitWidth />
+            <Box sx={{ paddingTop: '10px' }}>{installApplicationStep[stepIndex].content}</Box>
+          </Stack>
+        </DialogContent>
+      </Dialog>
+    </Stack>
+  );
+};
+
+interface SelectApplicationContentProp {
+  onSelect: (...event: any) => void;
+}
+
+const SelectApplicationContent: React.FC<SelectApplicationContentProp> = ({ onSelect }) => {
+  const [search, setSearch] = useState('');
+
+  const applications = [
+    { image: Argo, title: 'argocd', summary: 'Argo CD - Declarative, GitOps Continues Delivery Tool for Kubernetes.' },
+    {
+      image: CertManager,
+      title: 'cert-manager',
+      summary:
+        'cert-manager is a Kubernetes addon to automate the management and issuance of TLS certificates from various issuing sources.',
+    },
+    {
+      image: Falco,
+      title: 'falco',
+      summary: 'Falco is a cloud native runtime security tool for Linux operating system.',
+    },
+    {
+      image: Flux2,
+      title: 'flux2',
+      summary:
+        'Flux is a tool for keeping Kubernetes clusters in sync with sources of configuration (like Git repositories), and automating updates to configuration when there is new cold to deploy.',
+    },
+  ];
+
+  const repeat = (arr: any[], n: number) => reduce(range(n), (acc) => concat(acc, arr), arr);
+  const list = filter(repeat(applications, 5), (application) => {
+    if (isEmpty(search)) return true;
+    return includes(application.title, search) || includes(application.summary, search);
+  });
+
+  return (
+    <Stack sx={{ gap: '10px' }}>
+      <Typography variant="body2" component="div" sx={{ display: 'flex', margin: '14px 0' }}>
+        Install third party Applications into a cluster,
+        <Link sx={{ display: 'flex', alignItems: 'center' }}>
+          learn more about Applications
+          <OpenInNew sx={{ fontSize: 15 }} />.
         </Link>
-      </p>
-    </Box>
+      </Typography>
+
+      <Searchbar value={search} onChange={(_, v) => setSearch(v)} />
+
+      <Stack sx={{ maxHeight: '500px', overflowY: 'scroll', marginTop: '30px', gap: '10px', flex: '1' }}>
+        {list.length > 0 ? (
+          map(list, (app, i) => (
+            <Card
+              sx={{
+                display: 'flex',
+                flex: '1',
+                minHeight: '150px',
+                maxHeight: '150px',
+                padding: '10px',
+                border: '1px solid rgba(0, 0, 0, .12)',
+                ':hover': { backgroundColor: 'rgba(0, 0, 0, .12)' },
+                cursor: 'pointer',
+              }}
+              key={i}
+              onClick={() => onSelect(app.title)}
+            >
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  backgroundColor: 'rgba(0, 0, 0, .12)',
+                  width: '128px',
+                }}
+              >
+                <CardMedia
+                  sx={{ width: '100%', height: '100%', backgroundSize: '30%' }}
+                  image={app.image}
+                  title={app.title}
+                />
+              </Box>
+              <CardContent sx={{ flex: 1, padding: '10px' }}>
+                <Typography variant="subtitle1">
+                  <strong>{app.title}</strong>
+                </Typography>
+                <Typography variant="caption">{app.summary}</Typography>
+              </CardContent>
+            </Card>
+          ))
+        ) : (
+          <Box sx={{ display: 'flex', justifyContent: 'center', padding: '30px' }}>
+            <Typography variant="body2">No applications found.</Typography>
+          </Box>
+        )}
+      </Stack>
+    </Stack>
   );
 };
 
@@ -847,61 +881,59 @@ const SummaryForm: React.FC<SummaryFormProps> = ({ formValue }) => {
   const summaryData: SummaryLayout = [
     [
       {
-        title: "Cluster",
+        title: 'Cluster',
         index: 1,
         sub: [
           {
-            title: "GENERAL",
+            title: 'GENERAL',
             contents: [
-              ["Name", formValue.cluster.name],
-              ["Version", formValue.cluster.controlPlaneVersion],
-              ["Container Runtime", formValue.cluster.containerRuntime],
+              ['Name', formValue.cluster.name],
+              ['Version', formValue.cluster.controlPlaneVersion],
+              ['Container Runtime', formValue.cluster.containerRuntime],
               [
-                "SSH Keys",
-                isEmpty(formValue.cluster.sshKeys)
-                  ? "No assigned keys"
-                  : formValue.cluster.sshKeys.join(", "),
+                'SSH Keys',
+                isEmpty(formValue.cluster.sshKeys) ? 'No assigned keys' : formValue.cluster.sshKeys.join(', '),
               ],
             ],
           },
 
           {
-            title: "NETWORK CONFIGURATION",
+            title: 'NETWORK CONFIGURATION',
             contents: [
-              ["CNI Plugin", formValue.cluster.cniPlugin],
-              ["CNI Plugin Version", formValue.cluster.cniPluginVersion],
-              ["Proxy Mode", "ebpf"],
-              ["Expose Strategy", "NodePort"],
-              ["Allowed IP Ranges for Node Ports", undefined],
-              ["Services CIDR", "10.240.16.0/20"],
-              ["Node CIDR Mask Size", "24"],
+              ['CNI Plugin', formValue.cluster.cniPlugin],
+              ['CNI Plugin Version', formValue.cluster.cniPluginVersion],
+              ['Proxy Mode', 'ebpf'],
+              ['Expose Strategy', 'NodePort'],
+              ['Allowed IP Ranges for Node Ports', undefined],
+              ['Services CIDR', '10.240.16.0/20'],
+              ['Node CIDR Mask Size', '24'],
             ],
           },
 
           {
-            title: "SPECIFICATION",
-            contents: [["User SSH Key Agent", undefined]],
+            title: 'SPECIFICATION',
+            contents: [['User SSH Key Agent', undefined]],
           },
 
           {
-            title: "ADMISSION PLUGINS",
-            contents: [["User SSH Key Agent", undefined]],
+            title: 'ADMISSION PLUGINS',
+            contents: [['User SSH Key Agent', undefined]],
           },
         ],
       },
       {
-        title: "Settings",
+        title: 'Settings',
         index: 2,
-        contents: [["Preset", "cocktail-preset"]],
+        contents: [['Preset', 'cocktail-preset']],
       },
       {
-        title: "Static Nodes",
+        title: 'Static Nodes',
         index: 3,
       },
     ],
     [
       {
-        title: "Applications",
+        title: 'Applications',
         index: 4,
       },
     ],
@@ -938,18 +970,14 @@ const SummaryStep: React.FC<SummaryStepProps> = ({ stepData }) => (
     </Typography>
 
     {map(stepData.sub, (sub) => (
-      <Box sx={{ paddingBottom: "24px" }} key={sub.title}>
-        <Typography variant="subtitle1" sx={{ marginBottom: "14px" }}>
+      <Box sx={{ paddingBottom: '24px' }} key={sub.title}>
+        <Typography variant="subtitle1" sx={{ marginBottom: '14px' }}>
           {sub.title}
         </Typography>
 
         <Box className="content">
           {map(sub.contents, (content) => (
-            <SummaryItem
-              key={content[0]}
-              label={content[0]}
-              value={content[1]}
-            />
+            <SummaryItem key={content[0]} label={content[0]} value={content[1]} />
           ))}
         </Box>
       </Box>

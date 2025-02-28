@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 
-import { Add, DeleteOutline, Close, Search } from '@mui/icons-material';
+import { Add, DeleteOutline, Close } from '@mui/icons-material';
 import {
   Box,
   Button,
@@ -17,7 +17,6 @@ import {
   IconButton,
   Paper,
   TextField,
-  InputAdornment,
   Typography,
   Divider,
   Table,
@@ -37,6 +36,7 @@ import toLower from 'lodash/toLower';
 
 import './common.scss';
 import { DotStatus } from './component/DotStatus';
+import Searchbar from './component/Searchbar/Searchbar';
 import './list.scss';
 import { getDeleteClusterSchema } from './schemas';
 import { getDotStatus } from './utils';
@@ -112,22 +112,7 @@ interface ListMenuProp {
 const ListMenu: React.FC<ListMenuProp> = ({ search, handleSearch, handleCreateClick }) => {
   return (
     <Box className="menu-container">
-      <TextField
-        variant="outlined"
-        size="small"
-        placeholder="Search"
-        value={search}
-        onChange={(e) => handleSearch(e.target.value)}
-        slotProps={{
-          input: {
-            startAdornment: (
-              <InputAdornment position="start">
-                <Search />
-              </InputAdornment>
-            ),
-          },
-        }}
-      />
+      <Searchbar value={search} onChange={(_, value) => handleSearch(value)} />
       <Button variant="contained" onClick={handleCreateClick} startIcon={<Add />}>
         Create Cluster
       </Button>
