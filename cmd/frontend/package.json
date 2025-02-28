@@ -59,7 +59,7 @@
     "js-yaml": "^4.1.0",
     "jsonpath-plus": "^10.0.7",
     "lodash": "^4.17.21",
-    "material-react-table": "^3.1.0",
+    "material-react-table": "^3.2.0",
     "monaco-editor": "^0.52.2",
     "notistack": "^3.0.2",
     "openapi-types": "^9.3.0",
@@ -132,33 +132,6 @@
   "lint-staged": {
     "src/**/*.{js,jsx,ts,tsx}": [
       "eslint -c package.json --fix"
-    ],
-    "src/**/*.{js,jsx,ts,tsx,json,css,scss,md}": [
-      "prettier --config package.json --write"
-    ],
-    "../app/**/*.{ts,tsx}": [
-      "eslint -c package.json --fix"
-    ],
-    "../app/**/*.{js,jsx,ts,tsx,json,css,scss,md}": [
-      "prettier --config package.json --write"
-    ],
-    "../plugins/headlamp-plugin/{bin,lib,template}/**/*.{ts,tsx}": [
-      "eslint -c package.json --fix"
-    ],
-    "../plugins/headlamp-plugin/{bin,lib,template}/**/*.{js,jsx,ts,tsx,json,css,scss,md}": [
-      "prettier --config package.json --write"
-    ],
-    "../plugins/examples/**/*.{ts,tsx}": [
-      "eslint -c package.json --fix --resolve-plugins-relative-to ."
-    ],
-    "../plugins/examples/**/*.{js,jsx,ts,tsx,json,css,scss,md}": [
-      "prettier --config package.json --write"
-    ],
-    "../e2e-tests/**/*.{js,jsx,ts,tsx,json,css,scss,md}": [
-      "prettier --config package.json --write"
-    ],
-    "../e2e-tests/**/*.{ts,tsx}": [
-      "eslint -c package.json --fix --resolve-plugins-relative-to ."
     ]
   },
   "eslintConfig": {
