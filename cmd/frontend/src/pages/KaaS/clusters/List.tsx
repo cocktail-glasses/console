@@ -57,7 +57,7 @@ import {
 
 export default function KaaSClusterList() {
   const [isLoading, setIsLoading] = useState(false);
-  const [tenantControlPlane, setTenantControlPlane] = useState<IoClastixKamajiV1alpha1TenantControlPlaneList>();
+  const [tenantControlPlanes, setTenantControlPlanes] = useState<IoClastixKamajiV1alpha1TenantControlPlaneList>();
 
   const websocket = useRef<null | WebSocket>();
   useEffect(() => {
@@ -80,7 +80,7 @@ export default function KaaSClusterList() {
         return res;
       })
       .then((res) => res.data)
-      .then((tcl) => setTenantControlPlane(tcl))
+      .then((tcl) => setTenantControlPlanes(tcl))
       .finally(() => setIsLoading(false));
 
     return () => {
@@ -94,7 +94,7 @@ export default function KaaSClusterList() {
     <Paper className="main-container">
       <h2>KaaS 클러스터 관리</h2>
       <ListMenu search={search} handleSearch={setSearch} />
-      <ListTable tenantControlPlanes={tenantControlPlane} search={search} isLoading={isLoading} />
+      <ListTable tenantControlPlanes={tenantControlPlanes} search={search} isLoading={isLoading} />
     </Paper>
   );
 }
