@@ -226,18 +226,26 @@ const ListTable: React.FC<ListTableProp> = ({ tenantControlPlanes, search, isLoa
               </TableCell>
             </TableRow>
           )}
-          {table.getRowModel().rows.map((row) => (
-            <TableRow className="row" key={row.id} hover onClick={() => handleRowClick(row)}>
-              {row.getVisibleCells().map((cell) => (
-                <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
-              ))}
-              <TableCell>
-                <IconButton aria-label="delete-cluster" onClick={(e) => handleDialogOpen(e, row.original)}>
-                  <DeleteOutline className="action-icon" />
-                </IconButton>
+          {table.getRowModel().rows.length > 0 ? (
+            table.getRowModel().rows.map((row) => (
+              <TableRow className="row" key={row.id} hover onClick={() => handleRowClick(row)}>
+                {row.getVisibleCells().map((cell) => (
+                  <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                ))}
+                <TableCell>
+                  <IconButton aria-label="delete-cluster" onClick={(e) => handleDialogOpen(e, row.original)}>
+                    <DeleteOutline className="action-icon" />
+                  </IconButton>
+                </TableCell>
+              </TableRow>
+            ))
+          ) : (
+            <TableRow className="row">
+              <TableCell colSpan={columns.length} align="center">
+                No Result
               </TableCell>
             </TableRow>
-          ))}
+          )}
         </TableBody>
       </Table>
       <DeleteClusterDialog
