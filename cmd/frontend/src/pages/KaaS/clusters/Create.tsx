@@ -45,6 +45,7 @@ import isString from 'lodash/isString';
 import map from 'lodash/map';
 
 import './common.scss';
+import DescriptionItem from './component/Description/DescriptionItem';
 import ProgressStepper from './component/ProgressStepper/ProgressStepper';
 import Searchbar from './component/Searchbar/Searchbar';
 import './create.scss';
@@ -977,30 +978,14 @@ const SummaryStep: React.FC<SummaryStepProps> = ({ stepData }) => (
 
         <Box className="content">
           {map(sub.contents, (content) => (
-            <SummaryItem key={content[0]} label={content[0]} value={content[1]} />
+            <DescriptionItem key={content[0]} description={{ label: content[0], value: content[1] }} />
           ))}
         </Box>
       </Box>
     ))}
 
     {map(stepData.contents, (content) => (
-      <SummaryItem key={content[0]} label={content[0]} value={content[1]} />
+      <DescriptionItem key={content[0]} description={{ label: content[0], value: content[1] }} />
     ))}
-  </Box>
-);
-
-interface SummaryItemProp {
-  label: string;
-  value?: any;
-}
-
-const SummaryItem: React.FC<SummaryItemProp> = ({ label, value }) => (
-  <Box className="item">
-    <Typography className="label" variant="caption" gutterBottom>
-      {label}
-    </Typography>
-    <Typography variant="body1" gutterBottom>
-      {value}
-    </Typography>
   </Box>
 );
