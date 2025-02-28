@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 
-import Box from '@mui/material/Box';
-import Paper from '@mui/material/Paper';
-import { useTheme } from '@mui/material/styles';
+import Box from "@mui/material/Box";
+import Paper from "@mui/material/Paper";
+import { useTheme } from "@mui/material/styles";
 
 import {
   MaterialReactTable,
@@ -11,19 +11,19 @@ import {
   MRT_Localization,
   MRT_TableOptions as MaterialTableOptions,
   useMaterialReactTable,
-} from 'material-react-table';
+} from "material-react-table";
 // import { MRT_Localization_DE } from 'material-react-table/locales/de';
-import { MRT_Localization_EN } from 'material-react-table/locales/en';
-import { MRT_Localization_KO } from 'material-react-table/locales/ko';
+import { MRT_Localization_EN } from "material-react-table/locales/en";
+import { MRT_Localization_KO } from "material-react-table/locales/ko";
 
-import Empty from '@components/common/EmptyContent';
-import Loader from '@components/common/Loader';
-import helpers from '@helpers';
-import { useURLState } from '@lib/util';
+import Empty from "@components/common/EmptyContent";
+import Loader from "@components/common/Loader";
+import helpers from "@helpers";
+import { useURLState } from "@lib/util";
 // import { MRT_Localization_ES } from 'material-react-table/locales/es';
 // import { MRT_Localization_FR } from 'material-react-table/locales/fr';
 // import { MRT_Localization_PT } from 'material-react-table/locales/pt';
-import { useSettings } from '@pages/Settings/hook';
+import { useSettings } from "@pages/Settings/hook";
 
 /**
  * Column definition
@@ -33,7 +33,10 @@ import { useSettings } from '@pages/Settings/hook';
  *
  * @see https://www.material-react-table.com/docs/api/column-options
  */
-export type TableColumn<RowItem extends Record<string, any>, Value = any> = MaterialTableColumn<RowItem, Value> & {
+export type TableColumn<
+  RowItem extends Record<string, any>,
+  Value = any,
+> = MaterialTableColumn<RowItem, Value> & {
   /**
    * Column width in the grid template format
    * Number values will be converted to "fr"
@@ -50,7 +53,10 @@ export type TableColumn<RowItem extends Record<string, any>, Value = any> = Mate
  *
  * @see https://www.material-react-table.com/docs/api/table-options
  */
-export type TableProps<RowItem extends Record<string, any>> = Omit<MaterialTableOptions<RowItem>, 'columns'> & {
+export type TableProps<RowItem extends Record<string, any>> = Omit<
+  MaterialTableOptions<RowItem>,
+  "columns"
+> & {
   columns: TableColumn<RowItem>[];
   /**
    * Message to show when the table is empty
@@ -89,8 +95,15 @@ export type TableProps<RowItem extends Record<string, any>> = Omit<MaterialTable
 
 // Use a zero-indexed "useURLState" hook, so pages are shown in the URL as 1-indexed
 // but internally are 0-indexed.
-function usePageURLState(key: string, prefix: string, initialPage: number): ReturnType<typeof useURLState> {
-  const [page, setPage] = useURLState(key, { defaultValue: initialPage + 1, prefix });
+function usePageURLState(
+  key: string,
+  prefix: string,
+  initialPage: number,
+): ReturnType<typeof useURLState> {
+  const [page, setPage] = useURLState(key, {
+    defaultValue: initialPage + 1,
+    prefix,
+  });
   const [zeroIndexPage, setZeroIndexPage] = useState(page - 1);
 
   useEffect(() => {
@@ -134,17 +147,28 @@ export default function Table<RowItem extends Record<string, any>>({
   loading,
   ...tableProps
 }: TableProps<RowItem>) {
-  const shouldReflectInURL = reflectInURL !== undefined && reflectInURL !== false;
-  const prefix = reflectInURL === true ? '' : reflectInURL || '';
-  const [page, setPage] = usePageURLState(shouldReflectInURL ? 'p' : '', prefix, initialPage);
-
-  const storeRowsPerPageOptions = useSettings('tableRowsPerPageOptions');
-  const rowsPerPageOptions = rowsPerPage || storeRowsPerPageOptions;
-  const defaultRowsPerPage = useMemo(() => helpers.getTablesRowsPerPage(rowsPerPageOptions[0]), [rowsPerPageOptions]);
-  const [pageSize, setPageSize] = useURLState(shouldReflectInURL ? 'perPage' : '', {
-    defaultValue: defaultRowsPerPage,
+  const shouldReflectInURL =
+    reflectInURL !== undefined && reflectInURL !== false;
+  const prefix = reflectInURL === true ? "" : reflectInURL || "";
+  const [page, setPage] = usePageURLState(
+    shouldReflectInURL ? "p" : "",
     prefix,
-  });
+    initialPage,
+  );
+
+  const storeRowsPerPageOptions = useSettings("tableRowsPerPageOptions");
+  const rowsPerPageOptions = rowsPerPage || storeRowsPerPageOptions;
+  const defaultRowsPerPage = useMemo(
+    () => helpers.getTablesRowsPerPage(rowsPerPageOptions[0]),
+    [rowsPerPageOptions],
+  );
+  const [pageSize, setPageSize] = useURLState(
+    shouldReflectInURL ? "perPage" : "",
+    {
+      defaultValue: defaultRowsPerPage,
+      prefix,
+    },
+  );
 
   const { t, i18n } = useTranslation();
   const theme = useTheme();
@@ -155,9 +179,9 @@ export default function Table<RowItem extends Record<string, any>>({
       tableProps.columns.map((column, i) => ({
         ...column,
         id: column.id ?? String(i),
-        header: column.header || '',
+        header: column.header || "",
       })),
-    [tableProps.columns]
+    [tableProps.columns],
   );
 
   const tableData = useMemo(() => {
@@ -171,23 +195,23 @@ export default function Table<RowItem extends Record<string, any>>({
       return !isHidden;
     })
     .map((it) => {
-      if (typeof it.gridTemplate === 'number') {
+      if (typeof it.gridTemplate === "number") {
         return `${it.gridTemplate}fr`;
       }
-      return it.gridTemplate ?? '1fr';
+      return it.gridTemplate ?? "1fr";
     })
-    .join(' ');
+    .join(" ");
 
   const paginationSelectProps = import.meta.env.UNDER_TEST
     ? {
         inputProps: {
           SelectDisplayProps: {
-            'aria-controls': 'test-id',
+            "aria-controls": "test-id",
           },
         },
       }
     : undefined;
-    const table = useMaterialReactTable({
+  const table = useMaterialReactTable({
     ...tableProps,
     columns: tableColumns ?? [],
     data: tableData,
@@ -197,12 +221,15 @@ export default function Table<RowItem extends Record<string, any>>({
     autoResetAll: false,
     onPaginationChange: (updater: any) => {
       if (!tableProps.data?.length) return;
-      const pagination = updater({ pageIndex: Number(page) - 1, pageSize: Number(pageSize) });
+      const pagination = updater({
+        pageIndex: Number(page) - 1,
+        pageSize: Number(pageSize),
+      });
       setPage(pagination.pageIndex + 1);
       setPageSize(pagination.pageSize);
     },
     initialState: {
-      density: 'compact',
+      density: "compact",
       ...(tableProps.initialState ?? {}),
     },
     state: {
@@ -212,18 +239,18 @@ export default function Table<RowItem extends Record<string, any>>({
         pageSize: pageSize,
       },
     },
-    layoutMode: 'grid',
+    layoutMode: "grid",
     // Need to provide our own empty message
     // because default one breaks with our custom layout
     renderEmptyRowsFallback: () => (
       <Box height={60}>
         <Box position="absolute" left={0} right={0} textAlign="center">
-          <Empty>{t('No results found')}</Empty>
+          <Empty>{t("No results found")}</Empty>
         </Box>
       </Box>
     ),
     muiSearchTextFieldProps: {
-      id: 'table-search-field',
+      id: "table-search-field",
     },
     muiPaginationProps: {
       rowsPerPageOptions: rowsPerPageOptions,
@@ -235,34 +262,34 @@ export default function Table<RowItem extends Record<string, any>>({
       sx: {
         // By default in compact mode text doesn't wrap
         // so we need to override that
-        whiteSpace: 'normal',
-        width: 'unset',
-        minWidth: 'unset',
+        whiteSpace: "normal",
+        width: "unset",
+        minWidth: "unset",
       },
     },
     muiTablePaperProps: {
-      variant: 'outlined',
+      variant: "outlined",
       elevation: 0,
       sx: {
-        display: 'grid',
-        backgroundColor: 'transparent',
+        display: "grid",
+        backgroundColor: "transparent",
       },
     },
     muiTableBodyProps: {
       sx: {
-        display: 'contents',
+        display: "contents",
       },
     },
     muiTableBodyRowProps: {
       sx: {
-        display: 'contents',
+        display: "contents",
         backgroundColor: theme.palette.tables.body.background,
       },
     },
     muiBottomToolbarProps: {
       sx: {
-        backgroundColor: 'transparent',
-        boxShadow: 'none',
+        backgroundColor: "transparent",
+        boxShadow: "none",
       },
     },
     muiTableProps: {
@@ -272,49 +299,49 @@ export default function Table<RowItem extends Record<string, any>>({
     },
     muiTableHeadProps: {
       sx: {
-        display: 'contents',
+        display: "contents",
       },
     },
     muiTableHeadCellProps: {
       sx: {
-        width: 'unset',
-        minWidth: 'unset',
-        borderTop: '1px solid',
+        width: "unset",
+        minWidth: "unset",
+        borderTop: "1px solid",
         borderColor: theme.palette.tables.head.borderColor,
-        paddingTop: '0.5rem',
+        paddingTop: "0.5rem",
       },
     },
     muiTableHeadRowProps: {
       sx: {
-        display: 'contents',
+        display: "contents",
         background: theme.palette.tables.head.background,
         boxShadow: undefined,
       },
     },
     muiTopToolbarProps: {
       sx: {
-        background: 'transparent',
+        background: "transparent",
       },
     },
     muiTableFooterRowProps: {
       sx: {
-        backgroundColor: 'transparent',
+        backgroundColor: "transparent",
       },
     },
   });
 
-  if (!!errorMessage) {
+  if (errorMessage) {
     return <Empty color="error">{errorMessage}</Empty>;
   }
 
   if (loading) {
-    return <Loader title={t('Loading table data')} />;
+    return <Loader title={t("Loading table data")} />;
   }
 
   if (!tableProps.data?.length && !loading) {
     return (
       <Paper variant="outlined">
-        <Empty>{emptyMessage || t('No data to be shown.')}</Empty>
+        <Empty>{emptyMessage || t("No data to be shown.")}</Empty>
       </Paper>
     );
   }
