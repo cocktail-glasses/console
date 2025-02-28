@@ -1,9 +1,11 @@
 package auth
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"github.com/cocktailcloud/console/pkg/auth/cocktail"
+	"github.com/cocktailcloud/console/pkg/auth/oauth2"
 	"net/url"
 	"os"
 
@@ -263,7 +265,7 @@ func (c *completedOptions) getAuthenticator(
 	flags.FatalIfFailed(flags.ValidateFlagNotEmpty("base-address", baseURL.String()))
 
 	var (
-		err                      error
+		//err                      error
 		userAuthOIDCIssuerURL    *url.URL
 		authLoginErrorEndpoint   = proxy.SingleJoiningSlash(baseURL.String(), server.AuthLoginErrorEndpoint)
 		authLoginSuccessEndpoint = proxy.SingleJoiningSlash(baseURL.String(), server.AuthLoginSuccessEndpoint)
@@ -273,11 +275,11 @@ func (c *completedOptions) getAuthenticator(
 	)
 
 	var scopes []string
-	authSource := cocktail.AuthSourceOIDC
+	authSource := oauth2.AuthSourceOIDC
 
 	if c.AuthType == "cocktail" {
 		scopes = []string{"user:full"}
-		authSource = cocktail.AuthSourceCocktail
+		authSource = oauth2.AuthSourceCocktaiCloud
 
 		userAuthOIDCIssuerURL = c.IssuerURL
 	} else {
@@ -288,37 +290,73 @@ func (c *completedOptions) getAuthenticator(
 
 	oidcClientSecret = c.ClientSecret
 
-	// Config for logging into console.
-	oidcClientConfig := &cocktail.Config{
-		AuthSource:   authSource,
-		IssuerURL:    userAuthOIDCIssuerURL.String(),
-		IssuerCA:     c.CAFilePath,
-		ClientID:     c.ClientID,
-		ClientSecret: oidcClientSecret,
-		RedirectURL:  proxy.SingleJoiningSlash(baseURL.String(), server.AuthLoginCallbackEndpoint),
-		Scope:        scopes,
+	if c.AuthType == "cocktail" {
+		// Config for logging into console.
+		oidcClientConfig := &cocktail.Config{
+			AuthSource:   authSource,
+			IssuerURL:    userAuthOIDCIssuerURL.String(),
+			IssuerCA:     c.CAFilePath,
+			ClientID:     c.ClientID,
+			ClientSecret: oidcClientSecret,
+			RedirectURL:  proxy.SingleJoiningSlash(baseURL.String(), server.AuthLoginCallbackEndpoint),
+			Scope:        scopes,
 
-		// Use the k8s CA file for OpenShift OAuth metadata discovery.
-		// This might be different than IssuerCA.
-		K8sCA: caCertFilePath,
+			// Use the k8s CA file for OpenShift OAuth metadata discovery.
+			// This might be different than IssuerCA.
+			K8sCA: caCertFilePath,
 
-		ErrorURL:   authLoginErrorEndpoint,
-		SuccessURL: authLoginSuccessEndpoint,
+			ErrorURL:   authLoginErrorEndpoint,
+			SuccessURL: authLoginSuccessEndpoint,
 
-		CookiePath:              cookiePath,
-		SecureCookies:           useSecureCookies,
-		CookieEncryptionKey:     sessionConfig.CookieEncryptionKey,
-		CookieAuthenticationKey: sessionConfig.CookieAuthenticationKey,
+			CookiePath:              cookiePath,
+			SecureCookies:           useSecureCookies,
+			CookieEncryptionKey:     sessionConfig.CookieEncryptionKey,
+			CookieAuthenticationKey: sessionConfig.CookieAuthenticationKey,
+		}
+
+		if c.LogoutRedirectURL != nil {
+			oidcClientConfig.LogoutRedirectOverride = c.LogoutRedirectURL.String()
+		}
+
+		authenticator, err := cocktail.NewCocktailAuthenticator(oidcClientConfig)
+		if err != nil {
+			klog.Fatalf("Error initializing authenticator: %v", err)
+		}
+		return authenticator, nil
+
+	} else {
+
+		// Config for logging into console.
+		oidcClientConfig := &oauth2.Config{
+			AuthSource:   authSource,
+			IssuerURL:    userAuthOIDCIssuerURL.String(),
+			IssuerCA:     c.CAFilePath,
+			ClientID:     c.ClientID,
+			ClientSecret: oidcClientSecret,
+			RedirectURL:  proxy.SingleJoiningSlash(baseURL.String(), server.AuthLoginCallbackEndpoint),
+			Scope:        scopes,
+
+			// Use the k8s CA file for OpenShift OAuth metadata discovery.
+			// This might be different than IssuerCA.
+			K8sCA: caCertFilePath,
+
+			ErrorURL:   authLoginErrorEndpoint,
+			SuccessURL: authLoginSuccessEndpoint,
+
+			CookiePath:              cookiePath,
+			SecureCookies:           useSecureCookies,
+			CookieEncryptionKey:     sessionConfig.CookieEncryptionKey,
+			CookieAuthenticationKey: sessionConfig.CookieAuthenticationKey,
+		}
+
+		if c.LogoutRedirectURL != nil {
+			oidcClientConfig.LogoutRedirectOverride = c.LogoutRedirectURL.String()
+		}
+		authenticator, err := oauth2.NewOAuth2Authenticator(context.Background(), oidcClientConfig)
+		if err != nil {
+			klog.Fatalf("Error initializing authenticator: %v", err)
+		}
+		return authenticator, nil
 	}
 
-	if c.LogoutRedirectURL != nil {
-		oidcClientConfig.LogoutRedirectOverride = c.LogoutRedirectURL.String()
-	}
-
-	authenticator, err := cocktail.NewCocktailAuthenticator(oidcClientConfig)
-	if err != nil {
-		klog.Fatalf("Error initializing authenticator: %v", err)
-	}
-
-	return authenticator, nil
 }

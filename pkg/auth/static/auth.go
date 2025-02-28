@@ -1,6 +1,7 @@
 package static
 
 import (
+	"github.com/cocktailcloud/console/pkg/auth/sessions"
 	"net/http"
 
 	"github.com/cocktailcloud/console/pkg/auth"
@@ -28,7 +29,7 @@ func (s *StaticAuthenticator) LogoutFunc(w http.ResponseWriter, req *http.Reques
 	w.WriteHeader(http.StatusNoContent)
 }
 
-func (s *StaticAuthenticator) CallbackFunc(fn func(successURL string, w http.ResponseWriter)) func(w http.ResponseWriter, req *http.Request) {
+func (s *StaticAuthenticator) CallbackFunc(fn func(loginInfo sessions.LoginJSON, successURL string, w http.ResponseWriter)) func(w http.ResponseWriter, req *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) { w.WriteHeader(http.StatusNoContent) }
 }
 

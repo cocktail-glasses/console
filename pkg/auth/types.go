@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"github.com/cocktailcloud/console/pkg/auth/sessions"
 	"net/http"
 )
 
@@ -9,7 +10,7 @@ type Authenticator interface {
 
 	LoginFunc(w http.ResponseWriter, req *http.Request)
 	LogoutFunc(w http.ResponseWriter, req *http.Request)
-	CallbackFunc(fn func(successURL string, w http.ResponseWriter)) func(w http.ResponseWriter, req *http.Request)
+	CallbackFunc(fn func(loginInfo sessions.LoginJSON, successURL string, w http.ResponseWriter)) func(w http.ResponseWriter, req *http.Request)
 
 	LogoutRedirectURL() string
 	GetSpecialURLs() SpecialAuthURLs
