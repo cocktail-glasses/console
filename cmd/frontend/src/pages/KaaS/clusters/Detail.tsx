@@ -371,7 +371,10 @@ interface DescriptionItemProps {
 }
 
 const DescriptionItem: React.FC<DescriptionItemProps> = ({ description }) => (
-  <Stack className="info" sx={{ marginRight: "30px", height: "62px" }}>
+  <Stack
+    className="description-item"
+    sx={{ marginRight: "30px", height: "62px" }}
+  >
     <Typography className="caption" variant="caption">
       {description.label}
     </Typography>

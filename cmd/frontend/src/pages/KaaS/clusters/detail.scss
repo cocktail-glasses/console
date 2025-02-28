@@ -18,12 +18,6 @@
       }
     }
   }
-
-  .info {
-    .caption {
-      color: rgb(184, 184, 184);
-    }
-  }
 }
 
 .back-btn {
@@ -43,6 +37,13 @@
   max-height: var(--action-btn-size);
   min-height: var(--action-btn-size);
   border-color: rgba(255, 255, 255, 0.12);
+}
+
+.description-item {
+  --caption-color: #7e868f;
+  .caption {
+    color: var(--caption-color);
+  }
 }
 
 .table {
@@ -191,4 +192,10 @@
 
 .margin-right-5 {
   margin-right: 5px;
+}
+
+.dark {
+  .description-item {
+    --caption-color: #b8b8b8;
+  }
 }
