@@ -1,6 +1,6 @@
 import { useEffect, useState, Dispatch, SetStateAction, useMemo } from "react";
 import { useForm } from "react-hook-form";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -50,6 +50,7 @@ import {
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
+  Row,
   useReactTable,
 } from "@tanstack/react-table";
 
@@ -74,7 +75,7 @@ export default function KaaSClusterList() {
       <h2>KaaS 클러스터 관리</h2>
       <ListMenu search={search} handleSearch={setSearch} />
       <ListTable
-        tenantControlPlane={tenantControlPlane}
+        tenantControlPlanes={tenantControlPlane}
         search={search}
         isLoading={isLoading}
       />
@@ -123,25 +124,35 @@ const ListMenu: React.FC<ListMenuProp> = ({
 };
 
 interface ListTableProp {
-  tenantControlPlane?: IoClastixKamajiV1alpha1TenantControlPlaneList;
+  tenantControlPlanes?: IoClastixKamajiV1alpha1TenantControlPlaneList;
   search?: string;
   isLoading?: boolean;
 }
 
 const ListTable: React.FC<ListTableProp> = ({
-  tenantControlPlane,
+  tenantControlPlanes,
   search,
   isLoading,
 }) => {
   dayjs.extend(relativeTime);
+
+  const navigate = useNavigate();
+  const handleRowClick = (
+    row: Row<IoClastixKamajiV1alpha1TenantControlPlane>,
+  ) => {
+    const metadata = row.original.metadata;
+    navigate(`/kaas/clusters/${metadata?.namespace}/${metadata?.name}`);
+  };
 
   // delete cluster dialog
   const [isOpenDialog, setIsOpenDialog] = useState(false);
   const [cluster, setCluster] =
     useState<IoClastixKamajiV1alpha1TenantControlPlane>();
   const handleDialogOpen = (
+    e: Event,
     cluster: IoClastixKamajiV1alpha1TenantControlPlane,
   ) => {
+    e.stopPropagation();
     setCluster(cluster);
     setIsOpenDialog(true);
   };
@@ -155,21 +166,6 @@ const ListTable: React.FC<ListTableProp> = ({
   };
 
   // tanstack-table example
-  const nameCell = (
-    info: CellContext<
-      IoClastixKamajiV1alpha1TenantControlPlane,
-      string | undefined
-    >,
-  ) => {
-    const metadata = info.row.original.metadata;
-
-    return (
-      <Link to={`/kaas/clusters/${metadata?.namespace}/${metadata?.name}`}>
-        {metadata?.name}
-      </Link>
-    );
-  };
-
   const statusCell = (
     info: CellContext<
       IoClastixKamajiV1alpha1TenantControlPlane,
@@ -210,10 +206,7 @@ const ListTable: React.FC<ListTableProp> = ({
     createColumnHelper<IoClastixKamajiV1alpha1TenantControlPlane>();
   const columns = useMemo(
     () => [
-      columnHelper.accessor("metadata.name", {
-        header: "Name",
-        cell: nameCell,
-      }),
+      columnHelper.accessor("metadata.name", { header: "Name" }),
       columnHelper.accessor("metadata.namespace", { header: "Namespace" }),
       columnHelper.accessor("status.kubernetesResources.version.status", {
         header: "Status",
@@ -236,7 +229,7 @@ const ListTable: React.FC<ListTableProp> = ({
   );
 
   const table = useReactTable({
-    data: tenantControlPlane?.items || [],
+    data: tenantControlPlanes?.items || [],
     columns,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
@@ -274,14 +267,22 @@ const ListTable: React.FC<ListTableProp> = ({
             </TableRow>
           )}
           {table.getRowModel().rows.map((row) => (
-            <TableRow className="row" key={row.id}>
+            <TableRow
+              className="row"
+              key={row.id}
+              hover
+              onClick={() => handleRowClick(row)}
+            >
               {row.getVisibleCells().map((cell) => (
                 <TableCell key={cell.id}>
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </TableCell>
               ))}
               <TableCell>
-                <IconButton onClick={() => handleDialogOpen(row.original)}>
+                <IconButton
+                  aria-label="delete-cluster"
+                  onClick={(e) => handleDialogOpen(e, row.original)}
+                >
                   <DeleteOutline className="action-icon" />
                 </IconButton>
               </TableCell>
