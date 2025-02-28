@@ -1,6 +1,5 @@
-# cocktail-glasses
+# Console Frontend
 
-##Cocktail Glasses 란 ?
 
 ---
 
