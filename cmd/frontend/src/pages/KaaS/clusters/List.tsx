@@ -1,4 +1,4 @@
-import { useEffect, useState, Dispatch, SetStateAction, useMemo } from 'react';
+import { useEffect, useState, Dispatch, SetStateAction, useMemo, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 
@@ -32,6 +32,7 @@ import {
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 
+import isUndefined from 'lodash/isUndefined';
 import toLower from 'lodash/toLower';
 
 import { DotStatus } from './component/DotStatus';
@@ -57,14 +58,34 @@ import {
 export default function KaaSClusterList() {
   const [isLoading, setIsLoading] = useState(false);
   const [tenantControlPlane, setTenantControlPlane] = useState<IoClastixKamajiV1alpha1TenantControlPlaneList>();
+
+  const websocket = useRef<null | WebSocket>();
   useEffect(() => {
     setIsLoading(true);
     const kamajiAPI = new KamajiAPI(undefined, '/k8s');
     kamajiAPI
       .listKamajiClastixIoV1alpha1TenantControlPlaneForAllNamespaces()
+      .then((res) => {
+        const resourceVersion = res.data.metadata?.resourceVersion;
+        const url = new URL(res.request.responseURL || '');
+        url.searchParams.append('watch', '1');
+        if (!isUndefined(resourceVersion)) url.searchParams.append('resourceVersion', resourceVersion);
+
+        const ws = new WebSocket(url.href);
+        ws.onmessage = (e) => console.log(e.data);
+        ws.onclose = () => console.log('close websocket for kamaji list');
+        if (websocket.current) websocket.current.close();
+        websocket.current = ws;
+
+        return res;
+      })
       .then((res) => res.data)
       .then((tcl) => setTenantControlPlane(tcl))
       .finally(() => setIsLoading(false));
+
+    return () => {
+      if (websocket.current) websocket.current.close();
+    };
   }, []);
 
   const [search, setSearch] = useState('');
