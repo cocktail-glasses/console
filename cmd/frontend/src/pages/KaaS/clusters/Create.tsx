@@ -180,12 +180,12 @@ export default function Create() {
 }
 
 interface ClusterFormValue {
-  name: string;
-  sshKeys: string[];
-  cniPlugin: string;
-  cniPluginVersion: string;
-  controlPlaneVersion: string;
-  containerRuntime: string;
+  name?: string;
+  sshKeys?: string[];
+  cniPlugin?: string;
+  cniPluginVersion?: string;
+  controlPlaneVersion?: string;
+  containerRuntime?: string;
 }
 
 interface ClusterFormProps {
@@ -367,7 +367,7 @@ const ClusterForm: React.FC<ClusterFormProps> = ({ values, handleSubmit, handleE
                 >
                   {map(sshKeys, (sshKey) => (
                     <MenuItem value={sshKey} key={sshKey}>
-                      <Checkbox checked={value.includes(sshKey)} />
+                      <Checkbox checked={value?.includes(sshKey)} />
                       <ListItemText primary={sshKey} />
                     </MenuItem>
                   ))}
@@ -888,12 +888,12 @@ const SummaryForm: React.FC<SummaryFormProps> = ({ formValue }) => {
           {
             title: 'GENERAL',
             contents: [
-              ['Name', formValue.cluster.name],
-              ['Version', formValue.cluster.controlPlaneVersion],
-              ['Container Runtime', formValue.cluster.containerRuntime],
+              ['Name', formValue.cluster?.name],
+              ['Version', formValue.cluster?.controlPlaneVersion],
+              ['Container Runtime', formValue.cluster?.containerRuntime],
               [
                 'SSH Keys',
-                isEmpty(formValue.cluster.sshKeys) ? 'No assigned keys' : formValue.cluster.sshKeys.join(', '),
+                isEmpty(formValue.cluster?.sshKeys) ? 'No assigned keys' : formValue.cluster.sshKeys?.join(', '),
               ],
             ],
           },
@@ -901,8 +901,8 @@ const SummaryForm: React.FC<SummaryFormProps> = ({ formValue }) => {
           {
             title: 'NETWORK CONFIGURATION',
             contents: [
-              ['CNI Plugin', formValue.cluster.cniPlugin],
-              ['CNI Plugin Version', formValue.cluster.cniPluginVersion],
+              ['CNI Plugin', formValue.cluster?.cniPlugin],
+              ['CNI Plugin Version', formValue.cluster?.cniPluginVersion],
               ['Proxy Mode', 'ebpf'],
               ['Expose Strategy', 'NodePort'],
               ['Allowed IP Ranges for Node Ports', undefined],
