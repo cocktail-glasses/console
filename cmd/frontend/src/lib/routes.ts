@@ -1,86 +1,82 @@
-import DaemonSet from "./k8s/daemonSet";
-import Deployment from "./k8s/deployment";
-import Job from "./k8s/job";
-import ReplicaSet from "./k8s/replicaSet";
-import StatefulSet from "./k8s/statefulSet";
-
-import Home from "@pages/Home";
-import { UsersDetail, UsersList } from "@pages/Users";
-import Settings from "@pages/Settings";
-
-import KaaSList from "@pages/KaaS/clusters/List";
-import KaaSDetail from "@pages/KaaS/clusters/Detail";
-
+import DaemonSet from "@lib/k8s/daemonSet";
+import Deployment from "@lib/k8s/deployment";
+import Job from "@lib/k8s/job";
+import ReplicaSet from "@lib/k8s/replicaSet";
+import StatefulSet from "@lib/k8s/statefulSet";
 import Clusters from "@pages/Clusters/Clusters";
-
+import Home from "@pages/Home";
 import k8sClusterOverview from "@pages/K8s/cluster/Overview";
-import k8sNamespaceList from "@pages/K8s/namespace/List";
-import k8sNamespaceDetails from "@pages/K8s/namespace/Details";
-import k8sNodeList from "@pages/K8s/node/List";
-import k8sNodeDetails from "@pages/K8s/node/Details";
-import k8sCrdList from "@pages/K8s/crd/List";
-import k8sCrdDetails from "@pages/K8s/crd/Details";
-import k8sCrdCustomResourceList from "@pages/K8s/crd/CustomResourceList";
-import k8sCrdCustomResourceDetails from "@pages/K8s/crd/CustomResourceDetails";
-import k8sWorkloadOverview from "@pages/K8s/workload/Overview";
-import k8sWorkloadDetails from "@pages/K8s/workload/Details";
-import k8sPodList from "@pages/K8s/pod/List";
-import k8sPodDetails from "@pages/K8s/pod/Details";
-import k8sDeploymentsList from "@pages/K8s/deployments/List";
-import k8sStatefulsetList from "@pages/K8s/statefulset/List";
-import k8sStatefulsetDetails from "@pages/K8s/statefulset/Details";
-import k8sDaemonsetList from "@pages/K8s/daemonset/List";
-import k8sDaemonsetDetails from "@pages/K8s/daemonset/Details";
-import k8sReplicasetList from "@pages/K8s/replicaset/List";
-import k8sJobList from "@pages/K8s/job/List";
-import k8sCronjobList from "@pages/K8s/cronjob/List";
-import k8sCronjobDetails from "@pages/K8s/cronjob/Details";
-import k8sStorageClaimList from "@pages/K8s/storage/ClaimList";
-import k8sStorageClaimDetails from "@pages/K8s/storage/ClaimDetails";
-import k8sStorageVolumeList from "@pages/K8s/storage/VolumeList";
-import k8sStorageVolumeDetails from "@pages/K8s/storage/VolumeDetails";
-import k8sStorageClassList from "@pages/K8s/storage/ClassList";
-import k8sStorageClassDetails from "@pages/K8s/storage/ClassDetails";
-import k8sServiceList from "@pages/K8s/service/List";
-import k8sServiceDetails from "@pages/K8s/service/Details";
-import k8sEndpointsList from "@pages/K8s/endpoints/List";
-import k8sEndpointsDetails from "@pages/K8s/endpoints/Details";
-import k8sIngressList from "@pages/K8s/ingress/List";
-import k8sIngressDetails from "@pages/K8s/ingress/Details";
-import k8sIngressClassList from "@pages/K8s/ingress/ClassList";
-import k8sIngressClassDetails from "@pages/K8s/ingress/ClassDetails";
-import k8sNetworkpolicyList from "@pages/K8s/networkpolicy/List";
-import k8sNetworkpolicyDetails from "@pages/K8s/networkpolicy/Details";
-import k8sServiceaccountList from "@pages/K8s/serviceaccount/List";
-import k8sServiceaccountDetails from "@pages/K8s/serviceaccount/Details";
-import k8sRoleList from "@pages/K8s/role/List";
-import k8sRoleDetails from "@pages/K8s/role/Details";
-import k8sRoleBindingList from "@pages/K8s/role/BindingList";
-import k8sRoleBindingDetails from "@pages/K8s/role/BindingDetails";
-import k8sConfigmapList from "@pages/K8s/configmap/List";
 import k8sConfigmapDetails from "@pages/K8s/configmap/Details";
-import k8sSecretList from "@pages/K8s/secret/List";
-import k8sSecretDetails from "@pages/K8s/secret/Details";
-import k8sHorizontalPodAutoscalerList from "@pages/K8s/horizontalPodAutoscaler/List";
+import k8sConfigmapList from "@pages/K8s/configmap/List";
+import k8sCrdCustomResourceDetails from "@pages/K8s/crd/CustomResourceDetails";
+import k8sCrdCustomResourceList from "@pages/K8s/crd/CustomResourceList";
+import k8sCrdDetails from "@pages/K8s/crd/Details";
+import k8sCrdList from "@pages/K8s/crd/List";
+import k8sCronjobDetails from "@pages/K8s/cronjob/Details";
+import k8sCronjobList from "@pages/K8s/cronjob/List";
+import k8sDaemonsetDetails from "@pages/K8s/daemonset/Details";
+import k8sDaemonsetList from "@pages/K8s/daemonset/List";
+import k8sDeploymentsList from "@pages/K8s/deployments/List";
+import k8sEndpointsDetails from "@pages/K8s/endpoints/Details";
+import k8sEndpointsList from "@pages/K8s/endpoints/List";
 import k8sHorizontalPodAutoscalerDetails from "@pages/K8s/horizontalPodAutoscaler/Details";
-import k8sVerticalPodAutoscalerList from "@pages/K8s/verticalPodAutoscaler/List";
-import k8sVerticalPodAutoscalerDetails from "@pages/K8s/verticalPodAutoscaler/Details";
-import k8sPodDisruptionBudgetList from "@pages/K8s/podDisruptionBudget/List";
-import k8sPodDisruptionBudgetDetails from "@pages/K8s/podDisruptionBudget/Details";
-import k8sResourceQuotaList from "@pages/K8s/resourceQuota/List";
-import k8sResourceQuotaDetails from "@pages/K8s/resourceQuota/Details";
-import k8sLimitRangeList from "@pages/K8s/limitRange/List";
-import k8sLimitRangeDetails from "@pages/K8s/limitRange/Details";
-import k8sPriorityClassList from "@pages/K8s/priorityClass/List";
-import k8sPriorityClassDetails from "@pages/K8s/priorityClass/Details";
-import k8sRuntimeClassList from "@pages/K8s/runtimeClass/List";
-import k8sRuntimeClassDetails from "@pages/K8s/runtimeClass/Details";
+import k8sHorizontalPodAutoscalerList from "@pages/K8s/horizontalPodAutoscaler/List";
+import k8sIngressClassDetails from "@pages/K8s/ingress/ClassDetails";
+import k8sIngressClassList from "@pages/K8s/ingress/ClassList";
+import k8sIngressDetails from "@pages/K8s/ingress/Details";
+import k8sIngressList from "@pages/K8s/ingress/List";
+import k8sJobList from "@pages/K8s/job/List";
 import k8sLeaseList from "@pages/K8s/lease/List";
 import k8sLeaseDetails from "@pages/K8s/lease/List";
-import k8sWebhookconfigurationMutatingWebhookConfigList from "@pages/K8s/webhookconfiguration/MutatingWebhookConfigList";
+import k8sLimitRangeDetails from "@pages/K8s/limitRange/Details";
+import k8sLimitRangeList from "@pages/K8s/limitRange/List";
+import k8sNamespaceDetails from "@pages/K8s/namespace/Details";
+import k8sNamespaceList from "@pages/K8s/namespace/List";
+import k8sNetworkpolicyDetails from "@pages/K8s/networkpolicy/Details";
+import k8sNetworkpolicyList from "@pages/K8s/networkpolicy/List";
+import k8sNodeDetails from "@pages/K8s/node/Details";
+import k8sNodeList from "@pages/K8s/node/List";
+import k8sPodDetails from "@pages/K8s/pod/Details";
+import k8sPodList from "@pages/K8s/pod/List";
+import k8sPodDisruptionBudgetDetails from "@pages/K8s/podDisruptionBudget/Details";
+import k8sPodDisruptionBudgetList from "@pages/K8s/podDisruptionBudget/List";
+import k8sPriorityClassDetails from "@pages/K8s/priorityClass/Details";
+import k8sPriorityClassList from "@pages/K8s/priorityClass/List";
+import k8sReplicasetList from "@pages/K8s/replicaset/List";
+import k8sResourceQuotaDetails from "@pages/K8s/resourceQuota/Details";
+import k8sResourceQuotaList from "@pages/K8s/resourceQuota/List";
+import k8sRoleBindingDetails from "@pages/K8s/role/BindingDetails";
+import k8sRoleBindingList from "@pages/K8s/role/BindingList";
+import k8sRoleDetails from "@pages/K8s/role/Details";
+import k8sRoleList from "@pages/K8s/role/List";
+import k8sRuntimeClassDetails from "@pages/K8s/runtimeClass/Details";
+import k8sRuntimeClassList from "@pages/K8s/runtimeClass/List";
+import k8sSecretDetails from "@pages/K8s/secret/Details";
+import k8sSecretList from "@pages/K8s/secret/List";
+import k8sServiceDetails from "@pages/K8s/service/Details";
+import k8sServiceList from "@pages/K8s/service/List";
+import k8sServiceaccountDetails from "@pages/K8s/serviceaccount/Details";
+import k8sServiceaccountList from "@pages/K8s/serviceaccount/List";
+import k8sStatefulsetDetails from "@pages/K8s/statefulset/Details";
+import k8sStatefulsetList from "@pages/K8s/statefulset/List";
+import k8sStorageClaimDetails from "@pages/K8s/storage/ClaimDetails";
+import k8sStorageClaimList from "@pages/K8s/storage/ClaimList";
+import k8sStorageClassDetails from "@pages/K8s/storage/ClassDetails";
+import k8sStorageClassList from "@pages/K8s/storage/ClassList";
+import k8sStorageVolumeDetails from "@pages/K8s/storage/VolumeDetails";
+import k8sStorageVolumeList from "@pages/K8s/storage/VolumeList";
+import k8sVerticalPodAutoscalerDetails from "@pages/K8s/verticalPodAutoscaler/Details";
+import k8sVerticalPodAutoscalerList from "@pages/K8s/verticalPodAutoscaler/List";
 import k8sWebhookconfigurationMutatingWebhookConfigDetails from "@pages/K8s/webhookconfiguration/MutatingWebhookConfigDetails";
-import k8sWebhookconfigurationValidatingWebhookConfigList from "@pages/K8s/webhookconfiguration/ValidatingWebhookConfigList";
+import k8sWebhookconfigurationMutatingWebhookConfigList from "@pages/K8s/webhookconfiguration/MutatingWebhookConfigList";
 import k8sWebhookconfigurationValidatingWebhookConfigDetails from "@pages/K8s/webhookconfiguration/ValidatingWebhookConfigDetails";
+import k8sWebhookconfigurationValidatingWebhookConfigList from "@pages/K8s/webhookconfiguration/ValidatingWebhookConfigList";
+import k8sWorkloadDetails from "@pages/K8s/workload/Details";
+import k8sWorkloadOverview from "@pages/K8s/workload/Overview";
+import KaaSDetail from "@pages/KaaS/clusters/Detail";
+import KaaSList from "@pages/KaaS/clusters/List";
+import Settings from "@pages/Settings";
+import { UsersDetail, UsersList } from "@pages/Users";
 
 export interface RoutesType {
   id: string;
@@ -723,10 +719,16 @@ export const Routes: RoutesType[] = [
         page: "KaaS/clusters/Detail",
         element: KaaSDetail,
       },
-      { path: "/kaas/clusters", page: "KaaS/clusters/List", index: true },
+      {
+        path: "/kaas/clusters",
+        page: "KaaS/clusters/List",
+        element: KaaSList,
+        index: true,
+      },
       {
         path: "/kaas/clusters/:managementNamespace/:name",
         page: "KaaS/clusters/Detail",
+        element: KaaSDetail,
       },
     ],
   },

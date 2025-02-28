@@ -882,7 +882,7 @@ export function createRouteURL(routeName: string, params: any = {}) {
   //     path.push(`:${k}`)
   //   }
   // })
-  console.log("path", path, fullParams);
+  // console.log("path", path, fullParams);
   return generatePath(path.join("/"), fullParams);
 }
 // export function createRouteURL(routeName: string, params: RouteURLProps = {}) {

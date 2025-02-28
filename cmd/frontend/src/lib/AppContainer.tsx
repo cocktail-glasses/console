@@ -131,7 +131,7 @@ export default function AppContainer() {
         element: <ErrorComponent />,
       },
     ];
-    console.log("routes", routes);
+
     setSidebarGroups(g);
     setSidebarList(m);
   }

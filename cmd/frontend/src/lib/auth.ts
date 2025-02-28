@@ -1,8 +1,8 @@
-import { atom } from 'jotai';
-import { atomWithStorage, createJSONStorage } from 'jotai/utils';
+import { atom } from "jotai";
+import { atomWithStorage } from "jotai/utils";
 
-import { SESSION_KEY } from '@lib/constants';
-import store from 'redux/stores/store';
+import { SESSION_KEY } from "@lib/constants";
+import store from "redux/stores/store";
 
 export function getToken(cluster: string) {
   const getTokenMethodToUse = store.getState().ui.functionsToOverride.getToken;
@@ -15,7 +15,7 @@ export function getToken(cluster: string) {
 }
 
 export function getUserInfo(cluster: string) {
-  const user = getToken(cluster).split('.')[1];
+  const user = getToken(cluster).split(".")[1];
   return JSON.parse(atob(user));
 }
 
@@ -24,7 +24,7 @@ export function hasToken(cluster: string) {
 }
 
 function getTokens() {
-  return JSON.parse(localStorage.tokens || '{}');
+  return JSON.parse(localStorage.tokens || "{}");
 }
 
 export function setToken(cluster: string, token: string | null) {
@@ -79,22 +79,19 @@ export class Auth {
 
 export const asyncAuthAtom = atom(async (get) => await get(authAtom));
 
-export const authAtom = atomWithStorage(SESSION_KEY, '', {
+export const authAtom = atomWithStorage(SESSION_KEY, "", {
   getItem(key, initialValue) {
-    console.log('getItem', key);
     const storedValue = sessionStorage.getItem(key);
     try {
-      const user = JSON.parse(storedValue ?? '');
+      const user = JSON.parse(storedValue ?? "");
       Auth.getInstance().setAccountSeq = user?.account.accountSeq;
       Auth.getInstance().setUserSeq = user?.userSeq;
       return user;
     } catch {
-      console.log('getItem catch');
       return initialValue;
     }
   },
   setItem(key, value: any) {
-    console.log('setItem', key, value);
     sessionStorage.setItem(key, JSON.stringify(value));
     if (value) {
       Auth.getInstance().setAccountSeq = value?.account.accountSeq;
@@ -102,28 +99,29 @@ export const authAtom = atomWithStorage(SESSION_KEY, '', {
     }
   },
   removeItem(key) {
-    console.log('removeItem', key);
     sessionStorage.removeItem(key);
   },
   subscribe(key, callback, initialValue) {
-    if (typeof window === 'undefined' || typeof window.addEventListener === 'undefined') {
+    if (
+      typeof window === "undefined" ||
+      typeof window.addEventListener === "undefined"
+    ) {
       return () => {};
     }
     const sub = (e: any) => {
-      console.log('subsub', e);
       if (e.storageArea === sessionStorage && e.key === key) {
         let newValue;
         try {
-          newValue = JSON.parse(e.newValue ?? '');
+          newValue = JSON.parse(e.newValue ?? "");
         } catch {
           newValue = initialValue;
         }
         callback(newValue);
       }
     };
-    window.addEventListener('storage', sub);
+    window.addEventListener("storage", sub);
     return () => {
-      window.removeEventListener('storage', sub);
+      window.removeEventListener("storage", sub);
     };
   },
 });

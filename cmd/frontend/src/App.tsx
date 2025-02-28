@@ -11,13 +11,11 @@ import i18n from "./i18n/config";
 
 import ErrorBoundary from "@components/common/ErrorBoundary";
 import "@lib/App/icons";
+import "@lib/App/icons";
 import AppContainer from "@lib/AppContainer";
 import ThemeProviderNexti18n from "@lib/ThemeProviderNexti18n";
 import { theme } from "@lib/stores";
-import themes, {
-  getThemeName,
-  /*, usePrefersColorScheme*/
-} from "@lib/themes";
+import themes, { getThemeName } from "@lib/themes";
 import ErrorComponent from "@pages/Common/ErrorPage";
 import store from "redux/stores/store";
 
