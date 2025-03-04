@@ -3,19 +3,19 @@ import { ReactElement } from 'react';
 import { ExpandMore } from '@mui/icons-material';
 import { Box, Typography } from '@mui/material';
 
-import style from './ExpandSection.module.scss';
+import style from './CollapseButton.module.scss';
 
 import clsx from 'clsx';
 
-interface CollapseButtonProps {
+export interface CollapseButtonProps {
   label: string | ReactElement;
   isCollapse: boolean;
-  handleOnChange: (...event: any[]) => void;
+  onChange: (...event: any[]) => void;
 }
 
-const CollapseButton = ({ label, isCollapse, handleOnChange }: CollapseButtonProps) => {
+const CollapseButton = ({ label, isCollapse, onChange }: CollapseButtonProps) => {
   return (
-    <Box className={style.collapseButton} onClick={handleOnChange}>
+    <Box className={style.collapseButton} onClick={onChange}>
       <hr className={style.line} />
       <Box className={style.labelContainer}>
         <Typography className={style.label} variant="subtitle1">

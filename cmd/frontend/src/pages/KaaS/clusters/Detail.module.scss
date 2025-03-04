@@ -20,16 +20,6 @@
   }
 }
 
-.back-btn {
-  --back-btn-size: 48px;
-  display: flex;
-  margin-top: 30px;
-  min-width: var(--back-btn-size);
-  max-width: var(--back-btn-size);
-  min-height: var(--back-btn-size);
-  max-height: var(--back-btn-size);
-}
-
 .action-btn {
   --action-btn-size: 45px;
   max-width: var(--action-btn-size);
@@ -133,10 +123,6 @@
     opacity: 1;
     transition: background-color 0.3s ease-in-out;
   }
-}
-
-.tab-container {
-  padding: 30px 0;
 }
 
 .margin-x-30 {

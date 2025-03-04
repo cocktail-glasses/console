@@ -1,19 +1,18 @@
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router';
 
-import { DeleteOutline } from '@mui/icons-material';
-import { Box, IconButton } from '@mui/material';
+import { Box } from '@mui/material';
 
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 
 import { identity, toLower } from 'lodash';
 
-import { DotStatus } from './component/DotStatus';
-import TableBase from './component/TableBase/TableBase';
-import tableStyle from './component/TableBase/TableBase.module.scss';
+import { DotStatus } from '../../../components/atoms/KaaS/DotStatus';
 import { getDotStatus } from './utils';
 
+import DeleteIconButton from '@components/molecules/KaaS/Button/DeleteIconButton/DeleteIconButton';
+import Table from '@components/molecules/KaaS/Table/Table';
 import { IoClastixKamajiV1alpha1TenantControlPlane } from '@lib/kamaji';
 import { CellContext, createColumnHelper, Row } from '@tanstack/react-table';
 
@@ -90,21 +89,14 @@ const TenantControlPlaneTable = ({
       }),
       columnHelper.display({
         id: 'delete-cluster',
-        cell: (props) => (
-          <IconButton
-            aria-label="delete-cluster"
-            onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => onClickDelete(e, props.row.original)}
-          >
-            <DeleteOutline className={tableStyle.actionIcon} />
-          </IconButton>
-        ),
+        cell: (props) => <DeleteIconButton onClick={(e: Event) => onClickDelete(e, props.row.original)} />,
       }),
     ],
     []
   );
 
   return (
-    <TableBase
+    <Table
       data={tenantControlPlanes}
       columns={columns}
       filter

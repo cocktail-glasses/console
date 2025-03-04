@@ -1,0 +1,8 @@
+.context-menu-btn {
+  --btn-size: 45px;
+  max-width: var(--btn-size);
+  min-width: var(--btn-size);
+  max-height: var(--btn-size);
+  min-height: var(--btn-size);
+  border-color: rgba(255, 255, 255, 0.12);
+}

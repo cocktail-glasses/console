@@ -1,21 +1,23 @@
 import { ChangeEvent } from 'react';
 
 import { Search as SearchIcon } from '@mui/icons-material';
-import { InputAdornment, TextField } from '@mui/material';
+import { BaseTextFieldProps, InputAdornment, TextField } from '@mui/material';
 
-interface SearchbarProps {
+import { isFunction } from 'lodash';
+
+interface SearchbarProps extends BaseTextFieldProps {
   value?: string;
-  onChange: (event: ChangeEvent, value: string) => void;
+  onChange?: (event: ChangeEvent, value: string) => void;
 }
 
-const Searchbar: React.FC<SearchbarProps> = ({ value, onChange }) => {
+const Searchbar = ({ value, onChange, ...props }: SearchbarProps) => {
   return (
     <TextField
       variant="outlined"
       size="small"
       placeholder="Search"
       value={value}
-      onChange={(e) => onChange(e, e.target.value)}
+      onChange={(e) => isFunction(onChange) && onChange(e, e.target.value)}
       slotProps={{
         input: {
           startAdornment: (
@@ -25,6 +27,7 @@ const Searchbar: React.FC<SearchbarProps> = ({ value, onChange }) => {
           ),
         },
       }}
+      {...props}
     />
   );
 };

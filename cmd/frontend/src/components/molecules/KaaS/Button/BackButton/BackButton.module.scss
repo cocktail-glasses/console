@@ -1,0 +1,9 @@
+.back-btn {
+  --back-btn-size: 48px;
+  display: flex;
+  margin-top: 30px;
+  min-width: var(--back-btn-size);
+  max-width: var(--back-btn-size);
+  min-height: var(--back-btn-size);
+  max-height: var(--back-btn-size);
+}
