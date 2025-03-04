@@ -36,6 +36,7 @@
       "@helpers": ["src/helpers"],
       "@typedefines/*": ["src/typedefines/*"],
       "@utils/*": ["src/utils/*"],
+      "@resources/*": ["src/resources/*"],
       // TODO: ccambo, 검증 대상
       "redux/*": ["src/redux/*"],
       "i18n/*": ["src/i18n/*"]

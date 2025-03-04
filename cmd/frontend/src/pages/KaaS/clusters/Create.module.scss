@@ -25,7 +25,7 @@
 
       &.cilium {
         $cilium-size: 80px;
-        background-image: url('/cni_cilium.svg');
+        background-image: url('@resources/cni_cilium.svg');
         max-height: $cilium-size;
         min-height: $cilium-size;
         max-width: $cilium-size;
@@ -34,7 +34,7 @@
 
       &.canal {
         $canal-size: 50px;
-        background-image: url('/cni_canal.png');
+        background-image: url('@resources/cni_canal.png');
         max-height: $canal-size;
         min-height: $canal-size;
         max-width: $canal-size;

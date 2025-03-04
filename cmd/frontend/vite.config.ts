@@ -2,6 +2,7 @@
 import { optimizeLodashImports } from '@optimize-lodash/rollup-plugin';
 import dynamicImportVars from '@rollup/plugin-dynamic-import-vars';
 import react from '@vitejs/plugin-react';
+import path from 'path';
 import { visualizer } from 'rollup-plugin-visualizer';
 import { defineConfig } from 'vite';
 import { compression } from 'vite-plugin-compression2';
@@ -90,6 +91,11 @@ export default defineConfig({
     // }),
     optimizeLodashImports(),
   ],
+  resolve: {
+    alias: {
+      '@resources': path.resolve(__dirname, 'src/resources'),
+    },
+  },
   css: {
     modules: {
       localsConvention: 'camelCase',

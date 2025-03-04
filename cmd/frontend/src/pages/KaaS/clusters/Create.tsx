@@ -52,11 +52,11 @@ import Searchbar from './component/Searchbar/Searchbar';
 import { createFormSchema } from './formValidation';
 
 import { DialogTitle } from '@components/common';
+import Argo from '@resources/app_argo.svg';
+import CertManager from '@resources/app_cert-manager.svg';
+import Falco from '@resources/app_falco.svg';
+import Flux2 from '@resources/app_flux2.svg';
 import clsx from 'clsx';
-import Argo from 'public/app_argo.svg';
-import CertManager from 'public/app_cert-manager.svg';
-import Falco from 'public/app_falco.svg';
-import Flux2 from 'public/app_flux2.svg';
 
 interface FormValue {
   cluster: ClusterFormValue;

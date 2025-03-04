@@ -53,9 +53,9 @@ import { DotStatus, DotStatusEnum } from './component/DotStatus';
 import { getDotStatus } from './utils';
 
 import { IoClastixKamajiV1alpha1TenantControlPlane, KamajiClastixIoV1alpha1Api as KamajiAPI } from '@lib/kamaji';
+import NodeExporter from '@resources/addon_prometheus-node-exporter.svg';
 import { createColumnHelper, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
 import clsx from 'clsx';
-import NodeExporter from 'public/prometheus-node-exporter.svg';
 
 export default function Detail() {
   const { managementNamespace, name } = useParams<{
