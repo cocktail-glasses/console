@@ -5,7 +5,6 @@ import {
   VerticalAlignBottom,
   MoreVert,
   Add,
-  ExpandMore,
   Done,
   Close,
   SmartToyOutlined,
@@ -17,14 +16,12 @@ import {
 import {
   Box,
   Button,
-  Collapse,
   FormControl,
   IconButton,
   InputLabel,
   Link,
   MenuItem,
   Paper,
-  Popover,
   Select,
   Stack,
   Switch,
@@ -50,11 +47,13 @@ import map from 'lodash/map';
 import style from './Detail.module.scss';
 import DescriptionItem, { Description } from './component/Description/DescriptionItem';
 import { DotStatus, DotStatusEnum } from './component/DotStatus';
+import ExpandSection from './component/ExpandSection/ExpandSection';
+import TableBase from './component/TableBase/TableBase';
 import { getDotStatus } from './utils';
 
 import { IoClastixKamajiV1alpha1TenantControlPlane, KamajiClastixIoV1alpha1Api as KamajiAPI } from '@lib/kamaji';
 import NodeExporter from '@resources/addon_prometheus-node-exporter.svg';
-import { createColumnHelper, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
+import { createColumnHelper } from '@tanstack/react-table';
 import clsx from 'clsx';
 
 export default function Detail() {
@@ -296,50 +295,25 @@ const TenantClusterInformation: React.FC<TenantClusterInformationProps> = ({ ten
           </Select>
         </FormControl>
         {map(detailInfo, (detail) => (
-          <DescriptionItem description={detail} />
+          <DescriptionItem key={detail.label} description={detail} />
         ))}
       </Box>
-      <CollapseButton
+      <ExpandSection
         label={<strong>ADDITIONAL CLUSTER INFORMATION</strong>}
         isCollapse={isCollapse}
-        handleOnChange={() => setIsCollapse((prev) => !prev)}
+        onChangeCollapse={() => setIsCollapse((prev) => !prev)}
+        data={map(additionalClusterInformation, (infomration) => (
+          <Box key={infomration.title} sx={{ paddingBottom: '24px', flex: '1 1 33%', maxWidth: '33%' }}>
+            <Typography variant="h6" sx={{ marginBottom: '14px' }}>
+              {infomration.title}
+            </Typography>
+            {map(infomration.data, (data, i) => (
+              <Box key={i}>{infomration.content(data)}</Box>
+            ))}
+          </Box>
+        ))}
       />
-      <Collapse in={!isCollapse}>
-        <Box sx={{ padding: '0 60px', display: 'flex', flexWrap: 'wrap' }}>
-          {map(additionalClusterInformation, (infomration) => (
-            <Box sx={{ paddingBottom: '24px', flex: '1 1 33%', maxWidth: '33%' }}>
-              <Typography variant="h6" sx={{ marginBottom: '14px' }}>
-                {infomration.title}
-              </Typography>
-              {map(infomration.data, (data, i) => (
-                <Box key={i}>{infomration.content(data)}</Box>
-              ))}
-            </Box>
-          ))}
-        </Box>
-      </Collapse>
     </Paper>
-  );
-};
-
-interface CollapseButtonProps {
-  label: string | ReactElement;
-  isCollapse: boolean;
-  handleOnChange: (...event: any[]) => void;
-}
-
-const CollapseButton: React.FC<CollapseButtonProps> = ({ label, isCollapse, handleOnChange }) => {
-  return (
-    <Box className={style.collapseButton} onClick={handleOnChange}>
-      <hr className={style.line} />
-      <Box className={style.labelContainer}>
-        <Typography className={style.label} variant="subtitle1">
-          {label}
-        </Typography>
-        <ExpandMore className={clsx({ [style.iconArrowUp]: isCollapse })} />
-      </Box>
-      <hr className={style.line} />
-    </Box>
   );
 };
 
@@ -373,27 +347,7 @@ const TenantClusterNodes = () => (
               </TableSortLabel>
             </TableCell>
             <TableCell>
-              <Box>
-                Replicas
-                <Popover
-                  id="mouse-over-popover"
-                  sx={{ pointerEvents: 'none' }}
-                  open={true}
-                  // anchorEl={anchorEl}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left',
-                  }}
-                  transformOrigin={{
-                    vertical: 'top',
-                    horizontal: 'left',
-                  }}
-                  // onClose={handlePopoverClose}
-                  // disableRestoreFocus
-                >
-                  <Typography sx={{ p: 1 }}>I use Popover.</Typography>
-                </Popover>
-              </Box>
+              <Box>Replicas</Box>
             </TableCell>
             <TableCell>Kubelet Version</TableCell>
             <TableCell>Operating System</TableCell>
@@ -677,7 +631,7 @@ const RbacUserContent: React.FC<RbacUserContentProps> = ({ rbacUserData }) => {
     }),
   ];
 
-  return <RbacTable data={rbacUserData} columns={rbacUserTableColumns} />;
+  return <TableBase data={rbacUserData} columns={rbacUserTableColumns} />;
 };
 
 interface RbacGroup {
@@ -715,52 +669,5 @@ const RbacGroupContent: React.FC<RbacGroupContentProps> = ({ rbacGroupData }) =>
     }),
   ];
 
-  return <RbacTable data={rbacGroupData} columns={rbacGroupTableColumns} emptyMessage="No bindings available." />;
-};
-
-interface RbacTableProps {
-  data: any[];
-  columns: any[];
-  emptyMessage?: string;
-}
-
-const RbacTable: React.FC<RbacTableProps> = ({ data, columns, emptyMessage = 'No data available' }) => {
-  const table = useReactTable({
-    data,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-  });
-
-  return (
-    <TableContainer className={clsx(style.table, style.paddingY30)} sx={{ marginTop: '0px !important' }}>
-      <Table aria-label="tenant-control-plane table">
-        <TableHead>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
-                <TableCell key={header.id}>{flexRender(header.column.columnDef.header, header.getContext())}</TableCell>
-              ))}
-            </TableRow>
-          ))}
-        </TableHead>
-        <TableBody>
-          {table.getRowModel().rows.length > 0 ? (
-            table.getRowModel().rows.map((row) => (
-              <TableRow className={style.row} key={row.id}>
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
-                ))}
-              </TableRow>
-            ))
-          ) : (
-            <TableRow className={style.row}>
-              <TableCell colSpan={columns.length} align="center">
-                {emptyMessage}
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
-    </TableContainer>
-  );
+  return <TableBase data={rbacGroupData} columns={rbacGroupTableColumns} emptyMessage="No bindings available." />;
 };

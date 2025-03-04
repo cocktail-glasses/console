@@ -1,48 +1,22 @@
-import { useEffect, useState, Dispatch, SetStateAction, useMemo, useRef } from 'react';
+import { useEffect, useState, Dispatch, SetStateAction, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { Add, DeleteOutline } from '@mui/icons-material';
-import {
-  Box,
-  Button,
-  IconButton,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  CircularProgress,
-} from '@mui/material';
-
-import dayjs from 'dayjs';
-import relativeTime from 'dayjs/plugin/relativeTime';
+import { Add } from '@mui/icons-material';
+import { Box, Button, Paper } from '@mui/material';
 
 import isUndefined from 'lodash/isUndefined';
-import toLower from 'lodash/toLower';
 
-import DeleteClusterDialog from './DeleteClusterDialog';
+import DeleteClusterDialog, { DeleteClusterForm } from './DeleteClusterDialog';
 import style from './List.module.scss';
+import TenantControlPlaneTable from './TenantControlPlaneTable';
 import './common.scss';
-import { DotStatus } from './component/DotStatus';
 import Searchbar from './component/Searchbar/Searchbar';
-import { getDotStatus } from './utils';
 
 import {
   KamajiClastixIoV1alpha1Api as KamajiAPI,
   IoClastixKamajiV1alpha1TenantControlPlaneList,
   IoClastixKamajiV1alpha1TenantControlPlane,
 } from '@lib/kamaji';
-import {
-  CellContext,
-  createColumnHelper,
-  flexRender,
-  getCoreRowModel,
-  getFilteredRowModel,
-  Row,
-  useReactTable,
-} from '@tanstack/react-table';
 import clsx from 'clsx';
 
 export default function KaaSClusterList() {
@@ -116,143 +90,40 @@ interface ListTableProp {
 }
 
 const ListTable: React.FC<ListTableProp> = ({ tenantControlPlanes, search, isLoading }) => {
-  dayjs.extend(relativeTime);
-
-  const navigate = useNavigate();
-  const handleRowClick = (row: Row<IoClastixKamajiV1alpha1TenantControlPlane>) => {
-    const metadata = row.original.metadata;
-    navigate(`/kaas/clusters/${metadata?.namespace}/${metadata?.name}`);
-  };
-
   // delete cluster dialog
   const [isOpenDialog, setIsOpenDialog] = useState(false);
   const [cluster, setCluster] = useState<IoClastixKamajiV1alpha1TenantControlPlane>();
-  const handleDialogOpen = (e: Event, cluster: IoClastixKamajiV1alpha1TenantControlPlane) => {
+  const handleOpenDialog = (
+    e: React.MouseEvent<HTMLElement, MouseEvent>,
+    cluster: IoClastixKamajiV1alpha1TenantControlPlane
+  ) => {
     e.stopPropagation();
     setCluster(cluster);
     setIsOpenDialog(true);
   };
-  const handleDialogClose = () => {
+  const handleCloseDialog = () => {
     setIsOpenDialog(false);
   };
 
   const handleDeleteCluster = (deleteClusterOptions: DeleteClusterForm) => {
     console.log('delete cluster ', cluster, deleteClusterOptions);
-    handleDialogClose();
+    handleCloseDialog();
   };
-
-  // tanstack-table example
-  const statusCell = (info: CellContext<IoClastixKamajiV1alpha1TenantControlPlane, string | undefined>) => {
-    const status = info.getValue();
-    return (
-      <Box sx={{ display: 'flex' }}>
-        <DotStatus status={getDotStatus(toLower(status))} />
-        {status}
-      </Box>
-    );
-  };
-
-  const ageCell = (info: CellContext<IoClastixKamajiV1alpha1TenantControlPlane, string | undefined>) =>
-    dayjs(info.getValue()).fromNow();
-
-  const podsAccessor = (row: IoClastixKamajiV1alpha1TenantControlPlane) => {
-    const deployment = row.status?.kubernetesResources?.deployment;
-
-    return `${deployment?.availableReplicas || 0} / ${deployment?.replicas || '-'}`;
-  };
-
-  const dataStorageAccessor = (row: IoClastixKamajiV1alpha1TenantControlPlane) => {
-    const storage = row.status?.storage;
-
-    return `${storage?.dataStoreName} (${storage?.driver})`;
-  };
-
-  const columnHelper = createColumnHelper<IoClastixKamajiV1alpha1TenantControlPlane>();
-  const columns = useMemo(
-    () => [
-      columnHelper.accessor('metadata.name', { header: 'Name' }),
-      columnHelper.accessor('metadata.namespace', { header: 'Namespace' }),
-      columnHelper.accessor('status.kubernetesResources.version.status', {
-        header: 'Status',
-        cell: statusCell,
-      }),
-      columnHelper.accessor(podsAccessor, { header: 'Pods' }),
-      columnHelper.accessor('status.controlPlaneEndpoint', {
-        header: 'Endpoints',
-      }),
-      columnHelper.accessor('spec.kubernetes.version', { header: 'Version' }),
-      columnHelper.accessor(dataStorageAccessor, {
-        header: 'dataStorage (driver)',
-      }),
-      columnHelper.accessor('metadata.creationTimestamp', {
-        header: 'Age',
-        cell: ageCell,
-      }),
-    ],
-    []
-  );
-
-  const table = useReactTable({
-    data: tenantControlPlanes?.items || [],
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-  });
-
-  useEffect(() => {
-    table.setGlobalFilter(search);
-  }, [table, search]);
 
   return (
-    <TableContainer className={style.table}>
-      <Table aria-label="tenant-control-plane table">
-        <TableHead>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
-                <TableCell key={header.id}>{flexRender(header.column.columnDef.header, header.getContext())}</TableCell>
-              ))}
-              {/* empty for action */}
-              <TableCell></TableCell>
-            </TableRow>
-          ))}
-        </TableHead>
-        <TableBody>
-          {isLoading && (
-            <TableRow className={style.row}>
-              <TableCell colSpan={columns.length} align="center">
-                <CircularProgress />
-              </TableCell>
-            </TableRow>
-          )}
-          {table.getRowModel().rows.length > 0 ? (
-            table.getRowModel().rows.map((row) => (
-              <TableRow className={style.row} key={row.id} hover onClick={() => handleRowClick(row)}>
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
-                ))}
-                <TableCell>
-                  <IconButton aria-label="delete-cluster" onClick={(e) => handleDialogOpen(e, row.original)}>
-                    <DeleteOutline className={style.actionIcon} />
-                  </IconButton>
-                </TableCell>
-              </TableRow>
-            ))
-          ) : (
-            <TableRow className={style.row}>
-              <TableCell colSpan={columns.length} align="center">
-                No Result
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+    <>
+      <TenantControlPlaneTable
+        tenantControlPlanes={tenantControlPlanes?.items || []}
+        search={search}
+        onClickDelete={handleOpenDialog}
+        isLoading={isLoading}
+      />
       <DeleteClusterDialog
         isOpen={isOpenDialog}
-        handleClose={handleDialogClose}
+        onClose={handleCloseDialog}
         clusterName={cluster?.metadata?.name || ''}
-        handleDelete={handleDeleteCluster}
+        onDelete={handleDeleteCluster}
       />
-    </TableContainer>
+    </>
   );
 };

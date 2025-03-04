@@ -12,18 +12,18 @@ import { getDeleteClusterSchema } from './schemas';
 
 export interface DeleteClusterDialogProp {
   isOpen: boolean;
-  handleClose: () => void;
-  handleDelete: (deleteClusterOptions: DeleteClusterForm) => void;
+  onClose: () => void;
+  onDelete: (deleteClusterOptions: DeleteClusterForm) => void;
   clusterName: string;
 }
 
-interface DeleteClusterForm {
+export interface DeleteClusterForm {
   clusterName: string;
   cleanupLoadBalancers: boolean;
   cleanupVolumes: boolean;
 }
 
-const DeleteClusterDialog: React.FC<DeleteClusterDialogProp> = ({ isOpen, handleClose, handleDelete, clusterName }) => {
+const DeleteClusterDialog = ({ isOpen, onClose, onDelete, clusterName }: DeleteClusterDialogProp) => {
   const {
     register,
     formState: { isValid },
@@ -43,7 +43,7 @@ const DeleteClusterDialog: React.FC<DeleteClusterDialogProp> = ({ isOpen, handle
   return (
     <DialogBase
       isOpen={isOpen}
-      onClose={handleClose}
+      onClose={onClose}
       closeBtn
       title="Delete Cluster"
       content={
@@ -73,7 +73,7 @@ const DeleteClusterDialog: React.FC<DeleteClusterDialogProp> = ({ isOpen, handle
           variant="contained"
           size="large"
           startIcon={<DeleteOutline fontSize="large" />}
-          onClick={() => handleDelete(getValues())}
+          onClick={() => onDelete(getValues())}
           disabled={!isValid}
         >
           Delete Cluster
