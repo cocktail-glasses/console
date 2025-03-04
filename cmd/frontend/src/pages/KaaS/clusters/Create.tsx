@@ -28,8 +28,6 @@ import {
   InputAdornment,
   FormHelperText,
   Stack,
-  Dialog,
-  DialogContent,
   Card,
   CardContent,
   CardMedia,
@@ -47,11 +45,11 @@ import map from 'lodash/map';
 import style from './Create.module.scss';
 import './common.scss';
 import DescriptionItem from './component/Description/DescriptionItem';
+import DialogBase from './component/DialogBase/DialogBase';
 import ProgressStepper from './component/ProgressStepper/ProgressStepper';
 import Searchbar from './component/Searchbar/Searchbar';
 import { createFormSchema } from './formValidation';
 
-import { DialogTitle } from '@components/common';
 import Argo from '@resources/app_argo.svg';
 import CertManager from '@resources/app_cert-manager.svg';
 import Falco from '@resources/app_falco.svg';
@@ -760,18 +758,19 @@ const ApplicationsForm = () => {
         </Button>
       </Box>
 
-      <Dialog open={isOpen} sx={{ padding: '10px', '& .MuiDialog-paper': { maxWidth: '660px', minWidth: '660px' } }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingRight: '20px' }}>
-          <DialogTitle>Add Application</DialogTitle>
-          <Close sx={{ cursor: 'pointer' }} onClick={() => setIsOpen(false)} />
-        </Box>
-        <DialogContent>
+      <DialogBase
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        closeBtn
+        title="Add Application"
+        content={
           <Stack>
             <ProgressStepper stepDatas={installApplicationStep} activeStepIndex={stepIndex} fitWidth />
             <Box sx={{ paddingTop: '10px' }}>{installApplicationStep[stepIndex].content}</Box>
           </Stack>
-        </DialogContent>
-      </Dialog>
+        }
+        sx={{ padding: '10px', '& .MuiDialog-paper': { maxWidth: '660px', minWidth: '660px' } }}
+      />
     </Stack>
   );
 };

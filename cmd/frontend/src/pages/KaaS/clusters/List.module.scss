@@ -22,33 +22,3 @@
     }
   }
 }
-
-.dialog {
-  .close-btn {
-    position: absolute;
-    right: 8px;
-    top: 8px;
-    color: #808080;
-  }
-
-  .content {
-    display: flex;
-    flex-direction: column;
-
-    & > * {
-      margin-bottom: 8px;
-    }
-  }
-
-  .action-group {
-    padding: 8px;
-    padding-top: 20px;
-
-    .action-button {
-      text-transform: none;
-      font-family: Roboto, helvetica, arial, sans-serif;
-      font-size: 16px;
-      font-weight: 400;
-    }
-  }
-}

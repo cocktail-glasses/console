@@ -1,24 +1,12 @@
 import { useEffect, useState, Dispatch, SetStateAction, useMemo, useRef } from 'react';
-import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 
-import { zodResolver } from '@hookform/resolvers/zod';
-
-import { Add, DeleteOutline, Close } from '@mui/icons-material';
+import { Add, DeleteOutline } from '@mui/icons-material';
 import {
   Box,
   Button,
-  Checkbox,
-  Dialog,
-  DialogTitle,
-  DialogActions,
-  DialogContent,
-  FormControlLabel,
   IconButton,
   Paper,
-  TextField,
-  Typography,
-  Divider,
   Table,
   TableBody,
   TableCell,
@@ -34,11 +22,11 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 import isUndefined from 'lodash/isUndefined';
 import toLower from 'lodash/toLower';
 
+import DeleteClusterDialog from './DeleteClusterDialog';
 import style from './List.module.scss';
 import './common.scss';
 import { DotStatus } from './component/DotStatus';
 import Searchbar from './component/Searchbar/Searchbar';
-import { getDeleteClusterSchema } from './schemas';
 import { getDotStatus } from './utils';
 
 import {
@@ -266,78 +254,5 @@ const ListTable: React.FC<ListTableProp> = ({ tenantControlPlanes, search, isLoa
         handleDelete={handleDeleteCluster}
       />
     </TableContainer>
-  );
-};
-
-interface DeleteClusterDialogProp {
-  isOpen: boolean;
-  handleClose: () => void;
-  handleDelete: (deleteClusterOptions: DeleteClusterForm) => void;
-  clusterName: string;
-}
-
-interface DeleteClusterForm {
-  clusterName: string;
-  cleanupLoadBalancers: boolean;
-  cleanupVolumes: boolean;
-}
-
-const DeleteClusterDialog: React.FC<DeleteClusterDialogProp> = ({ isOpen, handleClose, handleDelete, clusterName }) => {
-  const {
-    register,
-    formState: { isValid },
-    getValues,
-    reset,
-  } = useForm<DeleteClusterForm>({
-    defaultValues: {
-      clusterName: '',
-    },
-    resolver: zodResolver(getDeleteClusterSchema(clusterName)),
-  });
-
-  useEffect(() => {
-    reset();
-  }, [isOpen, reset]);
-
-  return (
-    <Dialog open={isOpen} onClose={handleClose} className={style.dialog}>
-      <DialogTitle>Delete Cluster</DialogTitle>
-      <IconButton aria-label="close" className={style.closeBtn} onClick={handleClose}>
-        <Close />
-      </IconButton>
-      <DialogContent className={style.content}>
-        <Typography variant="body1">
-          {`Delete `}
-          <strong>{clusterName}</strong>
-          {` cluster permanently?`}
-        </Typography>
-
-        <Box sx={{ marginTop: '8px', marginBottom: '15px !important' }}>
-          <TextField variant="outlined" label="Cluster Name" required fullWidth {...register('clusterName')} />
-        </Box>
-
-        <FormControlLabel
-          control={<Checkbox {...register('cleanupLoadBalancers')} />}
-          label="Cleanup connected Load Balancers"
-        />
-        <FormControlLabel
-          control={<Checkbox {...register('cleanupVolumes')} />}
-          label="Cleanup connected volumes (dynamically provisioned PVs and PVCs)"
-        />
-      </DialogContent>
-      <Divider />
-      <DialogActions className="action-group">
-        <Button
-          className={style.actionButton}
-          variant="contained"
-          size="large"
-          startIcon={<DeleteOutline fontSize="large" />}
-          onClick={() => handleDelete(getValues())}
-          disabled={!isValid}
-        >
-          Delete Cluster
-        </Button>
-      </DialogActions>
-    </Dialog>
   );
 };
