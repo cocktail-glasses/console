@@ -5,7 +5,7 @@
   }
 }
 
-.dark {
+:global(.dark) {
   .description-item {
     --caption-color: #b8b8b8;
   }

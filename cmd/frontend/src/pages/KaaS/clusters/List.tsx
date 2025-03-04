@@ -34,10 +34,10 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 import isUndefined from 'lodash/isUndefined';
 import toLower from 'lodash/toLower';
 
+import style from './List.module.scss';
 import './common.scss';
 import { DotStatus } from './component/DotStatus';
 import Searchbar from './component/Searchbar/Searchbar';
-import './list.scss';
 import { getDeleteClusterSchema } from './schemas';
 import { getDotStatus } from './utils';
 
@@ -55,6 +55,7 @@ import {
   Row,
   useReactTable,
 } from '@tanstack/react-table';
+import clsx from 'clsx';
 
 export default function KaaSClusterList() {
   const [isLoading, setIsLoading] = useState(false);
@@ -95,7 +96,7 @@ export default function KaaSClusterList() {
   const handleCreateClick = () => navigate('/kaas/clusters/create');
 
   return (
-    <Paper className="main-container">
+    <Paper className={clsx('main-container', style.mainContainer)}>
       <h2>KaaS 클러스터 관리</h2>
       <ListMenu search={search} handleSearch={setSearch} handleCreateClick={handleCreateClick} />
       <ListTable tenantControlPlanes={tenantControlPlanes} search={search} isLoading={isLoading} />
@@ -111,7 +112,7 @@ interface ListMenuProp {
 
 const ListMenu: React.FC<ListMenuProp> = ({ search, handleSearch, handleCreateClick }) => {
   return (
-    <Box className="menu-container">
+    <Box className={style.menuContainer}>
       <Searchbar value={search} onChange={(_, value) => handleSearch(value)} />
       <Button variant="contained" onClick={handleCreateClick} startIcon={<Add />}>
         Create Cluster
@@ -215,7 +216,7 @@ const ListTable: React.FC<ListTableProp> = ({ tenantControlPlanes, search, isLoa
   }, [table, search]);
 
   return (
-    <TableContainer className="table">
+    <TableContainer className={style.table}>
       <Table aria-label="tenant-control-plane table">
         <TableHead>
           {table.getHeaderGroups().map((headerGroup) => (
@@ -230,7 +231,7 @@ const ListTable: React.FC<ListTableProp> = ({ tenantControlPlanes, search, isLoa
         </TableHead>
         <TableBody>
           {isLoading && (
-            <TableRow className="row">
+            <TableRow className={style.row}>
               <TableCell colSpan={columns.length} align="center">
                 <CircularProgress />
               </TableCell>
@@ -238,19 +239,19 @@ const ListTable: React.FC<ListTableProp> = ({ tenantControlPlanes, search, isLoa
           )}
           {table.getRowModel().rows.length > 0 ? (
             table.getRowModel().rows.map((row) => (
-              <TableRow className="row" key={row.id} hover onClick={() => handleRowClick(row)}>
+              <TableRow className={style.row} key={row.id} hover onClick={() => handleRowClick(row)}>
                 {row.getVisibleCells().map((cell) => (
                   <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
                 ))}
                 <TableCell>
                   <IconButton aria-label="delete-cluster" onClick={(e) => handleDialogOpen(e, row.original)}>
-                    <DeleteOutline className="action-icon" />
+                    <DeleteOutline className={style.actionIcon} />
                   </IconButton>
                 </TableCell>
               </TableRow>
             ))
           ) : (
-            <TableRow className="row">
+            <TableRow className={style.row}>
               <TableCell colSpan={columns.length} align="center">
                 No Result
               </TableCell>
@@ -299,12 +300,12 @@ const DeleteClusterDialog: React.FC<DeleteClusterDialogProp> = ({ isOpen, handle
   }, [isOpen, reset]);
 
   return (
-    <Dialog open={isOpen} onClose={handleClose} className="dialog">
+    <Dialog open={isOpen} onClose={handleClose} className={style.dialog}>
       <DialogTitle>Delete Cluster</DialogTitle>
-      <IconButton aria-label="close" className="close-btn" onClick={handleClose}>
+      <IconButton aria-label="close" className={style.closeBtn} onClick={handleClose}>
         <Close />
       </IconButton>
-      <DialogContent className="content">
+      <DialogContent className={style.content}>
         <Typography variant="body1">
           {`Delete `}
           <strong>{clusterName}</strong>
@@ -327,7 +328,7 @@ const DeleteClusterDialog: React.FC<DeleteClusterDialogProp> = ({ isOpen, handle
       <Divider />
       <DialogActions className="action-group">
         <Button
-          className="action-button"
+          className={style.actionButton}
           variant="contained"
           size="large"
           startIcon={<DeleteOutline fontSize="large" />}

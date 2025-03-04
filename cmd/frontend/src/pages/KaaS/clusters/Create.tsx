@@ -44,14 +44,15 @@ import isFunction from 'lodash/isFunction';
 import isString from 'lodash/isString';
 import map from 'lodash/map';
 
+import style from './Create.module.scss';
 import './common.scss';
 import DescriptionItem from './component/Description/DescriptionItem';
 import ProgressStepper from './component/ProgressStepper/ProgressStepper';
 import Searchbar from './component/Searchbar/Searchbar';
-import './create.scss';
 import { createFormSchema } from './formValidation';
 
 import { DialogTitle } from '@components/common';
+import clsx from 'clsx';
 import Argo from 'public/app_argo.svg';
 import CertManager from 'public/app_cert-manager.svg';
 import Falco from 'public/app_falco.svg';
@@ -122,7 +123,7 @@ export default function Create() {
   const navigate = useNavigate();
 
   return (
-    <Paper className="main-form main-container">
+    <Paper className={clsx(style.mainContainer, style.mainForm, 'main-container')}>
       <h2>Create Cluster</h2>
 
       <ProgressStepper stepDatas={stepDatas} activeStepIndex={activeStepIndex} />
@@ -299,18 +300,18 @@ const ClusterForm: React.FC<ClusterFormProps> = ({ values, handleSubmit, handleE
               <ToggleButtonGroup
                 value={value}
                 exclusive
-                className="cni-plugin-group"
+                className={style.cniPluginGroup}
                 onChange={(_, selected) => onChange(selected)}
               >
-                <ToggleButton value="cilium" className="cni-plugin">
-                  <span className="plugin-image cilium" />
+                <ToggleButton value="cilium" className={style.cniPlugin}>
+                  <span className={clsx(style.pluginImage, style.cilium)} />
                 </ToggleButton>
 
-                <ToggleButton value="canal" className="cni-plugin">
-                  <span className="plugin-image canal" />
+                <ToggleButton value="canal" className={style.cniPlugin}>
+                  <span className={clsx(style.pluginImage, style.canal)} />
                 </ToggleButton>
 
-                <ToggleButton value="none" className="cni-plugin">
+                <ToggleButton value="none" className={style.cniPlugin}>
                   None
                 </ToggleButton>
               </ToggleButtonGroup>
@@ -941,9 +942,9 @@ const SummaryForm: React.FC<SummaryFormProps> = ({ formValue }) => {
   ];
 
   return (
-    <Box className="summary">
+    <Box className={style.summary}>
       {map(summaryData, (group, groupIndex) => (
-        <Box className="group" key={groupIndex}>
+        <Box className={style.group} key={groupIndex}>
           {map(group, (step) => (
             <SummaryStep key={step.title} stepData={step} />
           ))}
@@ -965,8 +966,8 @@ interface SummaryStepProps {
 }
 
 const SummaryStep: React.FC<SummaryStepProps> = ({ stepData }) => (
-  <Box className="step">
-    <Typography className={`header counter-${stepData.index}`} gutterBottom>
+  <Box className={style.step}>
+    <Typography className={`${style.header} ${style[`counter-${stepData.index}`]}`} gutterBottom>
       {stepData.title}
     </Typography>
 
@@ -976,7 +977,7 @@ const SummaryStep: React.FC<SummaryStepProps> = ({ stepData }) => (
           {sub.title}
         </Typography>
 
-        <Box className="content">
+        <Box className={style.content}>
           {map(sub.contents, (content) => (
             <DescriptionItem key={content[0]} description={{ label: content[0], value: content[1] }} />
           ))}

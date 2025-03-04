@@ -1,6 +1,6 @@
 import { Stack, Typography } from '@mui/material';
 
-import './index.scss';
+import style from './DescriptionItem.module.scss';
 
 export interface Description {
   label?: string;
@@ -12,8 +12,8 @@ interface DescriptionItemProps {
 }
 
 const DescriptionItem: React.FC<DescriptionItemProps> = ({ description }) => (
-  <Stack className="description-item" sx={{ marginRight: '30px', height: '62px' }}>
-    <Typography className="caption" variant="caption">
+  <Stack className={style.descriptionItem} sx={{ marginRight: '30px', height: '62px' }}>
+    <Typography className={style.caption} variant="caption">
       {description.label}
     </Typography>
     <Typography variant="body1" sx={{ lineHeight: '1.66' }}>

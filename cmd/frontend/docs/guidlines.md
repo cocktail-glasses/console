@@ -193,15 +193,19 @@ import { UserService } from '@lib/services';
 ```
 
 ## Kubernetes 모델 추출 & client 생성
+
 k8s 클러스터 리소스를 모델로 추출하기 위해 openapi-generator를 이용합니다.
 
 ### 1. kube api-server proxy
+
 openapi-generator를 이용하기 위해 클러스터의 openapi 명세를 가져올 수 있어야 합니다. 다음을 실행하여 kube api-server에 프록시합니다.
+
 ```sh
 kubectl proxy
 ```
 
 ### 2. openapi-generator 실행
+
 openapi 스펙은 v2, v3가 존재합니다.
 
 - v2: 클러스터 모든 리소스를 통합한 명세를 제공합니다.
@@ -209,9 +213,10 @@ openapi 스펙은 v2, v3가 존재합니다.
 - v3: 클러스터 그룹/버전 별로 명세를 제공합니다.
 
 다음을 실행하여 k8s 모델과 client를 생성할 수 있습니다.
-``` sh
+
+```sh
 # input: http://localhost:8001/openapi/v2, output: ./gen
-npm run gen 
+npm run gen
 
 # input: http://localhost:8001/openapi/v3/apis/kamaji.clastix.io/v1alpha1, output: ./gen
 npm run gen -- version=v3 api=kamaji.clastix.io/v1alpha1
@@ -230,8 +235,8 @@ npm run gen -- version=v3 api=kamaji.clastix.io/v1alpha1 url=http://cocktail.io
 |api|클러스터 리소스 그룹 버전 ex. kamaji.clastix.io/v1alpha1||
 |output|추출된 결과 디렉터리 경로|./gen|
 
-
 ### 3. 모델 & client 추출
+
 명령을 실행하면 결과 디렉터리가 생성됩니다. 결과 디렉터리에서 `api.ts`, `base.ts`, `common.ts`, `configuration.ts`, `index.ts` 파일을 `src/lib/[model-name]/` 경로에 복사합니다.
 
 > **Note**
@@ -240,17 +245,149 @@ npm run gen -- version=v3 api=kamaji.clastix.io/v1alpha1 url=http://cocktail.io
 ## kamaji 호출 예제
 
 ```typescript
-import { KamajiClastixIoV1alpha1Api as KamajiAPI, Configuration } from '@lib/kamaji'
+import { KamajiClastixIoV1alpha1Api as KamajiAPI, Configuration } from '@lib/kamaji';
 import { AxiosError } from 'axios';
 
 const kamajiConf = new Configuration({
-    basePath: 'http://localhost:8001'
-  })
+  basePath: 'http://localhost:8001',
+});
 
-  const kamajiApi = new KamajiAPI(kamajiConf)
-  kamajiApi.listKamajiClastixIoV1alpha1NamespacedTenantControlPlane('tenant-root')
-  .then(res => res.data)
-  .then(res => res.items)
-  .then(res => console.log(res))
-  .catch((e: AxiosError) => console.log(e.message))
+const kamajiApi = new KamajiAPI(kamajiConf);
+kamajiApi
+  .listKamajiClastixIoV1alpha1NamespacedTenantControlPlane('tenant-root')
+  .then((res) => res.data)
+  .then((res) => res.items)
+  .then((res) => console.log(res))
+  .catch((e: AxiosError) => console.log(e.message));
+```
+
+## CSS Module
+
+기본적으로 전역 스코프인 css를 css 파일별로 로컬 스코프로 변환해주는 기술입니다.
+
+### css module 적용
+
+#### css 파일명 변경
+
+작성한 css 또는 scss 파일을 모듈화하려면 .module 을 붙여줘야 합니다.
+
+```bash
+[모듈명].module.css
+# or
+[모듈명].module.scss
+
+# example
+table.module.css # table.css
+```
+
+#### css module 임포트
+
+변환된 클래스명을 html에 주입하려면 다음과 같이 임포트하여 사용합니다.
+
+```tsx
+import style from './table.module.scss'
+
+...
+
+return (
+  <div className={style['table-container']}></div>
+)
+```
+
+### css 클래스명 camelCase로 변경
+
+개별 편의성을 위해 클래스명을 camelCase로 변환하여 사용할 수 있습니다.
+
+```js
+// vite.config.ts
+...
+
+// camelCase를 인식하도록 빌드 설정 추가
+css: {
+    modules: {
+      localsConvention: 'camelCase',
+    },
+},
+```
+
+```tsx
+import style from './table.module.scss'
+
+...
+return (
+  <div className={style.tableContainer}></div>
+)
+```
+
+### vscode css module 패키지
+
+css 모듈을 사용하여 개발할때 자동완성을 지원합니다.
+
+camelCase 자동완성을 설정하려면 다음 순서대로 설정을 변경합니다.
+
+1. vscode 설정 탭을 연다.
+2. CSS Module: Camel case를 검색한다.
+3. Edit in settings.json을 클릭한다.
+4. 설정값을 false에서 true로 변경한다.
+
+```js
+{
+  "cssModules.camelCase": true
+}
+```
+
+만약 자동완성이 camelCase로 보이지 않는다면 vscode를 재시작합니다.
+
+### css 모듈에서 전역 클래스 사용
+
+css 모듈에 표현된 클래스 중 외부(전역 css) 클래스임을 나타내야 하는 경우가 존재합니다.
+
+```scss
+.dark {
+  .table {
+    border: '1px solid white';
+  }
+}
+```
+
+위 스타일 코드에서 `dark` 클래스는 공통으로 사용되는 클래스입니다. 이런 경우 `:global` 를 사용하여 `.dark` 클래스는 전역 클래스임을 나타내어 변환되지 않도록 만들어 줍니다.
+
+```scss
+:global(.dark) {
+  .table {
+    border: '1px solid white';
+  }
+}
+
+// 아래와 동일
+
+.dark {
+  .[file-name]__table__[hash-value] {
+    border: '1px solid white';
+  }
+}
+```
+
+괄호 없이 사용된다면 해당 스코프를 전역 클래스로 사용합니다. 만약 전역 스코프 내부에서 로컬 클래스임을 나타내고 싶다면 `:local` 를 사용하여 로컬 클래스임을 나타내고 변환하도록 만들어 줍니다.
+
+```scss
+:global .dark {
+  // 해당 영역은 전역 클래스 스코프
+
+  :local(.table) {
+    // .table 클래스는 로컬 클래스이므로 .파일명__table__해시값 클래스로 변환됩니다.
+    border: '1px solid white';
+  }
+}
+
+:global .dark {
+  // 해당 영역은 전역 클래스 스코프
+
+  :local {
+    // 해당 영역은 로컬 클래스 스코프, 이 영역에 표시된 클래스는 모두 로컬 클래스이므로 변환됩니다.
+    .table {
+      border: '1px solid white';
+    }
+  }
+}
 ```

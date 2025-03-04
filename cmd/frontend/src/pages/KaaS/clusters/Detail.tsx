@@ -47,13 +47,14 @@ import head from 'lodash/head';
 import isEmpty from 'lodash/isEmpty';
 import map from 'lodash/map';
 
+import style from './Detail.module.scss';
 import DescriptionItem, { Description } from './component/Description/DescriptionItem';
 import { DotStatus, DotStatusEnum } from './component/DotStatus';
-import './detail.scss';
 import { getDotStatus } from './utils';
 
 import { IoClastixKamajiV1alpha1TenantControlPlane, KamajiClastixIoV1alpha1Api as KamajiAPI } from '@lib/kamaji';
 import { createColumnHelper, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
+import clsx from 'clsx';
 import NodeExporter from 'public/prometheus-node-exporter.svg';
 
 export default function Detail() {
@@ -91,7 +92,7 @@ const BackButton: React.FC<BackButtonProps> = ({ url }) => {
   const navigate = useNavigate();
   const handleClick = () => navigate(url);
   return (
-    <Button onClick={handleClick} variant="outlined" className="back-btn" color="success">
+    <Button onClick={handleClick} variant="outlined" className={style.backBtn} color="success">
       <ArrowBackIosNew />
     </Button>
   );
@@ -251,9 +252,9 @@ const TenantClusterInformation: React.FC<TenantClusterInformationProps> = ({ ten
   ];
 
   return (
-    <Paper className="main-container">
+    <Paper className={style.mainContainer}>
       <Box
-        className="title"
+        className={style.title}
         sx={{
           display: 'flex',
           justifyContent: 'space-between',
@@ -268,7 +269,7 @@ const TenantClusterInformation: React.FC<TenantClusterInformationProps> = ({ ten
           <Button variant="contained" startIcon={<VerticalAlignBottom />}>
             Get Kubeconfig
           </Button>
-          <Button variant="outlined" className="action-btn">
+          <Button variant="outlined" className={style.actionBtn}>
             <MoreVert sx={{ color: 'white' }} />
           </Button>
         </Box>
@@ -328,26 +329,24 @@ interface CollapseButtonProps {
 }
 
 const CollapseButton: React.FC<CollapseButtonProps> = ({ label, isCollapse, handleOnChange }) => {
-  const arrowIconClass = isCollapse ? 'icon-arrow-down' : 'icon-arrow-up';
-
   return (
-    <Box className="collapse-button" onClick={handleOnChange}>
-      <hr className="line" />
-      <Box className="label-container">
-        <Typography className="label" variant="subtitle1">
+    <Box className={style.collapseButton} onClick={handleOnChange}>
+      <hr className={style.line} />
+      <Box className={style.labelContainer}>
+        <Typography className={style.label} variant="subtitle1">
           {label}
         </Typography>
-        <ExpandMore className={arrowIconClass} />
+        <ExpandMore className={clsx({ [style.iconArrowUp]: isCollapse })} />
       </Box>
-      <hr className="line" />
+      <hr className={style.line} />
     </Box>
   );
 };
 
 const TenantClusterNodes = () => (
-  <Paper className="main-container">
+  <Paper className={style.mainContainer}>
     <Box
-      className="title"
+      className={style.title}
       sx={{
         display: 'flex',
         justifyContent: 'space-between',
@@ -364,7 +363,7 @@ const TenantClusterNodes = () => (
         </Button>
       </Box>
     </Box>
-    <TableContainer className="table">
+    <TableContainer className={style.table}>
       <Table>
         <TableHead>
           <TableRow>
@@ -402,7 +401,7 @@ const TenantClusterNodes = () => (
           </TableRow>
         </TableHead>
         <TableBody>
-          <TableRow className="row">
+          <TableRow className={style.row}>
             <TableCell colSpan={6} align="center">
               No machine deployments available.
             </TableCell>
@@ -432,7 +431,7 @@ const TenantClusterResources = () => {
         </Tabs>
       </Box>
       {map(tabDatas, (data, i) => (
-        <Paper key={data.label} hidden={tabIndex !== i} className="tab-container">
+        <Paper key={data.label} hidden={tabIndex !== i} className={style.tabContainer}>
           {data.content}
         </Paper>
       ))}
@@ -441,7 +440,7 @@ const TenantClusterResources = () => {
 };
 
 const EventsTabContent = () => (
-  <TableContainer className="table padding-y-30" sx={{ marginTop: '0px !important' }}>
+  <TableContainer className={clsx(style.table, style.paddingY30)} sx={{ marginTop: '0px !important' }}>
     <Table>
       <TableHead>
         <TableRow>
@@ -457,7 +456,7 @@ const EventsTabContent = () => (
         </TableRow>
       </TableHead>
       <TableBody>
-        <TableRow className="row">
+        <TableRow className={style.row}>
           <TableCell colSpan={5} align="center">
             No events available.
           </TableCell>
@@ -520,7 +519,7 @@ const RbacTabContent = () => {
   ];
 
   return (
-    <Stack className="margin-x-30">
+    <Stack className={style.marginX30}>
       <Box
         sx={{
           display: 'flex',
@@ -580,7 +579,7 @@ const RbacTabContent = () => {
 };
 
 const AddonTabContent = () => (
-  <Stack className="margin-x-30">
+  <Stack className={style.marginX30}>
     <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
       <Button variant="outlined" startIcon={<Add />}>
         Install Addon
@@ -597,18 +596,18 @@ interface AddonButtonProps {
 }
 
 const AddonButton: React.FC<AddonButtonProps> = ({ logoSrc }) => (
-  <Box className="addon-btn-container">
-    <Box className="addon-logo-container">
-      <img className="addon-logo" src={logoSrc} alt={logoSrc} />
+  <Box className={style.addonBtnContainer}>
+    <Box className={style.addonLogoContainer}>
+      <img className={style.addonLogo} src={logoSrc} alt={logoSrc} />
     </Box>
-    <Box className="addon-action-container">
+    <Box className={style.addonActionContainer}>
       <MoreVert />
     </Box>
   </Box>
 );
 
 const ApplicationsTabContent = () => (
-  <Stack className="margin-x-30">
+  <Stack className={style.marginX30}>
     <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
       <p style={{ flex: '1' }}>
         Install third party Applications into a cluster,{' '}
@@ -627,8 +626,8 @@ const ApplicationsTabContent = () => (
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Typography className="margin-right-5">Show System Applications</Typography>
-          <Switch className="ios-switch" defaultChecked />
+          <Typography className={style.marginRight5}>Show System Applications</Typography>
+          <Switch className={style.iosSwitch} defaultChecked />
         </Box>
         <Button variant="outlined" startIcon={<Add />} size="large" sx={{ height: '50px' }}>
           <Typography variant="caption">Add Application</Typography>
@@ -672,7 +671,7 @@ const RbacUserContent: React.FC<RbacUserContentProps> = ({ rbacUserData }) => {
       id: 'action',
       cell: () => (
         <IconButton>
-          <DeleteOutline className="action-icon" />
+          <DeleteOutline className={style.actionIcon} />
         </IconButton>
       ),
     }),
@@ -710,7 +709,7 @@ const RbacGroupContent: React.FC<RbacGroupContentProps> = ({ rbacGroupData }) =>
       id: 'action',
       cell: () => (
         <IconButton>
-          <DeleteOutline className="action-icon" />
+          <DeleteOutline className={style.actionIcon} />
         </IconButton>
       ),
     }),
@@ -733,7 +732,7 @@ const RbacTable: React.FC<RbacTableProps> = ({ data, columns, emptyMessage = 'No
   });
 
   return (
-    <TableContainer className="table padding-y-30" sx={{ marginTop: '0px !important' }}>
+    <TableContainer className={clsx(style.table, style.paddingY30)} sx={{ marginTop: '0px !important' }}>
       <Table aria-label="tenant-control-plane table">
         <TableHead>
           {table.getHeaderGroups().map((headerGroup) => (
@@ -747,14 +746,14 @@ const RbacTable: React.FC<RbacTableProps> = ({ data, columns, emptyMessage = 'No
         <TableBody>
           {table.getRowModel().rows.length > 0 ? (
             table.getRowModel().rows.map((row) => (
-              <TableRow className="row" key={row.id}>
+              <TableRow className={style.row} key={row.id}>
                 {row.getVisibleCells().map((cell) => (
                   <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
                 ))}
               </TableRow>
             ))
           ) : (
-            <TableRow className="row">
+            <TableRow className={style.row}>
               <TableCell colSpan={columns.length} align="center">
                 {emptyMessage}
               </TableCell>

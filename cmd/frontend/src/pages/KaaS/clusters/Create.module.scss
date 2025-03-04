@@ -1,0 +1,126 @@
+.main-form {
+  padding: 30px;
+}
+
+.cni-plugin-group {
+  .cni-plugin {
+    width: 118px;
+    height: 43px;
+    margin-right: 10px;
+    margin-bottom: 10px;
+    border-radius: 4px !important;
+
+    --cni-plugin-border: 1px solid rgba(0, 0, 0, 0.12);
+
+    &:not(:first-child) {
+      border-left: var(--cni-plugin-border);
+    }
+
+    .plugin-image {
+      position: absolute;
+      background-repeat: no-repeat;
+      background-size: contain;
+      background-position: center center;
+      filter: grayscale(1);
+
+      &.cilium {
+        $cilium-size: 80px;
+        background-image: url('/cni_cilium.svg');
+        max-height: $cilium-size;
+        min-height: $cilium-size;
+        max-width: $cilium-size;
+        min-width: $cilium-size;
+      }
+
+      &.canal {
+        $canal-size: 50px;
+        background-image: url('/cni_canal.png');
+        max-height: $canal-size;
+        min-height: $canal-size;
+        max-width: $canal-size;
+        min-width: $canal-size;
+      }
+    }
+
+    &:global(.Mui-selected) .plugin-image {
+      filter: none;
+    }
+  }
+}
+
+.summary {
+  padding-top: 30px;
+  display: flex;
+  gap: 10px;
+
+  .group {
+    flex: 1;
+
+    .step {
+      .header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 16px;
+        font-size: 20px;
+
+        &:before {
+          height: 22px;
+          width: 22px;
+          display: inline-flex;
+          justify-content: center;
+          align-items: center;
+          border-radius: 50%;
+          border: 1px solid;
+          font-size: 14px;
+          margin-right: 12px;
+        }
+
+        &.counter-1:before {
+          content: '1';
+        }
+
+        &.counter-2:before {
+          content: '2';
+        }
+
+        &.counter-3:before {
+          content: '3';
+        }
+
+        &.counter-4:before {
+          content: '4';
+        }
+
+        &.counter-5:before {
+          content: '5';
+        }
+      }
+
+      .content {
+        display: flex;
+        flex-wrap: wrap;
+        margin-bottom: 8px;
+
+        .item {
+          display: flex;
+          flex-direction: column;
+          margin-top: 6px;
+          margin-bottom: 6px;
+          margin-right: 30px;
+
+          .label {
+            color: rgb(126, 134, 143);
+          }
+        }
+      }
+    }
+  }
+}
+
+:global(.dark) {
+  .cni-plugin-group {
+    .cni-plugin {
+      --cni-plugin-border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+  }
+}

@@ -90,6 +90,11 @@ export default defineConfig({
     // }),
     optimizeLodashImports(),
   ],
+  css: {
+    modules: {
+      localsConvention: 'camelCase',
+    },
+  },
   // test: {
   //   globals: true,
   //   environment: 'jsdom',
@@ -136,7 +141,21 @@ export default defineConfig({
           apidevtools: ['@apidevtools/json-schema-ref-parser', '@apidevtools/swagger-parser'],
           xterm: ['xterm', 'xterm-addon-fit', 'xterm-addon-search'],
           recharts: ['recharts'],
-          vendor: ['lodash', 'notistack', 'js-base64', 'js-yaml', 'humanize-duration', 'jotai', '@tanstack/react-query', 'material-react-table', 'spacetime', 'dayjs', 'class-transformer', 'class-validator', 'yaml']
+          vendor: [
+            'lodash',
+            'notistack',
+            'js-base64',
+            'js-yaml',
+            'humanize-duration',
+            'jotai',
+            '@tanstack/react-query',
+            'material-react-table',
+            'spacetime',
+            'dayjs',
+            'class-transformer',
+            'class-validator',
+            'yaml',
+          ],
         },
       },
     },
