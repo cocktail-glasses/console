@@ -1,15 +1,19 @@
 import React, { useState } from 'react';
 
-import { Add, SmartToyOutlined, Person3Outlined, DeleteOutline } from '@mui/icons-material';
+import { SmartToyOutlined, Person3Outlined, DeleteOutline } from '@mui/icons-material';
 import {
   Box,
-  Button,
   FormControl,
+  FormControlLabel,
+  FormLabel,
   IconButton,
   MenuItem,
+  Radio,
+  RadioGroup,
   Select,
   Stack,
   TableSortLabel,
+  TextField,
   Typography,
 } from '@mui/material';
 
@@ -19,36 +23,48 @@ import map from 'lodash/map';
 
 import style from './RbacTabContent.module.scss';
 
+import AddButton from '@components/molecules/KaaS/Button/AddButton/AddButton';
+import Dialog from '@components/molecules/KaaS/Dialog/Dialog';
 import Table from '@components/molecules/KaaS/Table/Table';
+// import ClusterRoleBinding from '@lib/k8s/clusterRoleBinding';
+// import RoleBinding, { KubeRoleBinding } from '@lib/k8s/roleBinding';
 import { createColumnHelper } from '@tanstack/react-table';
 
 const RbacTabContent = () => {
+  // const [clusterRoleBindings] = ClusterRoleBinding.useList();
+  // const [roleBindings] = RoleBinding.useList();
+
+  // const filterByUser = (roleBinding: KubeRoleBinding) => roleBinding.subjects
+  // const print = (roleBinding: KubeRoleBinding) => console.log('subject: ', map(roleBinding.subjects, 'kind'));
+
+  // clusterRoleBindings?.forEach(print);
+
   const rbacTypes = [
     {
       value: 'serviceAccount',
       label: (
-        <>
+        <Box className={style.selectIconOption}>
           <SmartToyOutlined />
           Service Account
-        </>
+        </Box>
       ),
     },
     {
       value: 'user',
       label: (
-        <>
+        <Box className={style.selectIconOption}>
           <Person3Outlined />
           User
-        </>
+        </Box>
       ),
     },
     {
       value: 'group',
       label: (
-        <>
+        <Box className={style.selectIconOption}>
           <SmartToyOutlined />
           Group
-        </>
+        </Box>
       ),
     },
   ];
@@ -74,17 +90,65 @@ const RbacTabContent = () => {
     },
   ];
 
+  // create service account
+  const [isOpen, setIsOpen] = useState(false);
+  const createServiceAccountContent = (
+    <Stack>
+      <TextField variant="outlined" label="Name" required />
+
+      <FormControl sx={{ marginTop: '30px' }}>
+        <FormLabel>Select a Group</FormLabel>
+        <RadioGroup defaultValue="" sx={{ marginTop: '10px', gap: '30px' }}>
+          <FormControlLabel
+            value="projectManager"
+            control={<Radio name="" />}
+            label={
+              <Stack>
+                <Typography>Project Manager</Typography>
+                <Typography variant="caption">
+                  Manage the project, members and service accounts, no access to clusters
+                </Typography>
+              </Stack>
+            }
+          />
+          <FormControlLabel
+            value="editor"
+            control={<Radio name="" />}
+            label={
+              <Stack>
+                <Typography>Editor</Typography>
+                <Typography variant="caption">Write access and management of clusters, nodes and SSH Keys</Typography>
+              </Stack>
+            }
+          />
+          <FormControlLabel
+            value="viewer"
+            control={<Radio name="" />}
+            label={
+              <Stack>
+                <Typography>Viewer</Typography>
+                <Typography variant="caption">Read-only access, can only view existing resources</Typography>
+              </Stack>
+            }
+          />
+        </RadioGroup>
+      </FormControl>
+    </Stack>
+  );
+
+  const createServiceAccountFooter = (
+    <Box>
+      <AddButton label="Create Service Account" size="large" />
+    </Box>
+  );
+
   return (
     <Stack className={style.rbacContent}>
       <Box className={style.menuContainer}>
         <FormControl className={style.rbacSelector}>
           <Select variant="outlined" size="small" value={rbacSelect} onChange={(e) => setRbacSelect(e.target.value)}>
             {map(rbacTypes, (rbacType) => (
-              <MenuItem
-                value={rbacType.value}
-                key={rbacType.value}
-                sx={{ display: 'flex', alignItems: 'center', gap: '10px' }}
-              >
+              <MenuItem value={rbacType.value} key={rbacType.value}>
                 {rbacType.label}
               </MenuItem>
             ))}
@@ -93,31 +157,22 @@ const RbacTabContent = () => {
 
         <Box className={style.rbacActionContainer}>
           {eq(rbacSelect, rbacTypes[0].value) && (
-            <Button
-              variant="contained"
-              startIcon={<Add />}
-              sx={{
-                height: '45px',
-                color: 'white',
-                fontSize: '16px',
-                textTransform: 'none',
-              }}
-            >
-              <strong>Add Service Account</strong>
-            </Button>
+            <AddButton
+              label={<strong>Add Service Account</strong>}
+              size="large"
+              className="kaas-primary-color"
+              textTransform="none"
+              onClick={() => setIsOpen(true)}
+              sx={{ height: '45px', color: 'white', fontSize: '16px' }}
+            />
           )}
-          <Button
-            variant="contained"
-            startIcon={<Add />}
-            sx={{
-              height: '45px',
-              color: 'white',
-              fontSize: '16px',
-              textTransform: 'none',
-            }}
-          >
-            <strong>Add Binding</strong>
-          </Button>
+          <AddButton
+            label={<strong>Add Binding</strong>}
+            size="large"
+            className="kaas-primary-color"
+            textTransform="none"
+            sx={{ height: '45px', color: 'white', fontSize: '16px' }}
+          />
         </Box>
       </Box>
       <Box>
@@ -125,6 +180,15 @@ const RbacTabContent = () => {
         {eq(rbacSelect, rbacTypes[1].value) && <RbacUserContent rbacUserData={rbacUserData} />}
         {eq(rbacSelect, rbacTypes[2].value) && <RbacGroupContent rbacGroupData={[]} />}
       </Box>
+      <Dialog
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        closeBtn
+        title="Create Service Account"
+        content={createServiceAccountContent}
+        footer={createServiceAccountFooter}
+        sx={{ padding: '20px', '& .MuiDialog-paper': { maxWidth: '660px', minWidth: '660px' } }}
+      />
     </Stack>
   );
 };
