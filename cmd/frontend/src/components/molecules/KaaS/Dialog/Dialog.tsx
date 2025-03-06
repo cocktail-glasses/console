@@ -1,12 +1,13 @@
 import { ReactElement } from 'react';
 
-import { Dialog as DialogBase, Divider, SxProps, Theme } from '@mui/material';
+import { Dialog as DialogBase, Divider, SxProps, Theme, useTheme } from '@mui/material';
 
 import style from './Dialog.module.scss';
 
 import Content from '@components/atoms/KaaS/Dialog/Content/Content';
 import Footer from '@components/atoms/KaaS/Dialog/Footer/Footer';
 import Title from '@components/atoms/KaaS/Dialog/Title/Title';
+import clsx from 'clsx';
 
 export interface DialogBaseProps {
   isOpen: boolean;
@@ -32,17 +33,21 @@ const Dialog = ({
   contentClassName,
   footerClassName,
   ...props
-}: DialogBaseProps) => (
-  <DialogBase open={isOpen} onClose={onClose} className={style.dialog} {...props}>
-    <Title title={title} closeBtn={closeBtn} onClose={onClose} className={titleClassName} />
-    <Content content={content} className={contentClassName} />
-    {footer && (
-      <>
-        <Divider />
-        <Footer footer={footer} className={footerClassName} />
-      </>
-    )}
-  </DialogBase>
-);
+}: DialogBaseProps) => {
+  const theme = useTheme();
+
+  return (
+    <DialogBase open={isOpen} onClose={onClose} className={clsx(theme.palette.mode, style.dialog)} {...props}>
+      <Title title={title} closeBtn={closeBtn} onClose={onClose} className={titleClassName} />
+      <Content content={content} className={contentClassName} />
+      {footer && (
+        <>
+          <Divider />
+          <Footer footer={footer} className={footerClassName} />
+        </>
+      )}
+    </DialogBase>
+  );
+};
 
 export default Dialog;
