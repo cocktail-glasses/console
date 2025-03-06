@@ -1,10 +1,11 @@
+import { ReactNode } from 'react';
+
 import { Add } from '@mui/icons-material';
-import { ButtonOwnProps } from '@mui/material';
 
-import Button from '@components/atoms/KaaS/Button/Button';
+import Button, { ButtonProps } from '@components/atoms/KaaS/Button/Button';
 
-interface AddButtonProps extends ButtonOwnProps {
-  label: string;
+interface AddButtonProps extends ButtonProps {
+  label: ReactNode;
   onClick?: (...e: any[]) => void;
 }
 

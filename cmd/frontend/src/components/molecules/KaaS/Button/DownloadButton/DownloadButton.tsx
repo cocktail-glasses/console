@@ -1,7 +1,8 @@
 import { VerticalAlignBottom } from '@mui/icons-material';
-import { Button } from '@mui/material';
 
-interface DownloadButtonProps {
+import Button, { ButtonProps } from '@components/atoms/KaaS/Button/Button';
+
+interface DownloadButtonProps extends ButtonProps {
   label?: string;
 }
 
