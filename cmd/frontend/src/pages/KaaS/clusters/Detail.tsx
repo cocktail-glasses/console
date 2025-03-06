@@ -2,28 +2,39 @@ import React, { useEffect, useState, ReactElement } from 'react';
 import { useParams } from 'react-router';
 
 import { Done, Close } from '@mui/icons-material';
-import { Box, FormControl, InputLabel, MenuItem, Paper, Select, TableSortLabel, Typography } from '@mui/material';
+import {
+  Box,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Paper,
+  Select,
+  Stack,
+  TableSortLabel,
+  Typography,
+} from '@mui/material';
 
 import get from 'lodash/get';
 import has from 'lodash/has';
 import isEmpty from 'lodash/isEmpty';
 import map from 'lodash/map';
 
-import DescriptionItem, { Description } from '../../../components/atoms/KaaS/DescriptionItem/DescriptionItem';
-import { DotStatus, DotStatusEnum } from '../../../components/atoms/KaaS/DotStatus';
-import ExpandSection from '../../../components/organisms/KaaS/ExpandSection/ExpandSection';
 import style from './Detail.module.scss';
+import './common.scss';
 import AddonTabContent from './component/TabContents/AddonTabContent/AddonTabContent';
 import ApplicationsTabContent from './component/TabContents/ApplicationsTabContent/ApplicationsTabContent';
 import EventsTabContent from './component/TabContents/EventsTabContent/EventsTabContent';
 import RbacTabContent from './component/TabContents/RbacTabContent/RbacTabContent';
 import { getDotStatus } from './utils';
 
+import DescriptionItem, { Description } from '@components/atoms/KaaS/DescriptionItem/DescriptionItem';
+import { DotStatus, DotStatusEnum } from '@components/atoms/KaaS/DotStatus';
 import AddButton from '@components/molecules/KaaS/Button/AddButton/AddButton';
 import BackButton from '@components/molecules/KaaS/Button/BackButton/BackButton';
 import ContextMenuButton from '@components/molecules/KaaS/Button/ContextMenuButton/ContextMenuButton';
 import DownloadButton from '@components/molecules/KaaS/Button/DownloadButton/DownloadButton';
 import Table from '@components/molecules/KaaS/Table/Table';
+import ExpandSection from '@components/organisms/KaaS/ExpandSection/ExpandSection';
 import TabsContent from '@components/organisms/KaaS/TabsContent/TabsContent';
 import { IoClastixKamajiV1alpha1TenantControlPlane, KamajiClastixIoV1alpha1Api as KamajiAPI } from '@lib/kamaji';
 import { createColumnHelper } from '@tanstack/react-table';
@@ -46,12 +57,12 @@ export default function Detail() {
   }, [managementNamespace, name]);
 
   return (
-    <>
+    <Stack sx={{ paddingBottom: '40px' }}>
       <BackButton url="/kaas/clusters" />
       <TenantClusterInformation tenantControlPlane={tenantControlPlane} />
       <TenantClusterNodes />
       <TenantClusterResources />
-    </>
+    </Stack>
   );
 }
 
@@ -223,7 +234,12 @@ const TenantClusterInformation: React.FC<TenantClusterInformationProps> = ({ ten
           <h2>{get(tenantControlPlane, 'metadata.name', '')}</h2>
         </Box>
         <Box sx={{ display: 'flex', gap: '10px' }}>
-          <DownloadButton label="Get Kubeconfig" />
+          <DownloadButton
+            label="Get Kubeconfig"
+            size="large"
+            textTransform="none"
+            sx={{ backgroundColor: '#00b2b2' }}
+          />
           <ContextMenuButton />
         </Box>
       </Box>
@@ -237,14 +253,14 @@ const TenantClusterInformation: React.FC<TenantClusterInformationProps> = ({ ten
         }}
       >
         <FormControl sx={{ width: '192px', height: '62px', marginRight: '30px' }}>
-          <InputLabel>Control Plane</InputLabel>
+          <InputLabel variant="outlined">Control Plane</InputLabel>
           <Select variant="outlined" value="1.29.4" label="Control Plane" size="small">
             <MenuItem value="1.29.4">1.29.4</MenuItem>
           </Select>
         </FormControl>
         <FormControl sx={{ width: '192px', height: '62px', marginRight: '30px' }}>
-          <InputLabel>CNI Plugin</InputLabel>
-          <Select variant="outlined" value="1.15.3" label="Control Plane" size="small">
+          <InputLabel variant="outlined">CNI Plugin</InputLabel>
+          <Select variant="outlined" value="1.15.3" label="CNI Plugin" size="small">
             <MenuItem value="1.15.3">1.15.3</MenuItem>
           </Select>
         </FormControl>
@@ -311,7 +327,7 @@ const TenantClusterNodes = () => {
           <h2>Machine Deployments</h2>
         </Box>
         <Box>
-          <AddButton label="Add Machine Deployment" />
+          <AddButton label="Add Machine Deployment" size="large" textTransform="none" className="kaas-primary-color" />
         </Box>
       </Box>
       <Table data={[]} columns={columns} emptyMessage="No machine deployments available." />
