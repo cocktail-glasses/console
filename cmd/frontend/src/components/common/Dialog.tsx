@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import Box from '@mui/material/Box';
 import MuiDialog, { DialogProps as MuiDialogProps } from '@mui/material/Dialog';
 import MuiDialogTitle, { DialogTitleProps } from '@mui/material/DialogTitle';
-import Grid from '@mui/material/Grid';
+import Grid from '@mui/material/Grid2';
 import Typography from '@mui/material/Typography';
 
 import ActionButton from '@components/common/ActionButton';
@@ -47,7 +47,7 @@ export function DialogTitle(props: OurDialogTitleProps) {
   return (
     <MuiDialogTitle style={{ display: 'flex' }} {...other}>
       <Grid container justifyContent="space-between" alignItems="center">
-        <Grid item>
+        <Grid>
           {disableTypography ? (
             children
           ) : (
@@ -65,7 +65,7 @@ export function DialogTitle(props: OurDialogTitleProps) {
           )}
         </Grid>
         {buttons && buttons.length > 0 && (
-          <Grid item>
+          <Grid>
             <Box>
               {buttons.map((button, index) => {
                 return <Fragment key={index}>{button}</Fragment>;
@@ -98,7 +98,7 @@ export function Dialog(props: DialogProps) {
     setFullScreen((fs) => {
       const newFullScreenState = !fs;
 
-      if (!!onFullScreenToggled) {
+      if (onFullScreenToggled) {
         onFullScreenToggled(newFullScreenState);
       }
 

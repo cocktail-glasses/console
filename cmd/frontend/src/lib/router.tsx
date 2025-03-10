@@ -87,9 +87,9 @@
 // import SettingsCluster from 'pages/Settings/SettingsCluster';
 // import SettingsClusters from 'pages/Settings/SettingsClusters';
 // import { UsersList, UsersDetail } from 'pages/Users'
-import { generatePath } from "react-router";
+import { generatePath } from 'react-router';
 
-import { getCluster } from "@lib/util";
+import { getCluster } from '@lib/util';
 
 // import store from 'redux/stores/store';
 
@@ -865,15 +865,15 @@ export function createRouteURL(routeName: string, params: any = {}) {
     ...params,
   };
   // const path = ['', 'clusters', ':cluster']
-  const path = ["", "clusters"];
+  const path = ['', 'clusters'];
   if (fullParams) {
     path.push();
   }
-  if (routeName !== "") {
+  if (routeName !== '') {
     path.push(routeName.toLocaleLowerCase());
   }
   Object.entries(params).forEach(([k, v]) => {
-    if (k !== "cluster" && v !== undefined) {
+    if (k !== 'cluster' && v !== undefined) {
       path.push(`:${k}`);
     }
   });
@@ -883,7 +883,7 @@ export function createRouteURL(routeName: string, params: any = {}) {
   //   }
   // })
   // console.log("path", path, fullParams);
-  return generatePath(path.join("/"), fullParams);
+  return generatePath(path.join('/'), fullParams);
 }
 // export function createRouteURL(routeName: string, params: RouteURLProps = {}) {
 //   const storeRoutes = store.getState().routes.routes;

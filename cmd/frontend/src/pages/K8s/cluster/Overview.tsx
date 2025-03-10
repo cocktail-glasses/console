@@ -6,12 +6,7 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import Grid from "@mui/material/Grid2";
 import Switch from "@mui/material/Switch";
 
-import {
-  CpuCircularChart,
-  MemoryCircularChart,
-  NodesStatusCircleChart,
-  PodsStatusCircleChart,
-} from "./Charts";
+import { CpuCircularChart, MemoryCircularChart, NodesStatusCircleChart, PodsStatusCircleChart } from "./Charts";
 
 import { DateLabel, Link, PageGrid, StatusLabel } from "@components/common";
 import Empty from "@components/common/EmptyContent";
@@ -39,29 +34,14 @@ export default function Overview() {
     <PageGrid>
       <SectionBox title={t("translation|Overview")} py={2} mt={[4, 0, 0]}>
         {noPermissions ? (
-          <Empty color="error">
-            {t("translation|No permissions to list pods.")}
-          </Empty>
+          <Empty color="error">{t("translation|No permissions to list pods.")}</Empty>
         ) : (
-          <Grid
-            container
-            justifyContent="flex-start"
-            alignItems="stretch"
-            spacing={4}
-          >
+          <Grid container justifyContent="flex-start" alignItems="stretch" spacing={4}>
             <Grid size={{ xs: 4 }} sx={{ maxWidth: "300px" }}>
-              <CpuCircularChart
-                items={nodes}
-                itemsMetrics={nodeMetrics}
-                noMetrics={noMetrics}
-              />
+              <CpuCircularChart items={nodes} itemsMetrics={nodeMetrics} noMetrics={noMetrics} />
             </Grid>
             <Grid size={{ xs: 4 }} sx={{ maxWidth: "300px" }}>
-              <MemoryCircularChart
-                items={nodes}
-                itemsMetrics={nodeMetrics}
-                noMetrics={noMetrics}
-              />
+              <MemoryCircularChart items={nodes} itemsMetrics={nodeMetrics} noMetrics={noMetrics} />
             </Grid>
             <Grid size={{ xs: 4 }} sx={{ maxWidth: "300px" }}>
               <PodsStatusCircleChart items={pods} />
@@ -78,23 +58,20 @@ export default function Overview() {
 }
 
 function EventsSection() {
-  const EVENT_WARNING_SWITCH_FILTER_STORAGE_KEY =
-    "EVENT_WARNING_SWITCH_FILTER_STORAGE_KEY";
+  const EVENT_WARNING_SWITCH_FILTER_STORAGE_KEY = "EVENT_WARNING_SWITCH_FILTER_STORAGE_KEY";
   const EVENT_WARNING_SWITCH_DEFAULT = true;
   const { t } = useTranslation(["translation", "glossary"]);
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const eventsFilter = queryParams.get("eventsFilter");
   const filterFunc = useFilterFunc<Event>([".jsonData.involvedObject.kind"]);
-  const [isWarningEventSwitchChecked, setIsWarningEventSwitchChecked] =
-    useState(
-      Boolean(
-        JSON.parse(
-          localStorage.getItem(EVENT_WARNING_SWITCH_FILTER_STORAGE_KEY) ||
-            EVENT_WARNING_SWITCH_DEFAULT.toString(),
-        ),
-      ),
-    );
+  const [isWarningEventSwitchChecked, setIsWarningEventSwitchChecked] = useState(
+    Boolean(
+      JSON.parse(
+        localStorage.getItem(EVENT_WARNING_SWITCH_FILTER_STORAGE_KEY) || EVENT_WARNING_SWITCH_DEFAULT.toString()
+      )
+    )
+  );
   const [events, eventsError] = Event.useList({ limit: Event.maxLimit });
 
   const warningActionFilterFunc = (event: Event, search?: string) => {
@@ -111,10 +88,7 @@ function EventsSection() {
     return true;
   };
 
-  const numWarnings = useMemo(
-    () => events?.filter((e) => e.type === "Warning").length ?? "?",
-    [events],
-  );
+  const numWarnings = useMemo(() => events?.filter((e) => e.type === "Warning").length ?? "?", [events]);
 
   function makeStatusLabel(event: Event) {
     return (
@@ -151,10 +125,7 @@ function EventsSection() {
             label={t("Only warnings ({{ numWarnings }})", { numWarnings })}
             control={<Switch color="primary" />}
             onChange={(event, checked) => {
-              localStorage.setItem(
-                EVENT_WARNING_SWITCH_FILTER_STORAGE_KEY,
-                checked.toString(),
-              );
+              localStorage.setItem(EVENT_WARNING_SWITCH_FILTER_STORAGE_KEY, checked.toString());
               setIsWarningEventSwitchChecked(checked);
             }}
           />,
@@ -170,9 +141,7 @@ function EventsSection() {
         },
         {
           label: t("Name"),
-          getValue: (event) =>
-            event.involvedObjectInstance?.getName() ??
-            event.involvedObject.name,
+          getValue: (event) => event.involvedObjectInstance?.getName() ?? event.involvedObject.name,
           render: (event) => makeObjectLink(event),
           gridTemplate: 1.5,
         },
@@ -189,11 +158,7 @@ function EventsSection() {
         {
           label: t("Message"),
           getValue: (event) => event.message ?? "",
-          render: (event) => (
-            <ShowHideLabel labelId={event.metadata?.uid || ""}>
-              {event.message || ""}
-            </ShowHideLabel>
-          ),
+          render: (event) => <ShowHideLabel labelId={event.metadata?.uid || ""}>{event.message || ""}</ShowHideLabel>,
           gridTemplate: 1.5,
         },
         {
@@ -202,9 +167,7 @@ function EventsSection() {
           gridTemplate: "min-content",
           cellProps: { align: "right" },
           getValue: (event) => -new Date(event.lastOccurrence).getTime(),
-          render: (event) => (
-            <DateLabel date={event.lastOccurrence} format="mini" />
-          ),
+          render: (event) => <DateLabel date={event.lastOccurrence} format="mini" />,
         },
       ]}
       filterFunction={warningActionFilterFunc}

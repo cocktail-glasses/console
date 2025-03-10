@@ -1,30 +1,26 @@
-import { useMemo } from "react";
-import { useTranslation } from "react-i18next";
-import { generatePath } from "react-router";
-import { useParams } from "react-router-dom";
+import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+import { generatePath } from 'react-router';
+import { useParams } from 'react-router-dom';
 
-import { useAtom, useAtomValue, useSetAtom } from "jotai";
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 
-import { ToggleButton, ToggleButtonGroup, Tooltip } from "@mui/material";
-import Box from "@mui/material/Box";
-import Drawer from "@mui/material/Drawer";
-import Grid from "@mui/material/Grid2";
-import List from "@mui/material/List";
-import useMediaQuery from "@mui/material/useMediaQuery";
+import { ToggleButton, ToggleButtonGroup, Tooltip } from '@mui/material';
+import Box from '@mui/material/Box';
+import Divider from '@mui/material/Divider';
+import Drawer from '@mui/material/Drawer';
+import Grid from '@mui/material/Grid2';
+import List from '@mui/material/List';
+import useMediaQuery from '@mui/material/useMediaQuery';
 
-import { PureSidebarProps } from "./SidebarInterface";
+import SelectContent from './SelectContent';
+import { PureSidebarProps } from './SidebarInterface';
 
-import { ActionButton } from "@components/common";
-import { Icon } from "@iconify/react";
-import SidebarItem from "@lib/Layout/Sidebar/SidebarItem";
-import {
-  sidebarGroupId,
-  sidebarGroups,
-  sidebarMenus,
-  sidebarMenuSelected,
-  sidebarIsOpen,
-} from "@lib/stores";
-import { useTypedSelector } from "redux/reducers/reducers";
+import { ActionButton } from '@components/common';
+import { Icon } from '@iconify/react';
+import SidebarItem from '@lib/Layout/Sidebar/SidebarItem';
+import { sidebarGroupId, sidebarGroups, sidebarMenus, sidebarMenuSelected, sidebarIsOpen } from '@lib/stores';
+import { useTypedSelector } from 'redux/reducers/reducers';
 
 // import { UriPrefix } from '@lib/api/constants';
 
@@ -34,14 +30,12 @@ export const drawerWidthClosed = 64;
 
 function useSidebarInfo() {
   const isSidebarOpen = useAtomValue(sidebarIsOpen);
-  const isTemporary = useMediaQuery("(max-width:599px)");
-  const isNarrowOnly = useMediaQuery("(max-width:960px) and (min-width:600px)");
+  const isTemporary = useMediaQuery('(max-width:599px)');
+  const isNarrowOnly = useMediaQuery('(max-width:960px) and (min-width:600px)');
   const temporarySideBarOpen = isSidebarOpen === true && isTemporary; // && isSidebarOpenUserSelected === true;
 
   // The large sidebar does not open in medium view (600-960px).
-  const isOpen =
-    (isSidebarOpen === true && !isNarrowOnly) ||
-    (isSidebarOpen === true && temporarySideBarOpen);
+  const isOpen = (isSidebarOpen === true && !isNarrowOnly) || (isSidebarOpen === true && temporarySideBarOpen);
 
   return {
     isCollapsed: !temporarySideBarOpen && !isNarrowOnly,
@@ -50,11 +44,7 @@ function useSidebarInfo() {
     canExpand: !isNarrowOnly,
     isTemporary,
     isUserOpened: isSidebarOpen, //isSidebarOpenUserSelected,
-    width: isOpen
-      ? `${drawerWidth}px`
-      : isTemporary
-        ? "0px"
-        : `${drawerWidthClosed}px`,
+    width: isOpen ? `${drawerWidth}px` : isTemporary ? '0px' : `${drawerWidthClosed}px`,
   };
 }
 
@@ -70,20 +60,16 @@ function SidebarToggleButton() {
   }
 
   return (
-    <Box textAlign={isOpen ? "right" : "center"}>
+    <Box textAlign={isOpen ? 'right' : 'center'}>
       <ActionButton
         iconButtonProps={{
-          size: "small",
+          size: 'small',
         }}
         onClick={() => {
           setOpen(!isOpen);
         }}
-        icon={
-          isOpen
-            ? "mdi:chevron-left-box-outline"
-            : "mdi:chevron-right-box-outline"
-        }
-        description={t("translation|Collapse Sidebar")}
+        icon={isOpen ? 'mdi:chevron-left-box-outline' : 'mdi:chevron-right-box-outline'}
+        description={t('translation|Collapse Sidebar')}
       />
     </Box>
   );
@@ -91,14 +77,14 @@ function SidebarToggleButton() {
 
 function DefaultLinkArea(props: { sidebarName: string; isOpen: boolean }) {
   const { sidebarName, isOpen } = props;
-  console.log("sidebarName", sidebarName);
+  console.log('sidebarName', sidebarName);
   // if (sidebarName === DefaultSidebars.HOME) {
   return (
     <Box
       display="flex"
       justifyContent="space-between"
       alignItems="center"
-      flexDirection={isOpen ? "row" : "column"}
+      flexDirection={isOpen ? 'row' : 'column'}
       p={1}
     >
       <Box>{/* <AddClusterButton /> */}</Box>
@@ -139,18 +125,12 @@ export default function Sidebar() {
 
   // const sidebar = useTypedSelector(state => state.sidebar);
   const sidebar = {
-    selected: { sidebar: "HOME", item: "settings" },
+    selected: { sidebar: 'HOME', item: 'settings' },
     entries: [],
     filters: [],
     isVisible: true,
   };
-  const {
-    isOpen,
-    isUserOpened,
-    isNarrow,
-    canExpand,
-    isTemporary: isTemporaryDrawer,
-  } = useSidebarInfo();
+  const { isOpen, isUserOpened, isNarrow, canExpand, isTemporary: isTemporaryDrawer } = useSidebarInfo();
   const isNarrowOnly = isNarrow && !canExpand;
   // const arePluginsLoaded = useTypedSelector(state => state.plugins.loaded);
   const namespaces = useTypedSelector((state) => state.filter.namespaces);
@@ -159,9 +139,7 @@ export default function Sidebar() {
     return menus
       .filter((f: any) => f.group === groupID)
       .map((m: any) => {
-        const murl = params
-          ? generatePath(m.url, { ...params } as { [x: string]: string | null })
-          : m.url;
+        const murl = params ? generatePath(m.url, { ...params } as { [x: string]: string | null }) : m.url;
         return {
           name: m.id,
           label: m.label,
@@ -182,8 +160,7 @@ export default function Sidebar() {
       });
   }, [groupID, menus, params]);
 
-  const search =
-    namespaces.size !== 0 ? `?namespace=${[...namespaces].join("+")}` : "";
+  const search = namespaces.size !== 0 ? `?namespace=${[...namespaces].join('+')}` : '';
   if (sidebar.selected.sidebar === null || !sidebar?.isVisible) {
     return null;
   }
@@ -200,12 +177,7 @@ export default function Sidebar() {
       onToggleOpen={() => {
         setOpen(!isOpen);
       }}
-      linkArea={
-        <DefaultLinkArea
-          sidebarName={sidebar.selected.sidebar || ""}
-          isOpen={isOpen}
-        />
-      }
+      linkArea={<DefaultLinkArea sidebarName={sidebar.selected.sidebar || ''} isOpen={isOpen} />}
     />
   );
 }
@@ -221,53 +193,53 @@ export function PureSidebar({
   search,
   linkArea,
 }: PureSidebarProps) {
-  const { t } = useTranslation(["glossary"]);
+  const { t } = useTranslation(['glossary']);
   const [getSidebarGroup, setSidebarGroup] = useAtom(sidebarGroupId);
   const groups = useAtomValue(sidebarGroups);
-  const temporarySideBarOpen =
-    open === true && isTemporaryDrawer && openUserSelected === true;
+  const temporarySideBarOpen = open === true && isTemporaryDrawer && openUserSelected === true;
 
   // The large sidebar does not open in medium view (600-960px).
-  const largeSideBarOpen =
-    (open === true && !isNarrowOnly) || (open === true && temporarySideBarOpen);
+  const largeSideBarOpen = (open === true && !isNarrowOnly) || (open === true && temporarySideBarOpen);
 
   /**
    * For closing the sidebar if temporaryDrawer on mobile.
    */
   const toggleDrawer = (event: React.KeyboardEvent | React.MouseEvent) => {
     if (
-      event.type === "keydown" &&
-      ((event as React.KeyboardEvent).key === "Tab" ||
-        (event as React.KeyboardEvent).key === "Shift")
+      event.type === 'keydown' &&
+      ((event as React.KeyboardEvent).key === 'Tab' || (event as React.KeyboardEvent).key === 'Shift')
     ) {
       return;
     }
     onToggleOpen();
   };
 
+  const topContent = (
+    <Box
+      sx={(theme) => {
+        return {
+          ...theme.mixins.toolbar,
+        };
+      }}
+    />
+  );
   const contents = (
     <>
-      <Box
-        sx={(theme) => {
-          return {
-            ...theme.mixins.toolbar,
-          };
-        }}
-      />
       <Grid
         sx={{
-          height: "100%",
+          height: '100%',
         }}
         container
         direction="column"
         justifyContent="space-between"
         wrap="nowrap"
       >
-        <Grid>
+        <Grid sx={{ padding: 1 }}>
           <List
+            aria-label="sidebar list"
             onClick={isTemporaryDrawer ? toggleDrawer : undefined}
             onKeyDown={isTemporaryDrawer ? toggleDrawer : undefined}
-            sx={{ paddingTop: 0 }}
+            sx={{ padding: 1 }}
           >
             {items.map((item) => (
               <SidebarItem
@@ -281,16 +253,13 @@ export function PureSidebar({
           </List>
         </Grid>
         <Grid>
-          <Box sx={{ display: "flex", justifyContent: "center" }}>
+          <Box sx={{ display: 'flex', justifyContent: 'center' }}>
             <ToggleButtonGroup
-              orientation={open ? "horizontal" : "vertical"}
+              orientation={open ? 'horizontal' : 'vertical'}
               color="primary"
               value={getSidebarGroup}
               exclusive
-              onChange={(
-                event: React.MouseEvent<HTMLElement>,
-                newAlignment: string,
-              ) => {
+              onChange={(event: React.MouseEvent<HTMLElement>, newAlignment: string) => {
                 setSidebarGroup(newAlignment);
               }}
               sx={(theme) => ({ background: theme.palette.sidebarGroupBg })}
@@ -299,7 +268,7 @@ export function PureSidebar({
               {groups.map((g) => (
                 <ToggleButton key={g.id} value={g.id}>
                   <Tooltip title={t(g.label)}>
-                    <Icon icon={g.icon} width={"2em"} height={"2em"} />
+                    <Icon icon={g.icon} width={'2em'} height={'2em'} />
                   </Tooltip>
                 </ToggleButton>
               ))}
@@ -309,22 +278,19 @@ export function PureSidebar({
             textAlign="center"
             p={0}
             sx={(theme) => ({
-              "&, & *, & svg": {
+              '&, & *, & svg': {
                 color: theme.palette.sidebarLink.color,
               },
-              "& .MuiButton-root": {
+              '& .MuiButton-root': {
                 color: theme.palette.sidebarButtonInLinkArea.color,
-                "&:hover": {
-                  background:
-                    theme.palette.sidebarButtonInLinkArea.hover.background,
+                '&:hover': {
+                  background: theme.palette.sidebarButtonInLinkArea.hover.background,
                 },
               },
-              "& .MuiButton-containedPrimary": {
-                background:
-                  theme.palette.sidebarButtonInLinkArea.primary.background,
-                "&:hover": {
-                  background:
-                    theme.palette.sidebarButtonInLinkArea.hover.background,
+              '& .MuiButton-containedPrimary': {
+                background: theme.palette.sidebarButtonInLinkArea.primary.background,
+                '&:hover': {
+                  background: theme.palette.sidebarButtonInLinkArea.hover.background,
                 },
               },
             })}
@@ -336,6 +302,21 @@ export function PureSidebar({
     </>
   );
 
+  const selectContent = (
+    <>
+      <Box
+        sx={{
+          display: 'flex',
+          mt: 'calc(var(--template-frame-height, 0px) + 4px)',
+          p: 1.5,
+        }}
+      >
+        <SelectContent />
+      </Box>
+      <Divider />
+    </>
+  );
+
   const conditionalProps = isTemporaryDrawer
     ? {
         open: temporarySideBarOpen,
@@ -344,9 +325,9 @@ export function PureSidebar({
     : {};
 
   return (
-    <Box component="nav" aria-label={t("translation|Navigation")}>
+    <Box component="nav" aria-label={t('translation|Navigation')} className="sidebar-box">
       <Drawer
-        variant={isTemporaryDrawer ? "temporary" : "permanent"}
+        variant={isTemporaryDrawer ? 'temporary' : 'permanent'}
         sx={(theme) => {
           const drawer = {
             width: drawerWidth,
@@ -356,7 +337,7 @@ export function PureSidebar({
 
           const drawerOpen = {
             width: drawerWidth,
-            transition: theme.transitions.create("width", {
+            transition: theme.transitions.create('width', {
               easing: theme.transitions.easing.sharp,
               duration: theme.transitions.duration.enteringScreen,
             }),
@@ -364,44 +345,43 @@ export function PureSidebar({
           };
 
           const drawerClose = {
-            transition: theme.transitions.create("width", {
+            transition: theme.transitions.create('width', {
               easing: theme.transitions.easing.sharp,
               duration: theme.transitions.duration.leavingScreen,
             }),
-            overflowX: "hidden",
-            width: "56px",
-            [theme.breakpoints.down("xs")]: {
-              background: "initial",
+            overflowX: 'hidden',
+            width: '56px',
+            [theme.breakpoints.down('xs')]: {
+              background: 'initial',
             },
-            [theme.breakpoints.down("sm")]: {
+            [theme.breakpoints.down('sm')]: {
               width: theme.spacing(0),
             },
-            [theme.breakpoints.up("sm")]: {
-              width: "72px",
+            [theme.breakpoints.up('sm')]: {
+              width: '72px',
             },
             background: theme.palette.sidebarBg,
           };
 
-          if (
-            (isTemporaryDrawer && temporarySideBarOpen) ||
-            (!isTemporaryDrawer && largeSideBarOpen)
-          ) {
+          if ((isTemporaryDrawer && temporarySideBarOpen) || (!isTemporaryDrawer && largeSideBarOpen)) {
             return {
               ...drawer,
               ...drawerOpen,
-              "& .MuiPaper-root": { ...drawerOpen },
+              '& .MuiPaper-root': { ...drawerOpen },
             };
           } else {
             return {
               ...drawer,
               ...drawerClose,
-              "& .MuiPaper-root": { ...drawerClose },
+              '& .MuiPaper-root': { ...drawerClose },
             };
           }
         }}
         aria-label="drawer"
         {...conditionalProps}
       >
+        {topContent}
+        {selectContent}
         {contents}
       </Drawer>
     </Box>

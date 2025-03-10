@@ -73,7 +73,7 @@ export default function ListItemLink(props: ListItemLinkProps) {
 
   return (
     <StyledLi {...containerProps}>
-      <ListItem button component={renderLink} {...other}>
+      <ListItem component={renderLink} {...other} sx={{ paddingLeft: 1 }}>
         {listItemLinkContainer}
         {!iconOnly && <ListItemText primary={primary} secondary={subtitle} />}
       </ListItem>
