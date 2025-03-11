@@ -22,9 +22,9 @@ import AuthVisible from '@components/common/Resource/AuthVisible';
 import Terminal from '@components/common/Terminal';
 import { KubeContainerStatus } from '@lib/k8s/cluster';
 import Pod from '@lib/k8s/pod';
+import { Terminal as XTerminal } from '@xterm/xterm';
 import { DefaultHeaderAction } from 'redux/actionButtonsSlice';
 import { EventStatus, HeadlampEventType, useEventCallback } from 'redux/headlampEventSlice';
-import { Terminal as XTerminal } from 'xterm';
 
 const PaddedFormControlLabel = styled(FormControlLabel)(({ theme }) => ({
   margin: 0,
@@ -303,10 +303,10 @@ export interface VolumeDetailsProps {
 
 export function VolumeDetails(props: VolumeDetailsProps) {
   const { volumes } = props;
+  const { t } = useTranslation();
   if (!volumes) {
     return null;
   }
-  const { t } = useTranslation();
   return (
     <SectionBox title={t('translation|Volumes')}>
       <SimpleTable

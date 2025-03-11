@@ -1,4 +1,4 @@
-import { MutableRefObject, useCallback, useEffect, useRef, useState } from 'react';
+import React, { ReactNode, useEffect } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useTranslation } from 'react-i18next';
 
@@ -8,24 +8,24 @@ import DialogContent from '@mui/material/DialogContent';
 import Grid from '@mui/material/Grid';
 import InputBase from '@mui/material/InputBase';
 import Paper from '@mui/material/Paper';
-import { Theme } from '@mui/material/styles';
 
+// import { Theme } from '@mui/material/styles';
 import { uniqueId } from 'lodash';
 
 import ActionButton from '@components/common/ActionButton';
 import { Dialog, DialogProps } from '@components/common/Dialog';
-import { ITerminalOptions, Terminal as XTerminal } from 'xterm';
-import { FitAddon } from 'xterm-addon-fit';
-import { ISearchOptions, SearchAddon } from 'xterm-addon-search';
+import { FitAddon } from '@xterm/addon-fit';
+import { ISearchOptions, SearchAddon } from '@xterm/addon-search';
+import { Terminal as XTerminal } from '@xterm/xterm';
 
 export interface LogViewerProps extends DialogProps {
   logs: string[];
   title?: string;
   downloadName?: string;
   onClose: () => void;
-  topActions?: JSX.Element[];
+  topActions?: ReactNode[];
   open: boolean;
-  xtermRef?: MutableRefObject<XTerminal | null>;
+  xtermRef?: React.MutableRefObject<XTerminal | null>;
   /**
    * @description This is a callback function that is called when the user clicks on the reconnect button.
    * @returns void
@@ -50,22 +50,15 @@ export function LogViewer(props: LogViewerProps) {
     ...other
   } = props;
   const { t } = useTranslation();
-  const xtermRef = useRef<XTerminal | null>(null);
-  const fitAddonRef = useRef<any>(null);
-  const searchAddonRef = useRef<any>(null);
-  const [terminalContainerRef, setTerminalContainerRef] = useState<HTMLElement | null>(null);
-  const [showSearch, setShowSearch] = useState(false);
+  const xtermRef = React.useRef<XTerminal | null>(null);
+  const fitAddonRef = React.useRef<any>(null);
+  const searchAddonRef = React.useRef<any>(null);
+  const [terminalContainerRef, setTerminalContainerRef] = React.useState<HTMLElement | null>(null);
+  const [showSearch, setShowSearch] = React.useState(false);
 
   useHotkeys('ctrl+shift+f', () => {
     setShowSearch(true);
   });
-
-  const XterminalReadonlyConfig: ITerminalOptions = {
-    cursorStyle: 'bar',
-    scrollback: 10000,
-    rows: 30, // initial rows before fit
-    lineHeight: 1.21,
-  };
 
   function downloadLog() {
     // Cuts off the last 5 digits of the timestamp to remove the milliseconds
@@ -80,7 +73,7 @@ export function LogViewer(props: LogViewerProps) {
     element.click();
   }
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (!terminalContainerRef || !!xtermRef.current) {
       return;
     }
@@ -88,9 +81,15 @@ export function LogViewer(props: LogViewerProps) {
     fitAddonRef.current = new FitAddon();
     searchAddonRef.current = new SearchAddon();
 
-    xtermRef.current = new XTerminal(XterminalReadonlyConfig);
+    xtermRef.current = new XTerminal({
+      cursorStyle: 'bar',
+      scrollback: 10000,
+      rows: 30, // initial rows before fit
+      lineHeight: 1.21,
+      allowProposedApi: true,
+    });
 
-    if (!!outXtermRef) {
+    if (outXtermRef) {
       outXtermRef.current = xtermRef.current;
     }
 
@@ -116,24 +115,15 @@ export function LogViewer(props: LogViewerProps) {
       searchAddonRef.current?.dispose();
       xtermRef.current = null;
     };
-  }, [
-    terminalContainerRef,
-    xtermRef.current,
-    fitAddonRef,
-    outXtermRef,
-    enableCopyPasteInXterm,
-    XterminalReadonlyConfig,
-    getJointLogs,
-    searchAddonRef,
-  ]);
+  }, [terminalContainerRef, xtermRef.current]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (!xtermRef.current) {
       return;
     }
 
     // We're delegating to external xterm ref.
-    if (!!outXtermRef) {
+    if (outXtermRef) {
       return;
     }
 
@@ -148,7 +138,17 @@ export function LogViewer(props: LogViewerProps) {
   }
 
   return (
-    <Dialog title={title} withFullScreen onClose={onClose} {...other}>
+    <Dialog
+      title={title}
+      onFullScreenToggled={() => {
+        setTimeout(() => {
+          fitAddonRef.current!.fit();
+        }, 1);
+      }}
+      withFullScreen
+      onClose={onClose}
+      {...other}
+    >
       <DialogContent
         sx={(theme) => ({
           height: '80%',
@@ -226,7 +226,7 @@ export function LogViewer(props: LogViewerProps) {
 }
 
 // clears logs for pod
-function clearPodLogs(xtermRef: MutableRefObject<XTerminal | null>) {
+function clearPodLogs(xtermRef: React.MutableRefObject<XTerminal | null>) {
   xtermRef.current?.clear();
   // keeping this comment if logs dont print after clear
   // xtermRef.current?.write(getJointLogs());
@@ -255,14 +255,16 @@ interface SearchPopoverProps {
 
 export function SearchPopover(props: SearchPopoverProps) {
   const { searchAddonRef, open, onClose } = props;
-  const [searchResult, setSearchResult] = useState<{ resultIndex: number; resultCount: number } | undefined>(undefined);
-  const [searchText, setSearchText] = useState<string>('');
-  const [caseSensitiveChecked, setCaseSensitiveChecked] = useState<boolean>(false);
-  const [wholeWordMatchChecked, setWholeWordMatchChecked] = useState<boolean>(false);
-  const [regexChecked, setRegexChecked] = useState<boolean>(false);
+  const [searchResult, setSearchResult] = React.useState<{ resultIndex: number; resultCount: number } | undefined>(
+    undefined
+  );
+  const [searchText, setSearchText] = React.useState<string>('');
+  const [caseSensitiveChecked, setCaseSensitiveChecked] = React.useState<boolean>(false);
+  const [wholeWordMatchChecked, setWholeWordMatchChecked] = React.useState<boolean>(false);
+  const [regexChecked, setRegexChecked] = React.useState<boolean>(false);
   const { t } = useTranslation(['translation']);
-  const focusedRef = useCallback(
-    (node: any) => {
+  const focusedRef = React.useCallback(
+    (node: HTMLInputElement) => {
       if (open && !!node) {
         node.focus();
         node.select();
@@ -384,7 +386,7 @@ export function SearchPopover(props: SearchPopoverProps) {
     <></>
   ) : (
     <Paper
-      sx={(theme: Theme) => {
+      sx={(theme) => {
         //@todo: This style should match the theme being used.
         return {
           position: 'absolute',
@@ -396,7 +398,7 @@ export function SearchPopover(props: SearchPopoverProps) {
           display: 'flex',
           flexDirection: 'row',
           alignItems: 'center',
-          borderLeft: '2px solid #555',
+          borderLeft: `2px solid #555`,
           '& .SearchTextArea': {
             background: '#3c3c3c',
             display: 'flex',
@@ -409,7 +411,7 @@ export function SearchPopover(props: SearchPopoverProps) {
               fontSize: '0.85rem',
               border: '1px solid rgba(0,0,0,0)',
               '&.Mui-focused': {
-                border: '1px solid #007fd4',
+                border: `1px solid #007fd4`,
               },
               '&>input': {
                 padding: '2px 4px',

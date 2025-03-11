@@ -13,9 +13,9 @@ import { isEmpty } from 'lodash';
 
 import { Dialog } from '@components/common/Dialog';
 import Pod from '@lib/k8s/pod';
-import { Terminal as XTerminal } from 'xterm';
-import { FitAddon } from 'xterm-addon-fit';
-import 'xterm/css/xterm.css';
+import { FitAddon } from '@xterm/addon-fit';
+import { Terminal as XTerminal } from '@xterm/xterm';
+import '@xterm/xterm/css/xterm.css';
 
 const decoder = new TextDecoder('utf-8');
 const encoder = new TextEncoder();
@@ -151,7 +151,7 @@ export default function Terminal(props: TerminalProps) {
     }
 
     if (isSuccessfulExitError(channel, text)) {
-      if (!!onClose) {
+      if (onClose) {
         onClose();
       }
 
@@ -184,7 +184,7 @@ export default function Terminal(props: TerminalProps) {
     if (!isAttach && shells.available.length > 0) {
       setShells((currentShell) => ({
         ...currentShell,
-        currentIdx: (currentShell.currentIdx + 1),
+        currentIdx: currentShell.currentIdx + 1,
         // currentIdx: (currentShell.currentIdx + 1) % currentShell.available.length,
       }));
     }
@@ -341,7 +341,9 @@ export default function Terminal(props: TerminalProps) {
         if (isEmpty(error.metadata) && error.status === 'Success') {
           return true;
         }
-      } catch {}
+      } catch {
+        console.debug('Could not parse error message:', text);
+      }
     }
     return false;
   }
@@ -354,7 +356,9 @@ export default function Terminal(props: TerminalProps) {
         if (error.code === 500 && error.status === 'Failure' && error.reason === 'InternalError') {
           return true;
         }
-      } catch {}
+      } catch {
+        console.debug('Could not parse error message:', text);
+      }
     }
     // Windows container Error
     if (channel === 1) {
