@@ -1,28 +1,15 @@
-import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 
-import { VisibilityOff, Visibility } from '@mui/icons-material';
-import {
-  Box,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  OutlinedInput,
-  Select,
-  TextField,
-  ToggleButton,
-  ToggleButtonGroup,
-  Checkbox,
-  FormControlLabel,
-  IconButton,
-  InputAdornment,
-  FormHelperText,
-} from '@mui/material';
+import { Box, ToggleButton, ToggleButtonGroup } from '@mui/material';
 
 import isFunction from 'lodash/isFunction';
-import map from 'lodash/map';
 
-import '../../common.scss';
+import CheckboxLabel from '@components/molecules/KaaS/Form/CheckboxLabel';
+import PasswordField from '@components/molecules/KaaS/Form/PasswordField';
+import SelectField from '@components/molecules/KaaS/Form/SelectField';
+import TextField from '@components/molecules/KaaS/Form/TextField';
+
+// import '../../common.scss';
 
 interface SettingsFormProps {
   values?: SettingsFormValue;
@@ -58,9 +45,6 @@ const SettingSubForm: React.FC<SettingsFormProps> = ({ values, handleSubmit }) =
   // provider preset
   const providerPresets: string[] = ['cocktail-preset'];
 
-  // user credential password
-  const [isPasswordShow, setIsPasswordShow] = useState(false);
-
   return (
     <Box sx={{ display: 'flex', gap: '25px' }}>
       <Box sx={{ flex: 1 }}>
@@ -70,28 +54,14 @@ const SettingSubForm: React.FC<SettingsFormProps> = ({ values, handleSubmit }) =
             name="providerPreset"
             control={control}
             render={({ field: { value, onChange } }) => (
-              <FormControl fullWidth>
-                <InputLabel id="providerPreset" variant="outlined" required>
-                  Provider Preset
-                </InputLabel>
-                <Select
-                  variant="outlined"
-                  labelId="providerPreset"
-                  value={value}
-                  onChange={onChange}
-                  label="Provider Preset"
-                  required
-                >
-                  {map(providerPresets, (providerPreset) => (
-                    <MenuItem value={providerPreset} key={providerPreset}>
-                      {providerPreset}
-                    </MenuItem>
-                  ))}
-                </Select>
-                <FormHelperText>
-                  Using provider presets will disable most of the other provider-related fields.
-                </FormHelperText>
-              </FormControl>
+              <SelectField
+                required
+                label="Provider Preset"
+                value={value}
+                onChange={onChange}
+                items={providerPresets}
+                helperText="Using provider presets will disable most of the other provider-related fields."
+              />
             )}
           />
         </Box>
@@ -100,7 +70,7 @@ const SettingSubForm: React.FC<SettingsFormProps> = ({ values, handleSubmit }) =
             name="domain"
             control={control}
             render={({ field: { value, onChange } }) => (
-              <TextField label="Domain" variant="outlined" required fullWidth value={value} onChange={onChange} />
+              <TextField label="Domain" variant="outlined" required value={value} onChange={onChange} />
             )}
           />
         </Box>
@@ -127,7 +97,7 @@ const SettingSubForm: React.FC<SettingsFormProps> = ({ values, handleSubmit }) =
             name="userName"
             control={control}
             render={({ field: { value, onChange } }) => (
-              <TextField label="Username" variant="outlined" required fullWidth value={value} onChange={onChange} />
+              <TextField label="Username" variant="outlined" required value={value} onChange={onChange} />
             )}
           />
         </Box>
@@ -136,32 +106,7 @@ const SettingSubForm: React.FC<SettingsFormProps> = ({ values, handleSubmit }) =
             name="password"
             control={control}
             render={({ field: { value, onChange } }) => (
-              <FormControl variant="outlined">
-                <InputLabel htmlFor="password" required>
-                  Password
-                </InputLabel>
-                <OutlinedInput
-                  id="password"
-                  type={isPasswordShow ? 'text' : 'password'}
-                  required
-                  endAdornment={
-                    <InputAdornment position="end">
-                      <IconButton
-                        onClick={(e) => {
-                          e.preventDefault();
-                          setIsPasswordShow((prev) => !prev);
-                        }}
-                        edge="end"
-                      >
-                        {isPasswordShow ? <VisibilityOff /> : <Visibility />}
-                      </IconButton>
-                    </InputAdornment>
-                  }
-                  label="Password"
-                  value={value}
-                  onChange={onChange}
-                />
-              </FormControl>
+              <PasswordField label="Password" required value={value} onChange={onChange} />
             )}
           />
         </Box>
@@ -173,19 +118,14 @@ const SettingSubForm: React.FC<SettingsFormProps> = ({ values, handleSubmit }) =
             name="securityGroup"
             control={control}
             render={({ field: { value, onChange } }) => (
-              <FormControl fullWidth disabled>
-                <InputLabel id="providerPreset" variant="outlined">
-                  No Security Groups Available
-                </InputLabel>
-                <Select
-                  variant="outlined"
-                  labelId="providerPreset"
-                  value={value}
-                  onChange={onChange}
-                  label="No Security Groups Available"
-                ></Select>
-                <FormHelperText>Please enter your credentials first.</FormHelperText>
-              </FormControl>
+              <SelectField
+                disabled
+                label="No Security Groups Available"
+                helperText="Please enter your credentials first."
+                value={value}
+                onChange={onChange}
+                items={[]}
+              />
             )}
           />
         </Box>
@@ -194,19 +134,14 @@ const SettingSubForm: React.FC<SettingsFormProps> = ({ values, handleSubmit }) =
             name="network"
             control={control}
             render={({ field: { value, onChange } }) => (
-              <FormControl fullWidth disabled>
-                <InputLabel id="network" variant="outlined">
-                  No Networks Available
-                </InputLabel>
-                <Select
-                  variant="outlined"
-                  labelId="network"
-                  value={value}
-                  onChange={onChange}
-                  label="No Networks Available"
-                ></Select>
-                <FormHelperText>Please enter your credentials first.</FormHelperText>
-              </FormControl>
+              <SelectField
+                disabled
+                label="No Networks Available"
+                helperText="Please enter your credentials first."
+                value={value}
+                onChange={onChange}
+                items={[]}
+              />
             )}
           />
         </Box>
@@ -215,48 +150,32 @@ const SettingSubForm: React.FC<SettingsFormProps> = ({ values, handleSubmit }) =
             name="subnetId"
             control={control}
             render={({ field: { value, onChange } }) => (
-              <FormControl fullWidth disabled>
-                <InputLabel htmlFor="subnetId" variant="outlined">
-                  No IPv4 Subnet IDs Available
-                </InputLabel>
-                <Select
-                  variant="outlined"
-                  id="subnetId"
-                  value={value}
-                  onChange={onChange}
-                  label="No IPv4 Subnet IDs Available"
-                ></Select>
-                <FormHelperText>Please enter your credentials and network first.</FormHelperText>
-              </FormControl>
+              <SelectField
+                disabled
+                label="No IPv4 Subnet IDs Available"
+                helperText="Please enter your credentials and network first."
+                value={value}
+                onChange={onChange}
+                items={[]}
+              />
             )}
           />
         </Box>
         <Box sx={{ marginBottom: '10px' }}>
-          <FormControlLabel
-            control={<Checkbox name="enableIngressHostname" />}
-            label="Enable Ingress Hostname"
-            key="enableIngressHostname"
-          />
+          <CheckboxLabel label="Enable Ingress Hostname" />
         </Box>
         <Box sx={{ marginBottom: '10px' }}>
           <Controller
             name="userName"
             control={control}
             render={({ field: { value, onChange } }) => (
-              <FormControl fullWidth disabled>
-                <TextField
-                  label="Ingress Hostname Suffix"
-                  variant="outlined"
-                  fullWidth
-                  value={value}
-                  onChange={onChange}
-                  disabled
-                />
-                <FormHelperText>
-                  Set a specific suffix for the hostnames used for the PROXY protocol workaround that is enabled by
-                  EnableIngressHostname. The suffix is set to nip.io by default.
-                </FormHelperText>
-              </FormControl>
+              <TextField
+                disabled
+                label="Ingress Hostname Suffix"
+                helperText="Set a specific suffix for the hostnames used for the PROXY protocol workaround that is enabled by EnableIngressHostname. The suffix is set to nip.io by default."
+                value={value}
+                onChange={onChange}
+              />
             )}
           />
         </Box>

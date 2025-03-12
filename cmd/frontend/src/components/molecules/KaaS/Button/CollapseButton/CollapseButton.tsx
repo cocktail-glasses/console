@@ -16,14 +16,14 @@ export interface CollapseButtonProps {
 const CollapseButton = ({ label, isCollapse, onChange }: CollapseButtonProps) => {
   return (
     <Box className={style.collapseButton} onClick={onChange}>
-      <hr className={style.line} />
+      <Box component="hr" className={style.line} />
       <Box className={style.labelContainer}>
         <Typography className={style.label} variant="subtitle1">
           {label}
         </Typography>
         <ExpandMore className={clsx({ [style.iconArrowUp]: isCollapse })} />
       </Box>
-      <hr className={style.line} />
+      <Box component="hr" className={style.line} />
     </Box>
   );
 };

@@ -5,10 +5,10 @@ import { Paper } from '@mui/material';
 
 import isUndefined from 'lodash/isUndefined';
 
+import commonStyle from './Common.module.scss';
 import DeleteClusterDialog, { DeleteClusterForm } from './DeleteClusterDialog';
 import style from './List.module.scss';
 import TenantControlPlaneTable from './TenantControlPlaneTable';
-import './common.scss';
 
 import AddButton from '@components/molecules/KaaS/Button/AddButton/AddButton';
 import TableHeader from '@components/organisms/KaaS/TableHeader/TableHeader';
@@ -53,19 +53,19 @@ export default function KaaSClusterList() {
   }, []);
 
   return (
-    <Paper className={clsx('main-container', style.mainContainer)}>
+    <Paper className={clsx(commonStyle.mainContainer, style.mainContainer)}>
       <h2>KaaS 클러스터 관리</h2>
-      <ListTable tenantControlPlanes={tenantControlPlanes} isLoading={isLoading} />
+      <ListContent tenantControlPlanes={tenantControlPlanes} isLoading={isLoading} />
     </Paper>
   );
 }
 
-interface ListTableProp {
+interface ListContentProp {
   tenantControlPlanes?: IoClastixKamajiV1alpha1TenantControlPlaneList;
   isLoading?: boolean;
 }
 
-const ListTable = ({ tenantControlPlanes, isLoading }: ListTableProp) => {
+const ListContent = ({ tenantControlPlanes, isLoading }: ListContentProp) => {
   const [isOpenDialog, setIsOpenDialog] = useState(false);
   const [cluster, setCluster] = useState<IoClastixKamajiV1alpha1TenantControlPlane>();
 

@@ -20,7 +20,7 @@ export interface SelectItem {
 }
 
 interface CheckSelectFieldProps {
-  isRequired?: boolean;
+  required?: boolean;
   label: string;
   value?: string[];
   onChange?: (event: SelectChangeEvent<string[]>, child: ReactNode) => void;
@@ -33,7 +33,7 @@ interface CheckSelectFieldProps {
 const defaultDisplayFn = (selected: string[]) => selected.join(', ');
 
 const CheckSelectField = ({
-  isRequired = false,
+  required = false,
   label,
   value = [],
   onChange,
@@ -54,7 +54,7 @@ const CheckSelectField = ({
   };
 
   return (
-    <FormControl required={isRequired} fullWidth error={error}>
+    <FormControl required={required} fullWidth error={error}>
       <InputLabel variant="outlined">{label}</InputLabel>
       <Select
         aria-label="check select"

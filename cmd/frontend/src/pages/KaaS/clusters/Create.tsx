@@ -5,8 +5,8 @@ import { useNavigate } from 'react-router';
 import { ArrowBack, ArrowForward } from '@mui/icons-material';
 import { Box, Button, Paper } from '@mui/material';
 
+import commonStyle from './Common.module.scss';
 import style from './Create.module.scss';
-import './common.scss';
 import ApplicationsSubForm from './component/Forms/ApplicationsSubForm';
 import ClusterSubForm, { ClusterFormValue } from './component/Forms/ClusterSubForm';
 import SettingSubForm, { SettingsFormValue } from './component/Forms/SettingsSubForm';
@@ -83,7 +83,7 @@ export default function Create() {
   const navigate = useNavigate();
 
   return (
-    <Paper className={clsx(style.mainContainer, style.mainForm, 'main-container')}>
+    <Paper className={clsx(style.mainContainer, style.mainForm, commonStyle.mainContainer)}>
       <h2>Create Cluster</h2>
 
       <ProgressStepperContent stepDatas={stepDatas} activeStepIndex={activeStepIndex} />
@@ -96,7 +96,7 @@ export default function Create() {
           marginTop: '30px',
         }}
       >
-        <CancelButton onClick={() => navigate('/kaas/clusters')} />
+        <CancelButton onClick={() => navigate('/kaas/clusters')} variant={'contained'} />
         <Box sx={{ display: 'flex', gap: '10px' }}>
           <Button
             variant="outlined"

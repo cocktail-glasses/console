@@ -1,16 +1,13 @@
 import React, { useState } from 'react';
 
-import { SmartToyOutlined, Person3Outlined, DeleteOutline } from '@mui/icons-material';
+import { SmartToyOutlined, Person3Outlined } from '@mui/icons-material';
 import {
   Box,
   FormControl,
   FormControlLabel,
   FormLabel,
-  IconButton,
-  MenuItem,
   Radio,
   RadioGroup,
-  Select,
   Stack,
   TableSortLabel,
   TextField,
@@ -19,12 +16,14 @@ import {
 
 import eq from 'lodash/eq';
 import head from 'lodash/head';
-import map from 'lodash/map';
 
+import commonStyle from '../../../Common.module.scss';
 import style from './RbacTabContent.module.scss';
 
 import AddButton from '@components/molecules/KaaS/Button/AddButton/AddButton';
+import DeleteIconButton from '@components/molecules/KaaS/Button/DeleteIconButton/DeleteIconButton';
 import Dialog from '@components/molecules/KaaS/Dialog/Dialog';
+import SelectField from '@components/molecules/KaaS/Form/SelectField';
 import Table from '@components/molecules/KaaS/Table/Table';
 // import ClusterRoleBinding from '@lib/k8s/clusterRoleBinding';
 // import RoleBinding, { KubeRoleBinding } from '@lib/k8s/roleBinding';
@@ -145,22 +144,20 @@ const RbacTabContent = () => {
   return (
     <Stack className={style.rbacContent}>
       <Box className={style.menuContainer}>
-        <FormControl className={style.rbacSelector}>
-          <Select variant="outlined" size="small" value={rbacSelect} onChange={(e) => setRbacSelect(e.target.value)}>
-            {map(rbacTypes, (rbacType) => (
-              <MenuItem value={rbacType.value} key={rbacType.value}>
-                {rbacType.label}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+        <SelectField
+          className={style.rbacSelector}
+          size="small"
+          value={rbacSelect}
+          onChange={(e) => setRbacSelect(e.target.value)}
+          items={rbacTypes}
+        />
 
         <Box className={style.rbacActionContainer}>
           {eq(rbacSelect, rbacTypes[0].value) && (
             <AddButton
               label={<strong>Add Service Account</strong>}
               size="large"
-              className="kaas-primary-color"
+              className={commonStyle.kaasPrimaryColor}
               textTransform="none"
               onClick={() => setIsOpen(true)}
               sx={{ height: '45px', color: 'white', fontSize: '16px' }}
@@ -169,7 +166,7 @@ const RbacTabContent = () => {
           <AddButton
             label={<strong>Add Binding</strong>}
             size="large"
-            className="kaas-primary-color"
+            className={commonStyle.kaasPrimaryColor}
             textTransform="none"
             sx={{ height: '45px', color: 'white', fontSize: '16px' }}
           />
@@ -222,11 +219,7 @@ const RbacUserContent: React.FC<RbacUserContentProps> = ({ rbacUserData }) => {
     columnHelper.accessor('namespace', { header: 'Namespace' }),
     columnHelper.display({
       id: 'action',
-      cell: () => (
-        <IconButton>
-          <DeleteOutline className={style.actionIcon} />
-        </IconButton>
-      ),
+      cell: () => <DeleteIconButton variant="outlined" className={style.actionIcon} />,
     }),
   ];
 
@@ -260,11 +253,7 @@ const RbacGroupContent: React.FC<RbacGroupContentProps> = ({ rbacGroupData }) =>
     columnHelper.accessor('namespace', { header: 'Namespace' }),
     columnHelper.display({
       id: 'action',
-      cell: () => (
-        <IconButton>
-          <DeleteOutline className={style.actionIcon} />
-        </IconButton>
-      ),
+      cell: () => <DeleteIconButton variant="outlined" className={style.actionIcon} />,
     }),
   ];
 

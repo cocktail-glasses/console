@@ -5,8 +5,8 @@ import map from 'lodash/map';
 
 import { FormValue } from '../../Create';
 import style from '../../Create.module.scss';
-import '../../common.scss';
 
+// import '../../common.scss';
 import DescriptionItem from '@components/atoms/KaaS/DescriptionItem/DescriptionItem';
 
 interface SummaryFormProps {

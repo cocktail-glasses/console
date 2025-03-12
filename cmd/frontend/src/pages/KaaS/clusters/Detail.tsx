@@ -19,8 +19,8 @@ import has from 'lodash/has';
 import isEmpty from 'lodash/isEmpty';
 import map from 'lodash/map';
 
+import commonStyle from './Common.module.scss';
 import style from './Detail.module.scss';
-import './common.scss';
 import AddonTabContent from './component/TabContents/AddonTabContent/AddonTabContent';
 import ApplicationsTabContent from './component/TabContents/ApplicationsTabContent/ApplicationsTabContent';
 import EventsTabContent from './component/TabContents/EventsTabContent/EventsTabContent';
@@ -327,7 +327,12 @@ const TenantClusterNodes = () => {
           <h2>Machine Deployments</h2>
         </Box>
         <Box>
-          <AddButton label="Add Machine Deployment" size="large" textTransform="none" className="kaas-primary-color" />
+          <AddButton
+            label="Add Machine Deployment"
+            size="large"
+            textTransform="none"
+            className={commonStyle.kaasPrimaryColor}
+          />
         </Box>
       </Box>
       <Table data={[]} columns={columns} emptyMessage="No machine deployments available." />

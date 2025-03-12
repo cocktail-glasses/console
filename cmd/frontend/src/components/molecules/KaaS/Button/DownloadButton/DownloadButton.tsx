@@ -1,9 +1,11 @@
+import { ReactNode } from 'react';
+
 import { VerticalAlignBottom } from '@mui/icons-material';
 
-import Button, { ButtonProps } from '@components/atoms/KaaS/Button/Button';
+import Button from '@components/atoms/KaaS/Button/Button';
 
-interface DownloadButtonProps extends ButtonProps {
-  label?: string;
+interface DownloadButtonProps extends React.ComponentPropsWithoutRef<typeof Button> {
+  label?: ReactNode;
 }
 
 const DownloadButton = ({ label, ...props }: DownloadButtonProps) => (

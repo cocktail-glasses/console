@@ -1,10 +1,12 @@
 import { useState } from 'react';
 
-import { Add, OpenInNew } from '@mui/icons-material';
-import { Box, Button, Link, Typography, Stack } from '@mui/material';
+import { OpenInNew } from '@mui/icons-material';
+import { Box, Link, Typography, Stack } from '@mui/material';
 
-import '../../common.scss';
+// import '../../common.scss';
 import AddApplicationDialog from '../AddApplicationSearchList/AddApplicationDialog';
+
+import AddButton from '@components/molecules/KaaS/Button/AddButton/AddButton';
 
 const ApplicationsSubForm = () => {
   const [isOpenDialog, setIsOpenDialog] = useState(false);
@@ -19,14 +21,12 @@ const ApplicationsSubForm = () => {
             <OpenInNew sx={{ fontSize: 15 }} />
           </Link>
         </p>
-        <Button
+        <AddButton
+          label="Add Application"
           variant="outlined"
-          startIcon={<Add />}
           onClick={() => setIsOpenDialog(true)}
           sx={{ minHeight: '42px', maxHeight: '42px', textTransform: 'none' }}
-        >
-          Add Application
-        </Button>
+        />
       </Box>
 
       <AddApplicationDialog isOpen={isOpenDialog} onClose={() => setIsOpenDialog(false)} />

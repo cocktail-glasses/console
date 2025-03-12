@@ -1,19 +1,11 @@
-import { FormControl, TextField as TextFieldBase, FormHelperText } from '@mui/material';
+import { TextField as TextFieldBase } from '@mui/material';
 
-interface TextFieldProps {
-  isRequired?: boolean;
-  label: string;
-  value?: string;
-  onChange?: (...e: any[]) => void;
-  error?: boolean;
-  errorMessage?: string;
+interface TextFieldProps extends React.ComponentPropsWithoutRef<typeof TextFieldBase> {
+  required?: boolean;
 }
 
-const TextField = ({ isRequired = false, label, value, onChange, error, errorMessage }: TextFieldProps) => (
-  <FormControl fullWidth required={isRequired} error={error}>
-    <TextFieldBase label={label} variant="outlined" value={value} onChange={onChange} required={isRequired} />
-    <FormHelperText>{errorMessage}</FormHelperText>
-  </FormControl>
+const TextField = ({ required = false, ...props }: TextFieldProps) => (
+  <TextFieldBase required={required} fullWidth variant="outlined" {...props} />
 );
 
 export default TextField;

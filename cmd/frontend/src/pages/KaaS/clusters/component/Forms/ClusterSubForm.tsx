@@ -3,17 +3,17 @@ import { Controller, useForm } from 'react-hook-form';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 
-import { Delete } from '@mui/icons-material';
-import { Box, FormGroup, IconButton } from '@mui/material';
+import { Box, FormGroup } from '@mui/material';
 
 import { head, isFunction, map } from 'lodash';
 
-import { createFormSchema } from '../../formValidation';
+import { createFormSchema } from '../../schemas';
 import style from './ClusterSubForm.module.scss';
 
 import AddButton from '@components/molecules/KaaS/Button/AddButton/AddButton';
+import DeleteIconButton from '@components/molecules/KaaS/Button/DeleteIconButton/DeleteIconButton';
 import CheckSelectField from '@components/molecules/KaaS/Form/CheckSelectField';
-import Checkbox from '@components/molecules/KaaS/Form/Checkbox';
+import CheckboxLabel from '@components/molecules/KaaS/Form/CheckboxLabel';
 import SelectField from '@components/molecules/KaaS/Form/SelectField';
 import TextField from '@components/molecules/KaaS/Form/TextField';
 import ImageToggleButtonGroup from '@components/organisms/KaaS/ImageToggleButtonGroup/ImageToggleButtonGroup';
@@ -134,12 +134,12 @@ const ClusterSubForm = ({ values, handleSubmit, handleError }: ClusterFormProps)
           control={control}
           render={({ field: { value, onChange }, fieldState: { error, invalid } }) => (
             <TextField
-              isRequired
+              required
               label="Name"
               value={value}
               onChange={onChange}
               error={invalid}
-              errorMessage={error?.message}
+              helperText={error?.message}
             />
           )}
         />
@@ -160,7 +160,7 @@ const ClusterSubForm = ({ values, handleSubmit, handleError }: ClusterFormProps)
             control={control}
             render={({ field: { value, onChange } }) => (
               <SelectField
-                isRequired
+                required
                 label="CNI Plugin Version"
                 value={value}
                 onChange={onChange}
@@ -189,14 +189,14 @@ const ClusterSubForm = ({ values, handleSubmit, handleError }: ClusterFormProps)
         <h2>Specification</h2>
         <Box sx={{ display: 'flex', gap: '10px', marginBottom: '30px' }}>
           <SelectField
-            isRequired
+            required
             label="Control Plane Version"
             items={controlPlaneVersions}
             defaultValue={head(controlPlaneVersions)}
           />
 
           <SelectField
-            isRequired
+            required
             label="Container Runtime"
             value={head(containerRuntimes)}
             items={containerRuntimes}
@@ -221,8 +221,8 @@ const ClusterSubForm = ({ values, handleSubmit, handleError }: ClusterFormProps)
                 key={feature.value}
                 name={feature.value}
                 control={control}
-                render={({ field: { value, onChange } }) => (
-                  <Checkbox label={feature.label} value={value} onChange={onChange} />
+                render={({ field: { value = false, onChange } }) => (
+                  <CheckboxLabel label={feature.label} checked={value} onChange={onChange} />
                 )}
               />
             ))}
@@ -234,9 +234,7 @@ const ClusterSubForm = ({ values, handleSubmit, handleError }: ClusterFormProps)
           <Box sx={{ display: 'flex', gap: '10px' }}>
             <TextField label="Key" />
             <TextField label="Value" />
-            <IconButton aria-label="delete" size="large" disabled>
-              <Delete />
-            </IconButton>
+            <DeleteIconButton size="large" disabled />
           </Box>
         </Box>
       </Box>

@@ -1,16 +1,18 @@
-import { Button as ButtonBase, ButtonProps as ButtonBaseProps } from '@mui/material';
+import { Button as ButtonBase } from '@mui/material';
 
 import style from './Buttom.module.scss';
 
 import clsx from 'clsx';
 
-export interface ButtonProps extends ButtonBaseProps {
-  className?: string;
+export interface ButtonProps extends React.ComponentPropsWithoutRef<typeof ButtonBase> {
   textTransform?: 'capitalize' | 'uppercase' | 'lowercase' | 'none';
 }
 
-const Button = ({ className, textTransform, ...props }: ButtonProps) => (
-  <ButtonBase className={clsx(style.buttonBase, className, style[`text-transform-${textTransform}`])} {...props} />
+const Button = ({ textTransform, ...props }: ButtonProps) => (
+  <ButtonBase
+    className={clsx(style.buttonBase, props.className, style[`text-transform-${textTransform}`])}
+    {...props}
+  />
 );
 
 export default Button;

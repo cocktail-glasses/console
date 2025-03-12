@@ -1,24 +1,14 @@
-import { MouseEvent } from 'react';
-
 import { Close } from '@mui/icons-material';
-import { Button } from '@mui/material';
 
-import { isFunction } from 'lodash';
+import Button from '@components/atoms/KaaS/Button/Button';
 
-interface CancelButtonProps {
-  onClick?: (e: MouseEvent<HTMLButtonElement, any>) => void;
+interface CancelButtonProps extends React.ComponentPropsWithoutRef<typeof Button> {
+  label?: string;
 }
 
-const CancelButton = ({ onClick, ...props }: CancelButtonProps) => (
-  <Button
-    variant="outlined"
-    color="secondary"
-    size="large"
-    startIcon={<Close />}
-    onClick={(e) => isFunction(onClick) && onClick(e)}
-    {...props}
-  >
-    Cancel
+const CancelButton = ({ label, ...props }: CancelButtonProps) => (
+  <Button variant="outlined" color="secondary" size="large" startIcon={<Close />} {...props}>
+    {label || 'Cancel'}
   </Button>
 );
 

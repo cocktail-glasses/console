@@ -8,9 +8,9 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 
 import { identity, toLower } from 'lodash';
 
-import { DotStatus } from '../../../components/atoms/KaaS/DotStatus';
 import { getDotStatus } from './utils';
 
+import { DotStatus } from '@components/atoms/KaaS/DotStatus';
 import DeleteIconButton from '@components/molecules/KaaS/Button/DeleteIconButton/DeleteIconButton';
 import Table from '@components/molecules/KaaS/Table/Table';
 import { IoClastixKamajiV1alpha1TenantControlPlane } from '@lib/kamaji';
@@ -89,10 +89,14 @@ const TenantControlPlaneTable = ({
       }),
       columnHelper.display({
         id: 'delete-cluster',
-        cell: (props) => <DeleteIconButton onClick={(e: Event) => onClickDelete(e, props.row.original)} />,
+        cell: (props) => (
+          <DeleteIconButton
+            onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => onClickDelete(e, props.row.original)}
+          />
+        ),
       }),
     ],
-    []
+    [columnHelper, onClickDelete]
   );
 
   return (

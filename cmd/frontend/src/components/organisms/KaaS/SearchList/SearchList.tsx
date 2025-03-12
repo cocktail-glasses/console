@@ -5,7 +5,7 @@ import { Box, Typography, Stack } from '@mui/material';
 import { curry, filter, isFunction } from 'lodash';
 import map from 'lodash/map';
 
-import Searchbar from '@components/molecules/KaaS/Input/Searchbar/Searchbar';
+import Searchbar from '@components/molecules/KaaS/Form/Searchbar';
 
 interface SearchListProps<TItem> {
   search?: string;
@@ -34,7 +34,10 @@ const SearchList = <TItem,>({
 
   return (
     <>
-      <Searchbar value={_search} onChange={handleChangeSearch} />
+      <Searchbar
+        value={_search}
+        onChange={(e) => isFunction(handleChangeSearch) && handleChangeSearch(e, e.target.value)}
+      />
 
       <Stack sx={{ maxHeight: '500px', overflowY: 'scroll', marginTop: '30px', gap: '10px', flex: '1' }}>
         {list.length > 0 ? (

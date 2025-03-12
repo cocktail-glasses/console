@@ -5,10 +5,10 @@ import { zodResolver } from '@hookform/resolvers/zod';
 
 import { Box, Checkbox, FormControlLabel, TextField, Typography } from '@mui/material';
 
-import Dialog from '../../../components/molecules/KaaS/Dialog/Dialog';
 import { getDeleteClusterSchema } from './schemas';
 
 import DeleteButton from '@components/molecules/KaaS/Button/DeleteButton/DeleteButton';
+import Dialog from '@components/molecules/KaaS/Dialog/Dialog';
 
 export interface DeleteClusterDialogProp {
   isOpen: boolean;

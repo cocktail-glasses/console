@@ -1,4 +1,4 @@
-import { ReactElement, useEffect } from 'react';
+import { ReactElement, useEffect, ReactNode } from 'react';
 
 import {
   Table as TableBase,
@@ -35,7 +35,7 @@ interface TableBaseProps<TData> {
   columns: ColumnDef<TData, any>[];
   filter?: boolean | FilterFn;
   searchValue?: string;
-  emptyMessage?: string | ReactElement;
+  emptyMessage?: ReactNode;
   onClickRow?: (row: Row<TData>) => void;
   isLoading?: boolean;
 }

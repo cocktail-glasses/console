@@ -1,3 +1,5 @@
+import { Box } from '@mui/material';
+
 import cond from 'lodash/cond';
 import constant from 'lodash/constant';
 import curry from 'lodash/curry';
@@ -24,10 +26,10 @@ const statusStyle = (status: DotStatusEnum) => {
   ])(status);
 };
 
-const DotStatus: React.FC<DotStatusProps> = ({ status = DotStatusEnum.DEFAULT }) => (
-  <div className={style.dotStatusContainer}>
-    <div className={clsx(style.dotStatus, statusStyle(status))} />
-  </div>
+const DotStatus = ({ status = DotStatusEnum.DEFAULT }: DotStatusProps) => (
+  <Box className={style.dotStatusContainer}>
+    <Box className={clsx(style.dotStatus, statusStyle(status))} />
+  </Box>
 );
 
 export default DotStatus;
