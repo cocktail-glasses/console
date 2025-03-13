@@ -69,7 +69,7 @@ const (
 	graphQLEndpoint                       = "/api/graphql"
 	helmChartRepoProxyEndpoint            = "/api/helm/charts/"
 	indexPageTemplateName                 = "index.html"
-	k8sProxyEndpoint                      = "/api/kubernetes/"
+	k8sProxyEndpoint                      = "/k8s/"
 	knativeProxyEndpoint                  = "/api/console/knative/"
 	devConsoleEndpoint                    = "/api/dev-console/"
 	localesEndpoint                       = "/locales/resource.json"

@@ -60,7 +60,7 @@ func (cs *CombinedSessionStore) AddSession(w http.ResponseWriter, r *http.Reques
 	}*/
 	gob.Register(user)
 	clientSession.sessionToken.Values["user"] = user
-	paths := []string{"/api", "/builder", "/monitoring-api", "/cluster-api", "/alarm-api", "/metric-api", "/backup-api", "/ws", "/terminal", "/apis/package", "/apm", "/sm,", "/v1alpha1"}
+	paths := []string{"/api", "/builder", "/monitoring-api", "/cluster-api", "/alarm-api", "/metric-api", "/backup-api", "/ws", "/terminal", "/apis/package", "/apm", "/sm,", "/v1alpha1", "/k8s"}
 	var errs []error
 	for _, path := range paths {
 		clientSession.sessionToken.Options.Path = path
