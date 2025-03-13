@@ -217,18 +217,9 @@ declare global {
  * This could be either '' meaning /, or something like '/headlamp'.
  */
 function getBaseUrl(): string {
-  let baseUrl = '';
-  // if (window?.headlampBaseUrl !== undefined) {
-  //   baseUrl = window.headlampBaseUrl;
-  // } else {
-  //   baseUrl = import.meta.env.PUBLIC_URL ? import.meta.env.PUBLIC_URL : "";
-  // }
-
-  if (baseUrl === './' || baseUrl === '.' || baseUrl === '/') {
-    baseUrl = '/k8s';
-  }
-  return baseUrl;
+  return '/k8s';
 }
+
 function getAppVersion() {
   return localStorage.getItem('app_version');
 }
