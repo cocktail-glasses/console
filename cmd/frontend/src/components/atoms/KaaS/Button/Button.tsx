@@ -8,11 +8,13 @@ export interface ButtonProps extends React.ComponentPropsWithoutRef<typeof Butto
   textTransform?: 'capitalize' | 'uppercase' | 'lowercase' | 'none';
 }
 
-const Button = ({ textTransform, ...props }: ButtonProps) => (
-  <ButtonBase
-    className={clsx(style.buttonBase, props.className, style[`text-transform-${textTransform}`])}
-    {...props}
-  />
-);
+const Button = ({ textTransform, ...props }: ButtonProps) => {
+  return (
+    <ButtonBase
+      {...props}
+      className={clsx(style.buttonBase, props.className, style[`text-transform-${textTransform}`])}
+    />
+  );
+};
 
 export default Button;

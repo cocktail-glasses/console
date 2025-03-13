@@ -1,6 +1,7 @@
 import { ReactElement } from 'react';
 
-import { Dialog as DialogBase, Divider, SxProps, Theme, useTheme } from '@mui/material';
+import { Dialog as DialogBase, Divider, SxProps, Theme } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 
 import style from './Dialog.module.scss';
 

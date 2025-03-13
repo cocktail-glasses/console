@@ -160,7 +160,6 @@ const RbacTabContent = () => {
               className={commonStyle.kaasPrimaryColor}
               textTransform="none"
               onClick={() => setIsOpen(true)}
-              sx={{ height: '45px', color: 'white', fontSize: '16px' }}
             />
           )}
           <AddButton
@@ -168,7 +167,6 @@ const RbacTabContent = () => {
             size="large"
             className={commonStyle.kaasPrimaryColor}
             textTransform="none"
-            sx={{ height: '45px', color: 'white', fontSize: '16px' }}
           />
         </Box>
       </Box>
