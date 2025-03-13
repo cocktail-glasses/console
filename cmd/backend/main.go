@@ -25,7 +25,7 @@ const (
 	k8sInClusterCA          = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
 	k8sInClusterBearerToken = "/var/run/secrets/kubernetes.io/serviceaccount/token"
 
-	apiServerURL                  = "http://192.168.88.225:31287"
+	apiServerURL                  = "http://api-server:8080"
 	monitoringServerURL           = "http://monitoring:9000"
 	clusterAPIServerURL           = "http://cluster-api:9083"
 	alarmAPIServerURL             = "http://cluster-api:9013"
