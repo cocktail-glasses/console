@@ -1,7 +1,13 @@
+import { initReactI18next } from 'react-i18next';
+
+import sharedConfig from './i18nextSharedConfig.mjs';
+
+// import enGlossary from './locales/en/glossary.json';
+// import enTranslation from './locales/en/translation.json';
+// import koGlossary from './locales/ko/glossary.json';
+// import koTranslation from './locales/ko/translation.json';
 import i18next from 'i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
-import { initReactI18next } from 'react-i18next';
-import sharedConfig from './i18nextSharedConfig.mjs';
 
 const en = {}; // To keep TS happy.
 
@@ -29,10 +35,10 @@ i18next
       callback: (errorValue: unknown, translations: null | (typeof en)[Namespace]) => void
     ) {
       import(`./locales/${language}/${namespace}.json?import=default`)
-        .then(resources => {
+        .then((resources) => {
           callback(null, resources.default);
         })
-        .catch(error => {
+        .catch((error) => {
           callback(error, null);
         });
     },
@@ -45,6 +51,10 @@ i18next
     fallbackLng: 'en',
     contextSeparator: sharedConfig.contextSeparator,
     supportedLngs: Object.keys(supportedLanguages),
+    // resources: {
+    //   en: { translation: enTranslation, glossary: enGlossary },
+    //   ko: { translation: koTranslation, glossary: koGlossary },
+    // },
     // nonExplicitSupportedLngs: true,
     interpolation: {
       escapeValue: false, // not needed for react as it escapes by default
