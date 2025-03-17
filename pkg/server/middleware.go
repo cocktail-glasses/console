@@ -38,7 +38,8 @@ func authMiddlewareWithUser(authenticator auth.Authenticator, csrfVerifier *csrf
 					w.WriteHeader(http.StatusUnauthorized)
 					return
 				}
-				//r.Header.Set("Authorization", fmt.Sprintf("Bearer %s", user.Token))
+				// k8sProxy에 Authorization 헤더 추가
+				r.Header.Set("Authorization", fmt.Sprintf("Bearer %s", user.Token))
 				//r.Header.Set("Content-Type", "application/json;charset=UTF-8")
 				r.Header.Set("user-id", fmt.Sprintf("%s", user.UserSeq))
 				r.Header.Set("user-role", fmt.Sprintf("%s", user.UserRole))
