@@ -1,60 +1,43 @@
 import React, { useEffect, useState, ReactElement } from 'react';
-import { useNavigate, useParams } from 'react-router';
+import { useParams } from 'react-router';
 
-import {
-  VerticalAlignBottom,
-  MoreVert,
-  Add,
-  Done,
-  Close,
-  SmartToyOutlined,
-  Person3Outlined,
-  OpenInNew,
-  DeleteOutline,
-  ArrowBackIosNew,
-} from '@mui/icons-material';
+import { Done, Close } from '@mui/icons-material';
 import {
   Box,
-  Button,
   FormControl,
-  IconButton,
   InputLabel,
-  Link,
   MenuItem,
   Paper,
   Select,
   Stack,
-  Switch,
-  Tab,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   TableSortLabel,
-  Tabs,
   Typography,
 } from '@mui/material';
 
-import eq from 'lodash/eq';
 import get from 'lodash/get';
 import has from 'lodash/has';
-import head from 'lodash/head';
 import isEmpty from 'lodash/isEmpty';
 import map from 'lodash/map';
 
+import commonStyle from './Common.module.scss';
 import style from './Detail.module.scss';
-import DescriptionItem, { Description } from './component/Description/DescriptionItem';
-import { DotStatus, DotStatusEnum } from './component/DotStatus';
-import ExpandSection from './component/ExpandSection/ExpandSection';
-import TableBase from './component/TableBase/TableBase';
+import AddonTabContent from './component/TabContents/AddonTabContent/AddonTabContent';
+import ApplicationsTabContent from './component/TabContents/ApplicationsTabContent/ApplicationsTabContent';
+import EventsTabContent from './component/TabContents/EventsTabContent/EventsTabContent';
+import RbacTabContent from './component/TabContents/RbacTabContent/RbacTabContent';
 import { getDotStatus } from './utils';
 
+import DescriptionItem, { Description } from '@components/atoms/KaaS/DescriptionItem/DescriptionItem';
+import { DotStatus, DotStatusEnum } from '@components/atoms/KaaS/DotStatus';
+import AddButton from '@components/molecules/KaaS/Button/AddButton/AddButton';
+import BackButton from '@components/molecules/KaaS/Button/BackButton/BackButton';
+import ContextMenuButton from '@components/molecules/KaaS/Button/ContextMenuButton/ContextMenuButton';
+import DownloadButton from '@components/molecules/KaaS/Button/DownloadButton/DownloadButton';
+import Table from '@components/molecules/KaaS/Table/Table';
+import ExpandSection from '@components/organisms/KaaS/ExpandSection/ExpandSection';
+import TabsContent from '@components/organisms/KaaS/TabsContent/TabsContent';
 import { IoClastixKamajiV1alpha1TenantControlPlane, KamajiClastixIoV1alpha1Api as KamajiAPI } from '@lib/kamaji';
-import NodeExporter from '@resources/addon_prometheus-node-exporter.svg';
 import { createColumnHelper } from '@tanstack/react-table';
-import clsx from 'clsx';
 
 export default function Detail() {
   const { managementNamespace, name } = useParams<{
@@ -74,28 +57,14 @@ export default function Detail() {
   }, [managementNamespace, name]);
 
   return (
-    <>
+    <Stack sx={{ paddingBottom: '40px' }}>
       <BackButton url="/kaas/clusters" />
       <TenantClusterInformation tenantControlPlane={tenantControlPlane} />
       <TenantClusterNodes />
       <TenantClusterResources />
-    </>
+    </Stack>
   );
 }
-
-interface BackButtonProps {
-  url: string;
-}
-
-const BackButton: React.FC<BackButtonProps> = ({ url }) => {
-  const navigate = useNavigate();
-  const handleClick = () => navigate(url);
-  return (
-    <Button onClick={handleClick} variant="outlined" className={style.backBtn} color="success">
-      <ArrowBackIosNew />
-    </Button>
-  );
-};
 
 interface TenantClusterInformationProps {
   tenantControlPlane?: IoClastixKamajiV1alpha1TenantControlPlane;
@@ -265,12 +234,13 @@ const TenantClusterInformation: React.FC<TenantClusterInformationProps> = ({ ten
           <h2>{get(tenantControlPlane, 'metadata.name', '')}</h2>
         </Box>
         <Box sx={{ display: 'flex', gap: '10px' }}>
-          <Button variant="contained" startIcon={<VerticalAlignBottom />}>
-            Get Kubeconfig
-          </Button>
-          <Button variant="outlined" className={style.actionBtn}>
-            <MoreVert sx={{ color: 'white' }} />
-          </Button>
+          <DownloadButton
+            label="Get Kubeconfig"
+            size="large"
+            textTransform="none"
+            sx={{ backgroundColor: '#00b2b2' }}
+          />
+          <ContextMenuButton />
         </Box>
       </Box>
       <Box
@@ -283,14 +253,14 @@ const TenantClusterInformation: React.FC<TenantClusterInformationProps> = ({ ten
         }}
       >
         <FormControl sx={{ width: '192px', height: '62px', marginRight: '30px' }}>
-          <InputLabel>Control Plane</InputLabel>
+          <InputLabel variant="outlined">Control Plane</InputLabel>
           <Select variant="outlined" value="1.29.4" label="Control Plane" size="small">
             <MenuItem value="1.29.4">1.29.4</MenuItem>
           </Select>
         </FormControl>
         <FormControl sx={{ width: '192px', height: '62px', marginRight: '30px' }}>
-          <InputLabel>CNI Plugin</InputLabel>
-          <Select variant="outlined" value="1.15.3" label="Control Plane" size="small">
+          <InputLabel variant="outlined">CNI Plugin</InputLabel>
+          <Select variant="outlined" value="1.15.3" label="CNI Plugin" size="small">
             <MenuItem value="1.15.3">1.15.3</MenuItem>
           </Select>
         </FormControl>
@@ -301,7 +271,7 @@ const TenantClusterInformation: React.FC<TenantClusterInformationProps> = ({ ten
       <ExpandSection
         label={<strong>ADDITIONAL CLUSTER INFORMATION</strong>}
         isCollapse={isCollapse}
-        onChangeCollapse={() => setIsCollapse((prev) => !prev)}
+        onChange={() => setIsCollapse((prev) => !prev)}
         data={map(additionalClusterInformation, (infomration) => (
           <Box key={infomration.title} sx={{ paddingBottom: '24px', flex: '1 1 33%', maxWidth: '33%' }}>
             <Typography variant="h6" sx={{ marginBottom: '14px' }}>
@@ -317,54 +287,58 @@ const TenantClusterInformation: React.FC<TenantClusterInformationProps> = ({ ten
   );
 };
 
-const TenantClusterNodes = () => (
-  <Paper className={style.mainContainer}>
-    <Box
-      className={style.title}
-      sx={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginLeft: '30px',
-      }}
-    >
-      <Box>
-        <h2>Machine Deployments</h2>
+interface TenantClusterNode {
+  name: string;
+  replicas: number;
+  kubeletVersion: string;
+  operatingSystem: string;
+  created: string;
+}
+
+const TenantClusterNodes = () => {
+  const columnHelper = createColumnHelper<TenantClusterNode>();
+
+  const columns = [
+    columnHelper.accessor('name', {
+      header: () => (
+        <TableSortLabel active={true} direction={'asc'}>
+          Name
+        </TableSortLabel>
+      ),
+    }),
+    columnHelper.accessor('replicas', { header: 'Replicas' }),
+    columnHelper.accessor('kubeletVersion', { header: 'Kubelet Version' }),
+    columnHelper.accessor('operatingSystem', { header: 'Operating System' }),
+    columnHelper.accessor('created', { header: 'Created' }),
+  ];
+
+  return (
+    <Paper className={style.mainContainer}>
+      <Box
+        className={style.title}
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginLeft: '30px',
+        }}
+      >
+        <Box>
+          <h2>Machine Deployments</h2>
+        </Box>
+        <Box>
+          <AddButton
+            label="Add Machine Deployment"
+            size="large"
+            textTransform="none"
+            className={commonStyle.kaasPrimaryColor}
+          />
+        </Box>
       </Box>
-      <Box>
-        <Button variant="contained" startIcon={<Add />}>
-          Add Machine Deployment
-        </Button>
-      </Box>
-    </Box>
-    <TableContainer className={style.table}>
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableCell>
-              <TableSortLabel active={true} direction={'asc'}>
-                Name
-              </TableSortLabel>
-            </TableCell>
-            <TableCell>
-              <Box>Replicas</Box>
-            </TableCell>
-            <TableCell>Kubelet Version</TableCell>
-            <TableCell>Operating System</TableCell>
-            <TableCell>Created</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          <TableRow className={style.row}>
-            <TableCell colSpan={6} align="center">
-              No machine deployments available.
-            </TableCell>
-          </TableRow>
-        </TableBody>
-      </Table>
-    </TableContainer>
-  </Paper>
-);
+      <Table data={[]} columns={columns} emptyMessage="No machine deployments available." />
+    </Paper>
+  );
+};
 
 const TenantClusterResources = () => {
   const tabDatas = [
@@ -373,301 +347,6 @@ const TenantClusterResources = () => {
     { label: 'Addons', content: <AddonTabContent /> },
     { label: 'Applications', content: <ApplicationsTabContent /> },
   ];
-  const [tabIndex, setTabIndex] = useState(0);
 
-  return (
-    <Box sx={{ marginTop: '20px' }}>
-      <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-        <Tabs value={tabIndex} onChange={(_, v) => setTabIndex(v)} aria-label="basic tabs example">
-          {map(tabDatas, (data) => (
-            <Tab key={data.label} label={data.label} sx={{ textTransform: 'none' }} />
-          ))}
-        </Tabs>
-      </Box>
-      {map(tabDatas, (data, i) => (
-        <Paper key={data.label} hidden={tabIndex !== i} className={style.tabContainer}>
-          {data.content}
-        </Paper>
-      ))}
-    </Box>
-  );
-};
-
-const EventsTabContent = () => (
-  <TableContainer className={clsx(style.table, style.paddingY30)} sx={{ marginTop: '0px !important' }}>
-    <Table>
-      <TableHead>
-        <TableRow>
-          <TableCell>
-            <TableSortLabel active={true} direction={'asc'}>
-              Message
-            </TableSortLabel>
-          </TableCell>
-          <TableCell>Resource ID</TableCell>
-          <TableCell>Type</TableCell>
-          <TableCell>Count</TableCell>
-          <TableCell>Occurred</TableCell>
-        </TableRow>
-      </TableHead>
-      <TableBody>
-        <TableRow className={style.row}>
-          <TableCell colSpan={5} align="center">
-            No events available.
-          </TableCell>
-        </TableRow>
-      </TableBody>
-    </Table>
-  </TableContainer>
-);
-
-const RbacTabContent = () => {
-  const rbacTypes = [
-    {
-      value: 'serviceAccount',
-      label: (
-        <>
-          <SmartToyOutlined />
-          Service Account
-        </>
-      ),
-    },
-    {
-      value: 'user',
-      label: (
-        <>
-          <Person3Outlined />
-          User
-        </>
-      ),
-    },
-    {
-      value: 'group',
-      label: (
-        <>
-          <SmartToyOutlined />
-          Group
-        </>
-      ),
-    },
-  ];
-  const [rbacSelect, setRbacSelect] = useState(head(rbacTypes)?.value);
-
-  const rbacUserData = [
-    {
-      scope: 'Cluster',
-      user: 'skyikho@acornsoft.io',
-      clusterRole: 'cluster-admin',
-    },
-    {
-      scope: 'Namespace',
-      user: 'yunwansu@acornsoft.io',
-      clusterRole: 'namespace-admin',
-      namespace: 'default',
-    },
-    {
-      scope: 'Namespace',
-      user: 'yunwansu@acornsoft.io',
-      clusterRole: 'namespace-editor',
-      namespace: 'default',
-    },
-  ];
-
-  return (
-    <Stack className={style.marginX30}>
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-        }}
-      >
-        <FormControl sx={{ width: '192px', height: '62px', marginRight: '30px' }}>
-          <Select variant="outlined" size="small" value={rbacSelect} onChange={(e) => setRbacSelect(e.target.value)}>
-            {map(rbacTypes, (rbacType) => (
-              <MenuItem
-                value={rbacType.value}
-                key={rbacType.value}
-                sx={{ display: 'flex', alignItems: 'center', gap: '10px' }}
-              >
-                {rbacType.label}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-        <Box sx={{ display: 'flex', gap: '20px' }}>
-          {eq(rbacSelect, rbacTypes[0].value) && (
-            <Button
-              variant="contained"
-              startIcon={<Add />}
-              sx={{
-                height: '45px',
-                color: 'white',
-                fontSize: '16px',
-                textTransform: 'none',
-              }}
-            >
-              <strong>Add Service Account</strong>
-            </Button>
-          )}
-          <Button
-            variant="contained"
-            startIcon={<Add />}
-            sx={{
-              height: '45px',
-              color: 'white',
-              fontSize: '16px',
-              textTransform: 'none',
-            }}
-          >
-            <strong>Add Binding</strong>
-          </Button>
-        </Box>
-      </Box>
-      <Box>
-        {eq(rbacSelect, rbacTypes[0].value) && <RbacServiceAccountContent />}
-        {eq(rbacSelect, rbacTypes[1].value) && <RbacUserContent rbacUserData={rbacUserData} />}
-        {eq(rbacSelect, rbacTypes[2].value) && <RbacGroupContent rbacGroupData={[]} />}
-      </Box>
-    </Stack>
-  );
-};
-
-const AddonTabContent = () => (
-  <Stack className={style.marginX30}>
-    <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-      <Button variant="outlined" startIcon={<Add />}>
-        Install Addon
-      </Button>
-    </Box>
-    <Box sx={{ display: 'flex' }}>
-      <AddonButton logoSrc={NodeExporter} />
-    </Box>
-  </Stack>
-);
-
-interface AddonButtonProps {
-  logoSrc: string;
-}
-
-const AddonButton: React.FC<AddonButtonProps> = ({ logoSrc }) => (
-  <Box className={style.addonBtnContainer}>
-    <Box className={style.addonLogoContainer}>
-      <img className={style.addonLogo} src={logoSrc} alt={logoSrc} />
-    </Box>
-    <Box className={style.addonActionContainer}>
-      <MoreVert />
-    </Box>
-  </Box>
-);
-
-const ApplicationsTabContent = () => (
-  <Stack className={style.marginX30}>
-    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-      <p style={{ flex: '1' }}>
-        Install third party Applications into a cluster,{' '}
-        <Link sx={{ display: 'inline-flex', alignItems: 'center' }}>
-          learn more about Applicaitons
-          <OpenInNew sx={{ fontSize: 15 }} />.
-        </Link>
-      </p>
-      <Box
-        sx={{
-          display: 'flex',
-          flex: 1,
-          gap: '10px',
-          justifyContent: 'flex-end',
-          alignItems: 'center',
-        }}
-      >
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Typography className={style.marginRight5}>Show System Applications</Typography>
-          <Switch className={style.iosSwitch} defaultChecked />
-        </Box>
-        <Button variant="outlined" startIcon={<Add />} size="large" sx={{ height: '50px' }}>
-          <Typography variant="caption">Add Application</Typography>
-        </Button>
-      </Box>
-    </Box>
-    <Box sx={{ marginTop: '20px', textAlign: 'center' }}>
-      <Typography variant="body2">No applications added.</Typography>
-    </Box>
-  </Stack>
-);
-
-const RbacServiceAccountContent = () => <Typography align="center">No service accounts available.</Typography>;
-
-interface RbacUser {
-  scope: string;
-  user: string;
-  clusterRole: string;
-  namespace?: string;
-}
-
-interface RbacUserContentProps {
-  rbacUserData: RbacUser[];
-}
-
-const RbacUserContent: React.FC<RbacUserContentProps> = ({ rbacUserData }) => {
-  const columnHelper = createColumnHelper<RbacUser>();
-
-  const rbacUserTableColumns = [
-    columnHelper.accessor('scope', {
-      header: () => (
-        <TableSortLabel active={true} direction={'asc'}>
-          Scope
-        </TableSortLabel>
-      ),
-    }),
-    columnHelper.accessor('user', { header: 'User' }),
-    columnHelper.accessor('clusterRole', { header: 'Cluster Role' }),
-    columnHelper.accessor('namespace', { header: 'Namespace' }),
-    columnHelper.display({
-      id: 'action',
-      cell: () => (
-        <IconButton>
-          <DeleteOutline className={style.actionIcon} />
-        </IconButton>
-      ),
-    }),
-  ];
-
-  return <TableBase data={rbacUserData} columns={rbacUserTableColumns} />;
-};
-
-interface RbacGroup {
-  scope: string;
-  group: string;
-  clusterRole: string;
-  namespace?: string;
-}
-
-interface RbacGroupContentProps {
-  rbacGroupData: RbacGroup[];
-}
-
-const RbacGroupContent: React.FC<RbacGroupContentProps> = ({ rbacGroupData }) => {
-  const columnHelper = createColumnHelper<RbacGroup>();
-
-  const rbacGroupTableColumns = [
-    columnHelper.accessor('scope', {
-      header: () => (
-        <TableSortLabel active={true} direction={'asc'}>
-          Scope
-        </TableSortLabel>
-      ),
-    }),
-    columnHelper.accessor('group', { header: 'Group' }),
-    columnHelper.accessor('clusterRole', { header: 'Cluster Role' }),
-    columnHelper.accessor('namespace', { header: 'Namespace' }),
-    columnHelper.display({
-      id: 'action',
-      cell: () => (
-        <IconButton>
-          <DeleteOutline className={style.actionIcon} />
-        </IconButton>
-      ),
-    }),
-  ];
-
-  return <TableBase data={rbacGroupData} columns={rbacGroupTableColumns} emptyMessage="No bindings available." />;
+  return <TabsContent tabDatas={tabDatas} />;
 };

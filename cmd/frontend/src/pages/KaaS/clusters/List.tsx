@@ -1,17 +1,17 @@
-import { useEffect, useState, Dispatch, SetStateAction, useRef } from 'react';
+import { useEffect, useState, useRef, ChangeEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { Add } from '@mui/icons-material';
-import { Box, Button, Paper } from '@mui/material';
+import { Paper } from '@mui/material';
 
 import isUndefined from 'lodash/isUndefined';
 
+import commonStyle from './Common.module.scss';
 import DeleteClusterDialog, { DeleteClusterForm } from './DeleteClusterDialog';
 import style from './List.module.scss';
 import TenantControlPlaneTable from './TenantControlPlaneTable';
-import './common.scss';
-import Searchbar from './component/Searchbar/Searchbar';
 
+import AddButton from '@components/molecules/KaaS/Button/AddButton/AddButton';
+import TableHeader from '@components/organisms/KaaS/TableHeader/TableHeader';
 import {
   KamajiClastixIoV1alpha1Api as KamajiAPI,
   IoClastixKamajiV1alpha1TenantControlPlaneList,
@@ -52,47 +52,23 @@ export default function KaaSClusterList() {
     };
   }, []);
 
-  const [search, setSearch] = useState('');
-
-  const navigate = useNavigate();
-  const handleCreateClick = () => navigate('/kaas/clusters/create');
-
   return (
-    <Paper className={clsx('main-container', style.mainContainer)}>
+    <Paper className={clsx(commonStyle.mainContainer, style.mainContainer)}>
       <h2>KaaS 클러스터 관리</h2>
-      <ListMenu search={search} handleSearch={setSearch} handleCreateClick={handleCreateClick} />
-      <ListTable tenantControlPlanes={tenantControlPlanes} search={search} isLoading={isLoading} />
+      <ListContent tenantControlPlanes={tenantControlPlanes} isLoading={isLoading} />
     </Paper>
   );
 }
 
-interface ListMenuProp {
-  search?: string;
-  handleSearch: Dispatch<SetStateAction<string>>;
-  handleCreateClick?: () => void;
-}
-
-const ListMenu: React.FC<ListMenuProp> = ({ search, handleSearch, handleCreateClick }) => {
-  return (
-    <Box className={style.menuContainer}>
-      <Searchbar value={search} onChange={(_, value) => handleSearch(value)} />
-      <Button variant="contained" onClick={handleCreateClick} startIcon={<Add />}>
-        Create Cluster
-      </Button>
-    </Box>
-  );
-};
-
-interface ListTableProp {
+interface ListContentProp {
   tenantControlPlanes?: IoClastixKamajiV1alpha1TenantControlPlaneList;
-  search?: string;
   isLoading?: boolean;
 }
 
-const ListTable: React.FC<ListTableProp> = ({ tenantControlPlanes, search, isLoading }) => {
-  // delete cluster dialog
+const ListContent = ({ tenantControlPlanes, isLoading }: ListContentProp) => {
   const [isOpenDialog, setIsOpenDialog] = useState(false);
   const [cluster, setCluster] = useState<IoClastixKamajiV1alpha1TenantControlPlane>();
+
   const handleOpenDialog = (
     e: React.MouseEvent<HTMLElement, MouseEvent>,
     cluster: IoClastixKamajiV1alpha1TenantControlPlane
@@ -101,6 +77,7 @@ const ListTable: React.FC<ListTableProp> = ({ tenantControlPlanes, search, isLoa
     setCluster(cluster);
     setIsOpenDialog(true);
   };
+
   const handleCloseDialog = () => {
     setIsOpenDialog(false);
   };
@@ -110,8 +87,19 @@ const ListTable: React.FC<ListTableProp> = ({ tenantControlPlanes, search, isLoa
     handleCloseDialog();
   };
 
+  const [search, setSearch] = useState('');
+  const handleChangeSearch = (_: ChangeEvent, v: string) => setSearch(v);
+
+  const navigate = useNavigate();
+  const handleCreateClick = () => navigate('/kaas/clusters/create');
+
   return (
     <>
+      <TableHeader
+        search={search}
+        onChangeSearch={handleChangeSearch}
+        actions={<AddButton label="Create Cluster" onClick={handleCreateClick} />}
+      />
       <TenantControlPlaneTable
         tenantControlPlanes={tenantControlPlanes?.items || []}
         search={search}

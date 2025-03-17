@@ -1,0 +1,35 @@
+.img-toggle-btn-group {
+  .img-toggle-btn {
+    width: 118px;
+    height: 43px;
+    margin-right: 10px;
+    margin-bottom: 10px;
+    border-radius: 4px !important;
+
+    --img-toggle-btn-border: 1px solid rgba(0, 0, 0, 0.12);
+
+    &:not(:first-child) {
+      border-left: var(--img-toggle-btn-border);
+    }
+
+    .image {
+      position: absolute;
+      background-repeat: no-repeat;
+      background-size: contain;
+      background-position: center center;
+      filter: grayscale(1);
+    }
+
+    &:global(.Mui-selected) .image {
+      filter: none;
+    }
+  }
+}
+
+:global(.dark) {
+  .img-toggle-btn-group {
+    .img-toggle-btn {
+      --img-toggle-btn-border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+  }
+}

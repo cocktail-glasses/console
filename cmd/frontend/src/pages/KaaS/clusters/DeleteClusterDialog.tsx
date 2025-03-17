@@ -3,12 +3,12 @@ import { useForm } from 'react-hook-form';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 
-import { DeleteOutline } from '@mui/icons-material';
-import { Box, Button, Checkbox, FormControlLabel, TextField, Typography } from '@mui/material';
+import { Box, Checkbox, FormControlLabel, TextField, Typography } from '@mui/material';
 
-import DialogBase from './component/DialogBase/DialogBase';
-import style from './component/DialogBase/DialogBase.module.scss';
 import { getDeleteClusterSchema } from './schemas';
+
+import DeleteButton from '@components/molecules/KaaS/Button/DeleteButton/DeleteButton';
+import Dialog from '@components/molecules/KaaS/Dialog/Dialog';
 
 export interface DeleteClusterDialogProp {
   isOpen: boolean;
@@ -41,7 +41,7 @@ const DeleteClusterDialog = ({ isOpen, onClose, onDelete, clusterName }: DeleteC
   }, [isOpen, reset]);
 
   return (
-    <DialogBase
+    <Dialog
       isOpen={isOpen}
       onClose={onClose}
       closeBtn
@@ -68,16 +68,7 @@ const DeleteClusterDialog = ({ isOpen, onClose, onDelete, clusterName }: DeleteC
         </>
       }
       footer={
-        <Button
-          className={style.actionButton}
-          variant="contained"
-          size="large"
-          startIcon={<DeleteOutline fontSize="large" />}
-          onClick={() => onDelete(getValues())}
-          disabled={!isValid}
-        >
-          Delete Cluster
-        </Button>
+        <DeleteButton label="Delete Cluster" onClick={() => onDelete(getValues())} size="large" disabled={!isValid} />
       }
     />
   );
