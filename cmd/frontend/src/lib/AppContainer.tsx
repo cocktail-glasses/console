@@ -1,30 +1,24 @@
-import { Suspense } from "react";
-import { useTranslation } from "react-i18next";
+import { Suspense } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   createBrowserRouter,
   RouterProvider,
-  Navigate,
+  /*Navigate,*/
   RouteObject,
-} from "react-router-dom";
+} from 'react-router-dom';
 
-import { useAtomValue, useSetAtom } from "jotai";
-import { loadable } from "jotai/utils";
+import { useAtomValue, useSetAtom } from 'jotai';
+import { loadable } from 'jotai/utils';
 
-import { Loader } from "@components/common";
-import BasicLayout from "@lib/Layout/BasicLayout";
-import { asyncAuthAtom } from "@lib/auth";
-import { MenuType, Menus, Groups } from "@lib/menu";
-import { Routes } from "@lib/routes";
-import {
-  sidebarGroupId,
-  sidebarGroups,
-  sidebarMenus,
-  sidebarMenuSelected,
-  sidebarSub,
-} from "@lib/stores";
-import Login from "@pages/Auth/Login";
-import ErrorComponent from "@pages/Common/ErrorPage";
-import { SnackbarProvider } from "notistack";
+import { Loader } from '@components/common';
+import BasicLayout from '@lib/Layout/BasicLayout';
+import { asyncAuthAtom } from '@lib/auth';
+import { MenuType, Menus, Groups } from '@lib/menu';
+import { Routes } from '@lib/routes';
+import { sidebarGroupId, sidebarGroups, sidebarMenus, sidebarMenuSelected, sidebarSub } from '@lib/stores';
+import Login from '@pages/Auth/Login';
+import ErrorComponent from '@pages/Common/ErrorPage';
+import { SnackbarProvider } from 'notistack';
 
 // import { UriPrefix } from './api/constants';
 
@@ -41,9 +35,7 @@ function make(t: (...args: any[]) => any) {
 
   Menus.forEach((m: MenuType) => {
     if (!m.parent) {
-      const sub = Menus.filter(
-        (e) => e.group === m.group && m.id === e.parent,
-      ).map((e) => ({
+      const sub = Menus.filter((e) => e.group === m.group && m.id === e.parent).map((e) => ({
         ...e,
         url: menuUrl[e.route],
         label: t(e.label),
@@ -78,10 +70,7 @@ function make(t: (...args: any[]) => any) {
   return { r: routes, g: Groups, m: Object.values(menus) };
 }
 
-function AuthRoute(props: {
-  children: React.ReactNode | JSX.Element;
-  [otherProps: string]: any;
-}) {
+function AuthRoute(props: { children: React.ReactNode | JSX.Element; [otherProps: string]: any }) {
   const { children, menu, sub } = props;
   const setSidebarMenuSelected = useSetAtom(sidebarMenuSelected);
   const setSubList = useSetAtom(sidebarSub);
@@ -93,13 +82,13 @@ function AuthRoute(props: {
   } else {
     setSubList([]);
   }
-  return (
-    <Suspense fallback={<Loader title="Loading..." />}>{children}</Suspense>
-  );
+  return <Suspense fallback={<Loader title="Loading..." />}>{children}</Suspense>;
 }
 
 function AuthenticatedComponent(props: { isAuth: boolean }) {
-  return props.isAuth ? <BasicLayout /> : <Navigate to="/login" />;
+  // return props.isAuth ? <BasicLayout /> : <Navigate to="/login" />;
+  console.log(props);
+  return <BasicLayout />;
 }
 
 const loadableAtom = loadable(asyncAuthAtom);
@@ -107,27 +96,27 @@ export default function AppContainer() {
   const load = useAtomValue(loadableAtom);
   const setSidebarGroups = useSetAtom(sidebarGroups);
   const setSidebarList = useSetAtom(sidebarMenus);
-  const { t } = useTranslation(["glossary"]);
+  const { t } = useTranslation(['glossary']);
   let routes: RouteObject[] = [
     {
-      path: "*",
+      path: '*',
       element: <Loader title="Loading..." />,
     },
   ];
-  if (load.state == "hasData") {
+  if (load.state == 'hasData') {
     const { r, g, m } = make(t);
     routes = [
       {
-        path: "/",
+        path: '/',
         element: <AuthenticatedComponent isAuth={!!load.data} />,
         children: r,
       },
       {
-        path: "/login",
+        path: '/login',
         element: <Login />,
       },
       {
-        path: "*",
+        path: '*',
         element: <ErrorComponent />,
       },
     ];
@@ -141,8 +130,8 @@ export default function AppContainer() {
   return (
     <SnackbarProvider
       anchorOrigin={{
-        vertical: "bottom",
-        horizontal: "left",
+        vertical: 'bottom',
+        horizontal: 'left',
       }}
     >
       <RouterProvider router={router} />
