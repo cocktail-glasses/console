@@ -8,13 +8,13 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 
 import { identity, toLower } from 'lodash';
 
-import { getDotStatus } from './utils';
+import { getDotStatus } from './utils/utils';
 
 import { DotStatus } from '@components/atoms/KaaS/DotStatus';
 import DeleteIconButton from '@components/molecules/KaaS/Button/DeleteIconButton/DeleteIconButton';
 import Table from '@components/molecules/KaaS/Table/Table';
 import { IoClastixKamajiV1alpha1TenantControlPlane } from '@lib/kamaji';
-import { CellContext, createColumnHelper, Row } from '@tanstack/react-table';
+import { CellContext, createColumnHelper } from '@tanstack/react-table';
 
 interface TenantControlPlaneTableProps {
   tenantControlPlanes: IoClastixKamajiV1alpha1TenantControlPlane[];
@@ -35,8 +35,8 @@ const TenantControlPlaneTable = ({
   dayjs.extend(relativeTime);
 
   const navigate = useNavigate();
-  const handleRowClick = (row: Row<IoClastixKamajiV1alpha1TenantControlPlane>) => {
-    const metadata = row.original.metadata;
+  const handleRowClick = (row: IoClastixKamajiV1alpha1TenantControlPlane) => {
+    const metadata = row.metadata;
     navigate(`/kaas/clusters/${metadata?.namespace}/${metadata?.name}`);
   };
 
