@@ -4,5 +4,12 @@
 }
 
 .kaas-primary-color {
-  background-color: #0072b0;
+  background-color: #00517d;
+  color: #ffffff !important;
+}
+
+:global(.drak) {
+  .kaas-primary-color {
+    background-color: #0072b0;
+  }
 }

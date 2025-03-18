@@ -4,5 +4,19 @@
   min-width: var(--btn-size);
   max-height: var(--btn-size);
   min-height: var(--btn-size);
-  border-color: rgba(255, 255, 255, 0.12);
+  border: 1px solid #e0e3e5;
+
+  .context-icon {
+    color: #4d555c;
+  }
+}
+
+:global(.dark) {
+  .context-menu-btn {
+    border-color: rgba(255, 255, 255, 0.12);
+
+    .context-icon {
+      color: white;
+    }
+  }
 }

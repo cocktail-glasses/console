@@ -1,20 +1,17 @@
 .addon-btn-container {
+  --boder-color: #e0e3e5;
+
   display: flex;
   align-items: center;
   width: 250px;
   height: 64px;
-  border: 1px solid #464647;
+  border: 1px solid var(--boder-color);
   border-radius: 3px;
 
   .addon-logo-container {
     display: flex;
     justify-content: center;
     flex: 1 1 0;
-
-    .addon-logo {
-      filter: invert(0.25) brightness(100) contrast(100);
-      opacity: 85%;
-    }
   }
 
   .addon-action-container {
@@ -22,6 +19,19 @@
     align-items: center;
     height: 100%;
     padding: 5px;
-    border-left: 1px solid #464647;
+    border-left: 1px solid var(--boder-color);
+  }
+}
+
+:global(.dark) {
+  .addon-btn-container {
+    --boder-color: #464647;
+
+    .addon-logo-container {
+      .addon-logo {
+        filter: invert(0.25) brightness(100) contrast(100);
+        opacity: 85%;
+      }
+    }
   }
 }

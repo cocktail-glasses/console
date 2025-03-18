@@ -91,6 +91,7 @@ const TenantControlPlaneTable = ({
         id: 'delete-cluster',
         cell: (props) => (
           <DeleteIconButton
+            variant="outlined"
             onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => onClickDelete(e, props.row.original)}
           />
         ),

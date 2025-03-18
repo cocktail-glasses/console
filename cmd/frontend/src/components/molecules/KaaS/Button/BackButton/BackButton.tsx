@@ -16,13 +16,13 @@ const BackButton = ({ url, ...props }: BackButtonProps) => {
   const handleClick = () => navigate(url);
   return (
     <Button
-      onClick={handleClick}
-      variant={'outlined'}
-      className={clsx(style.backBtn, props.className)}
-      color="success"
       {...props}
+      onClick={handleClick}
+      variant={props.variant || 'outlined'}
+      className={clsx(style.backBtn, props.className)}
+      aria-label="back-button"
     >
-      <ArrowBackIosNew />
+      <ArrowBackIosNew className={style.icon} />
     </Button>
   );
 };

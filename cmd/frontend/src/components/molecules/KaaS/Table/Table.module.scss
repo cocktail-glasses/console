@@ -1,5 +1,13 @@
 .table {
+  --header-color: #4d555c;
   margin-top: 30px;
+
+  .header {
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 25px;
+    color: var(--header-color);
+  }
 
   .row {
     &:hover {
@@ -13,5 +21,11 @@
     .action-icon {
       color: gray;
     }
+  }
+}
+
+:global(.dark) {
+  .table {
+    --header-color: #ffffffd9;
   }
 }

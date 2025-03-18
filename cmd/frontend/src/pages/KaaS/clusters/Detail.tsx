@@ -120,14 +120,15 @@ const TenantClusterInformation = ({ tenantControlPlane }: TenantClusterInformati
       >
         <Box sx={{ display: 'flex' }}>
           <DotStatus status={dotStatus} />
-          <h2>{get(tenantControlPlane, 'metadata.name', '')}</h2>
+          <Typography variant="h6">{get(tenantControlPlane, 'metadata.name', '')}</Typography>
         </Box>
         <Box sx={{ display: 'flex', gap: '10px' }}>
           <DownloadButton
             label="Get Kubeconfig"
             size="large"
             textTransform="none"
-            sx={{ backgroundColor: '#00b2b2' }}
+            sx={{ backgroundColor: '#00b2b2 !important' }}
+            className={commonStyle.kaasPrimaryColor}
             onClick={() => downloadKubeconfig(tenantControlPlane)}
           />
           <ContextMenuButton />
@@ -459,10 +460,14 @@ const TCPConfigmaps = ({ tenantControlPlane, openEditor }: OpenEditorProps) => {
 
 interface TenantClusterNode {
   name: string;
-  replicas: number;
-  kubeletVersion: string;
-  operatingSystem: string;
-  created: string;
+  status: string;
+  age: number;
+  version: string;
+  internalIp: string;
+  externalIp: string;
+  osImage: string;
+  kernelVersion: string;
+  containerRuntime: string;
 }
 
 const TenantClusterNodes = () => {
@@ -476,10 +481,14 @@ const TenantClusterNodes = () => {
         </TableSortLabel>
       ),
     }),
-    columnHelper.accessor('replicas', { header: 'Replicas' }),
-    columnHelper.accessor('kubeletVersion', { header: 'Kubelet Version' }),
-    columnHelper.accessor('operatingSystem', { header: 'Operating System' }),
-    columnHelper.accessor('created', { header: 'Created' }),
+    columnHelper.accessor('status', { header: 'Status' }),
+    columnHelper.accessor('age', { header: 'Age' }),
+    columnHelper.accessor('version', { header: 'Version' }),
+    columnHelper.accessor('internalIp', { header: 'Internal Ip' }),
+    columnHelper.accessor('externalIp', { header: 'External Ip' }),
+    columnHelper.accessor('osImage', { header: 'OS Image' }),
+    columnHelper.accessor('kernelVersion', { header: 'Kernel Version' }),
+    columnHelper.accessor('containerRuntime', { header: 'Container Runtime' }),
   ];
 
   return (
@@ -494,7 +503,7 @@ const TenantClusterNodes = () => {
         }}
       >
         <Box>
-          <h2>Machine Deployments</h2>
+          <Typography variant="h6">Machine Deployments</Typography>
         </Box>
         <Box>
           <AddButton

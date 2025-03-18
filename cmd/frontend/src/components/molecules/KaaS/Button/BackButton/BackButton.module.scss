@@ -1,9 +1,33 @@
 .back-btn {
-  --back-btn-size: 48px;
+  --back-btn-x-size: 50px;
+  --back-btn-y-size: 45px;
   display: flex;
   margin-top: 30px;
-  min-width: var(--back-btn-size);
-  max-width: var(--back-btn-size);
-  min-height: var(--back-btn-size);
-  max-height: var(--back-btn-size);
+  min-width: var(--back-btn-x-size);
+  max-width: var(--back-btn-x-size);
+  min-height: var(--back-btn-y-size);
+  max-height: var(--back-btn-y-size);
+
+  border: 1px solid #7e868f;
+
+  &:hover {
+    border: 1px solid #7e868f;
+    background-color: #0000000a;
+    color: #7e868f;
+  }
+
+  .icon {
+    color: #7e868f;
+    font-size: 18px;
+  }
+}
+
+:global(.dark) {
+  .back-btn {
+    border-color: #b8b8b8;
+
+    .icon {
+      color: #b8b8b8;
+    }
+  }
 }

@@ -98,7 +98,9 @@ const ListContent = ({ tenantControlPlanes, isLoading }: ListContentProp) => {
       <TableHeader
         search={search}
         onChangeSearch={handleChangeSearch}
-        actions={<AddButton label="Create Cluster" onClick={handleCreateClick} />}
+        actions={
+          <AddButton label="Create Cluster" onClick={handleCreateClick} className={commonStyle.kaasPrimaryColor} />
+        }
       />
       <TenantControlPlaneTable
         tenantControlPlanes={tenantControlPlanes?.items || []}

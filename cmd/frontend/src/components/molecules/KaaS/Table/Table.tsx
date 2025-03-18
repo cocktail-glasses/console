@@ -73,12 +73,14 @@ const Table = <TData,>({
       className={clsx(style.table, style.paddingY30)}
       sx={merge({ marginTop: '0px !important' }, props.sx)}
     >
-      <TableBase aria-label="tenant-control-plane table">
+      <TableBase>
         <TableHead>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => (
-                <TableCell key={header.id}>{flexRender(header.column.columnDef.header, header.getContext())}</TableCell>
+                <TableCell className={style.header} key={header.id}>
+                  {flexRender(header.column.columnDef.header, header.getContext())}
+                </TableCell>
               ))}
             </TableRow>
           ))}
