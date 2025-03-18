@@ -10,11 +10,11 @@ import {
   CircularProgress,
 } from '@mui/material';
 
-import { isBoolean, isEmpty, isFunction } from 'lodash';
+import { isBoolean, isEmpty, isFunction, merge } from 'lodash';
 
 import style from './Table.module.scss';
 
-import { flexRender, getCoreRowModel, useReactTable, ColumnDef, getFilteredRowModel, Row } from '@tanstack/react-table';
+import { flexRender, getCoreRowModel, useReactTable, ColumnDef, getFilteredRowModel } from '@tanstack/react-table';
 import clsx from 'clsx';
 
 enum FilterFn {
@@ -30,13 +30,13 @@ enum FilterFn {
   inNumberRange = 'inNumberRange',
 }
 
-interface TableBaseProps<TData> {
+interface TableBaseProps<TData> extends React.ComponentPropsWithoutRef<typeof TableBase> {
   data: Array<TData>;
   columns: ColumnDef<TData, any>[];
   filter?: boolean | FilterFn;
   searchValue?: string;
   emptyMessage?: ReactNode;
-  onClickRow?: (row: Row<TData>) => void;
+  onClickRow?: (row: TData) => void;
   isLoading?: boolean;
 }
 
@@ -48,6 +48,7 @@ const Table = <TData,>({
   emptyMessage,
   onClickRow,
   isLoading,
+  ...props
 }: TableBaseProps<TData>): ReactElement => {
   const filterOption = () => {
     if (isBoolean(filter) && filter) {
@@ -67,7 +68,11 @@ const Table = <TData,>({
   }, [table, searchValue]);
 
   return (
-    <TableContainer className={clsx(style.table, style.paddingY30)} sx={{ marginTop: '0px !important' }}>
+    <TableContainer
+      {...props}
+      className={clsx(style.table, style.paddingY30)}
+      sx={merge({ marginTop: '0px !important' }, props.sx)}
+    >
       <TableBase aria-label="tenant-control-plane table">
         <TableHead>
           {table.getHeaderGroups().map((headerGroup) => (
@@ -92,7 +97,7 @@ const Table = <TData,>({
                 className={style.row}
                 key={row.id}
                 hover
-                onClick={() => isFunction(onClickRow) && onClickRow(row)}
+                onClick={() => isFunction(onClickRow) && onClickRow(row.original)}
               >
                 {row.getVisibleCells().map((cell) => (
                   <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>

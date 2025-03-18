@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { ReactNode, useState } from 'react';
 
 import { Box, Paper } from '@mui/material';
 
@@ -7,19 +7,22 @@ import { isFunction, map } from 'lodash';
 import style from './TabsContent.module.scss';
 
 import Tabs from '@components/molecules/KaaS/Tabs/Tabs';
+import clsx from 'clsx';
 
 export interface TabData {
-  label: string;
+  label: ReactNode;
   content: any;
 }
 
-interface TabsContent {
+interface TabsContentProps {
   tabIndex?: number;
   onChange?: (e: React.SyntheticEvent, v: any) => void;
   tabDatas: TabData[];
+  contentComponent?: React.ElementType;
+  mainProps?: React.ComponentPropsWithoutRef<typeof Box>;
 }
 
-const TabsContent = ({ tabIndex, onChange, tabDatas }: TabsContent) => {
+const TabsContent = ({ tabIndex, onChange, tabDatas, contentComponent, mainProps }: TabsContentProps) => {
   const [currentIndex, setCurrentIndex] = useState(tabIndex || 0);
 
   const handleChangeTab = (e: React.SyntheticEvent, v: any) => {
@@ -28,14 +31,19 @@ const TabsContent = ({ tabIndex, onChange, tabDatas }: TabsContent) => {
   };
 
   return (
-    <Box className={style.mainContainer}>
+    <Box {...mainProps} className={clsx(style.mainContainer, mainProps?.className)}>
       <Box className={style.tabsContainer}>
         <Tabs currentIndex={currentIndex} onChange={handleChangeTab} labels={map(tabDatas, (tab) => tab.label)} />
       </Box>
       {map(tabDatas, (tab, i) => (
-        <Paper key={tab.label} hidden={currentIndex !== i} className={style.contentContainer}>
+        <Box
+          component={contentComponent || Paper}
+          key={i}
+          hidden={currentIndex !== i}
+          className={style.contentContainer}
+        >
           {tab.content}
-        </Paper>
+        </Box>
       ))}
     </Box>
   );

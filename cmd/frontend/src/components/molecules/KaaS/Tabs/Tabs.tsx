@@ -1,19 +1,20 @@
+import { ReactNode } from 'react';
+
 import { Tabs as TabsBase } from '@mui/material';
 
 import { map } from 'lodash';
 
 import Tab from '@components/atoms/KaaS/Tab/Tab';
 
-interface TabsProps {
+interface TabsProps extends React.ComponentPropsWithoutRef<typeof TabsBase> {
   currentIndex: number;
-  onChange: (e: React.SyntheticEvent, v: any) => void;
-  labels: string[];
+  labels: ReactNode[];
 }
 
-const Tabs = ({ currentIndex, onChange, labels }: TabsProps) => (
-  <TabsBase value={currentIndex} onChange={onChange} aria-label="tabs">
-    {map(labels, (label) => (
-      <Tab label={label} key={label} />
+const Tabs = ({ currentIndex, labels, ...props }: TabsProps) => (
+  <TabsBase {...props} value={currentIndex}>
+    {map(labels, (label, i) => (
+      <Tab label={label} key={i} />
     ))}
   </TabsBase>
 );
