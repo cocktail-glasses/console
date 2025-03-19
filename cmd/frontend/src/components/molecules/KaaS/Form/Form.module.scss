@@ -1,5 +1,6 @@
 .form {
   --global-color: #007ce8;
+  --global-error-color: #e91e63;
   --label-text-color: rgba(77, 85, 92, 0.6);
   --input-boder-color: #e0e3e5;
   --helper-text-color: #7e868f99;
@@ -17,6 +18,10 @@
 
       &.Mui-disabled {
         --label-text-color: var(--disabled-text-color);
+      }
+
+      &.Mui-error {
+        --label-text-color: var(--global-error-color);
       }
     }
 
@@ -38,6 +43,10 @@
         --input-boder-color: var(--global-color);
       }
 
+      &.Mui-error {
+        --input-boder-color: var(--global-error-color);
+      }
+
       .MuiInputBase-input {
         &.Mui-disabled {
           color: var(--disabled-text-color);
@@ -50,6 +59,11 @@
     .MuiFormHelperText-root {
       color: var(--helper-text-color);
       font-size: 11px;
+
+      &.Mui-error {
+        --helper-text-color: var(--global-error-color);
+        font-weight: 700;
+      }
     }
   }
 }

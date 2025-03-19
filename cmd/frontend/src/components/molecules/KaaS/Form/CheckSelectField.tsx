@@ -67,7 +67,7 @@ const CheckSelectField = ({
         MenuProps={MenuProps}
       >
         {map(items, (item) => (
-          <MenuItem value={item.value}>
+          <MenuItem value={item.value} key={item.label}>
             <Checkbox checked={value?.includes(item.value)} />
             <ListItemText primary={item.label} />
           </MenuItem>
