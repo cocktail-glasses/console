@@ -7,7 +7,7 @@ interface CancelButtonProps extends React.ComponentPropsWithoutRef<typeof Button
 }
 
 const CancelButton = ({ label, ...props }: CancelButtonProps) => (
-  <Button variant="outlined" color="secondary" size="large" startIcon={<Close />} {...props}>
+  <Button {...props} variant={props.variant || 'outlined'} size={props.size || 'large'} startIcon={<Close />}>
     {label || 'Cancel'}
   </Button>
 );

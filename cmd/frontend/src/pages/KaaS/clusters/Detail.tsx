@@ -1,7 +1,18 @@
-import { useEffect, useState } from 'react';
+import { MouseEvent, useEffect, useState } from 'react';
 import { useParams } from 'react-router';
 
-import { Box, CircularProgress, Paper, Stack, TableSortLabel, Typography } from '@mui/material';
+import {
+  Box,
+  CircularProgress,
+  Divider,
+  Menu,
+  MenuItem,
+  MenuList,
+  Paper,
+  Stack,
+  TableSortLabel,
+  Typography,
+} from '@mui/material';
 
 import get from 'lodash/get';
 import isEmpty from 'lodash/isEmpty';
@@ -30,11 +41,17 @@ import { DotStatus } from '@components/atoms/KaaS/DotStatus';
 import AddButton from '@components/molecules/KaaS/Button/AddButton/AddButton';
 import BackButton from '@components/molecules/KaaS/Button/BackButton/BackButton';
 import ContextMenuButton from '@components/molecules/KaaS/Button/ContextMenuButton/ContextMenuButton';
+import DeleteIconButton from '@components/molecules/KaaS/Button/DeleteIconButton/DeleteIconButton';
 import DownloadButton from '@components/molecules/KaaS/Button/DownloadButton/DownloadButton';
+import SearchButton from '@components/molecules/KaaS/Button/SearchButton/SearchButton';
+import Dialog from '@components/molecules/KaaS/Dialog/Dialog';
 import DrawerEditor from '@components/molecules/KaaS/DrawerEditor/DrawerEditor';
+import CheckboxLabel from '@components/molecules/KaaS/Form/CheckboxLabel';
 import SelectField from '@components/molecules/KaaS/Form/SelectField';
+import TextField from '@components/molecules/KaaS/Form/TextField';
 import Table from '@components/molecules/KaaS/Table/Table';
 import ExpandSection from '@components/organisms/KaaS/ExpandSection/ExpandSection';
+import ImageToggleButtonGroup from '@components/organisms/KaaS/ImageToggleButtonGroup/ImageToggleButtonGroup';
 import TabsContent from '@components/organisms/KaaS/TabsContent/TabsContent';
 import { labelSelectorToQuery } from '@lib/k8s';
 import { ApiListOptions, KubeObjectInterface } from '@lib/k8s/cluster';
@@ -44,8 +61,13 @@ import Pod, { KubePod } from '@lib/k8s/pod';
 import Secret, { KubeSecret } from '@lib/k8s/secret';
 import Service, { KubeService } from '@lib/k8s/service';
 import { IoClastixKamajiV1alpha1TenantControlPlane, KamajiClastixIoV1alpha1Api as KamajiAPI } from '@lib/kamaji';
+import Centos from '@resources/os_centos.svg';
+import RedHat from '@resources/os_redhat.svg';
+import RockyLinux from '@resources/os_rocky-linux.svg';
+import Ubuntu from '@resources/os_ubuntu.svg';
 import { createColumnHelper } from '@tanstack/react-table';
 import { fromNow } from '@utils/date';
+import clsx from 'clsx';
 
 export default function Detail() {
   const { managementNamespace, name } = useParams<{
@@ -108,6 +130,37 @@ const TenantClusterInformation = ({ tenantControlPlane }: TenantClusterInformati
     setIsOpenEditor(true);
   };
 
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>();
+  const isContextOpen = Boolean(anchorEl);
+  const handleContextMenuClick = (e: MouseEvent<HTMLButtonElement>) => setAnchorEl(e.currentTarget);
+  const handleContextClose = () => setAnchorEl(null);
+
+  const contextItems = [
+    {
+      label: 'Edit Cluster',
+      onClick: () => handleContextClose(),
+    },
+    {
+      label: 'Edit provider',
+      onClick: () => handleContextClose(),
+    },
+    {
+      label: 'Manage SSH keys',
+      onClick: () => handleContextClose(),
+    },
+    {
+      label: 'Revoke Token',
+      onClick: () => handleContextClose(),
+    },
+    {
+      type: 'divider',
+    },
+    {
+      label: 'Delete Cluster',
+      onClick: () => handleContextClose(),
+    },
+  ];
+
   return (
     <Paper className={style.mainContainer}>
       <Box
@@ -118,7 +171,7 @@ const TenantClusterInformation = ({ tenantControlPlane }: TenantClusterInformati
           alignItems: 'center',
         }}
       >
-        <Box sx={{ display: 'flex' }}>
+        <Box className={commonStyle.title} sx={{ display: 'flex' }}>
           <DotStatus status={dotStatus} />
           <Typography variant="h6">{get(tenantControlPlane, 'metadata.name', '')}</Typography>
         </Box>
@@ -131,7 +184,34 @@ const TenantClusterInformation = ({ tenantControlPlane }: TenantClusterInformati
             className={commonStyle.kaasPrimaryColor}
             onClick={() => downloadKubeconfig(tenantControlPlane)}
           />
-          <ContextMenuButton />
+          <ContextMenuButton onClick={handleContextMenuClick} />
+          <Menu
+            anchorEl={anchorEl}
+            open={isContextOpen}
+            onClose={handleContextClose}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'left',
+            }}
+          >
+            <MenuList dense sx={{ paddingY: 0 }}>
+              {map(contextItems, (contextItem, i) => {
+                if (contextItem.type === 'divider') {
+                  return <Divider key={i} sx={{ marginY: '0px !important' }} />;
+                }
+
+                return (
+                  <MenuItem
+                    sx={{ height: '48px', paddingX: '10px', paddingY: 0 }}
+                    onClick={() => contextItem.onClick && contextItem.onClick()}
+                    key={i}
+                  >
+                    {contextItem.label}
+                  </MenuItem>
+                );
+              })}
+            </MenuList>
+          </Menu>
         </Box>
       </Box>
       <Box
@@ -491,31 +571,245 @@ const TenantClusterNodes = () => {
     columnHelper.accessor('containerRuntime', { header: 'Container Runtime' }),
   ];
 
+  const [isAddMachineDialogOpen, setIsAddMachineDialogOpen] = useState(false);
+
   return (
     <Paper className={style.mainContainer}>
       <Box
-        className={style.title}
+        className={clsx(style.title, commonStyle.title)}
         sx={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          marginLeft: '30px',
         }}
       >
-        <Box>
-          <Typography variant="h6">Machine Deployments</Typography>
-        </Box>
-        <Box>
-          <AddButton
-            label="Add Machine Deployment"
-            size="large"
-            textTransform="none"
-            className={commonStyle.kaasPrimaryColor}
-          />
-        </Box>
+        <Typography variant="h6">Machine Deployments</Typography>
+        <AddButton
+          label="Add Machine Deployment"
+          size="large"
+          textTransform="none"
+          className={commonStyle.kaasPrimaryColor}
+          onClick={() => setIsAddMachineDialogOpen(true)}
+        />
       </Box>
       <Table data={[]} columns={columns} emptyMessage="No machine deployments available." />
+      <AddMachineDialog isOpen={isAddMachineDialogOpen} onClose={() => setIsAddMachineDialogOpen(false)} />
     </Paper>
+  );
+};
+
+const AddMachineDialog = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
+  const [isExpandSectionOpen, setIsExpandSectionOpen] = useState(false);
+
+  const [osImage, setOsImage] = useState('');
+
+  const content = (
+    <Stack sx={{ marginTop: '10px' }}>
+      <TextField
+        label="Name"
+        helperText="Leave this field blank to use automatic name generation."
+        sx={{ marginBottom: '8px' }}
+        size="small"
+      />
+      <Box sx={{ display: 'flex', marginBottom: '30px', gap: '10px' }}>
+        <TextField label="Replicas" required size="small" />
+        <SelectField label="kubelet Version" required value="1.29.4" items={['1.29.4']} size="small" />
+      </Box>
+      <Box sx={{ display: 'flex', gap: '10px', alignItems: 'flex-start', marginBottom: '30px' }}>
+        <SelectField label="Instance Type" size="small" items={['cx1.2xlarge', 'cx1.4xlarge']} />
+        <SelectField
+          label="Preference"
+          helperText="Please select an instance type first."
+          size="small"
+          items={['alpine', 'centos.7', 'centos.7.desktop']}
+        />
+        <SearchButton variant="outlined" label="View" sx={{ maxWidth: '98px', minWidth: '98px' }} />
+      </Box>
+      <TextField label="CPUs" required size="small" sx={{ marginBottom: '30px' }} value="2" disabled />
+      <TextField label="Memory (MB)" required size="small" sx={{ marginBottom: '30px' }} value="2000" disabled />
+
+      <Stack>
+        <Typography variant="body2" sx={{ marginBottom: '8px' }}>
+          Primary Disk
+        </Typography>
+        <SelectField
+          label="Ubuntu System Image"
+          required
+          items={['20.04 - docker://ccpr.cocktailcloud.io/quay.io/kubermatic-virt-disks/ubuntu:20.04']}
+          size="small"
+          sx={{ marginBottom: '30px' }}
+        />
+        <SelectField label="Storage Class" required size="small" items={['host-local']} sx={{ marginBottom: '30px' }} />
+        <TextField label="Size (GB)" required size="small" sx={{ marginBottom: '30px' }} />
+
+        <ExpandSection
+          label="ADVANCED SCHEDULING SETTINGS"
+          isCollapse={!isExpandSectionOpen}
+          onChange={() => setIsExpandSectionOpen((prev) => !prev)}
+          contentPorps={{ sx: { padding: '0 !important' } }}
+          data={
+            <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, gap: '20px', marginBottom: '30px' }}>
+              <SelectField
+                label="Node Affinity Preset Type"
+                helperText="Ensures that tenant nodes are hosted on particular nodes."
+                sx={{ flex: 1 }}
+                items={['hard', 'soft']}
+                size="small"
+              />
+              <TextField label="Node Affinity Preset Key" required sx={{ flex: 1 }} size="small" disabled />
+              <TextField
+                label="Node Affinity Preset Values"
+                helperText="Use comma, space or enter key as the separator."
+                size="small"
+                disabled
+              />
+
+              <Stack sx={{ gap: '8px' }}>
+                <Typography>Topology Spread Constraints</Typography>
+                <Box sx={{ display: 'flex', gap: '10px' }}>
+                  <TextField label="Max Skew" value="1" size="small" />
+                  <TextField label="Topology Key" size="small" />
+                  <SelectField label="When Unsatisfiable" items={['ScheduleAnyway', 'DoNotSchedule']} size="small" />
+                </Box>
+              </Stack>
+            </Box>
+          }
+        />
+        <Box sx={{ display: 'flex' }}>
+          <ImageToggleButtonGroup
+            value={osImage}
+            onChange={(_, v) => {
+              if (v == null) return;
+              return setOsImage(v);
+            }}
+            items={[
+              {
+                image: (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: '10px', textTransform: 'none' }}>
+                    <img style={{ height: '28px', width: '28px' }} src={Ubuntu} alt={Ubuntu} />
+                    Ubuntu
+                  </Box>
+                ),
+                value: 'ubuntu',
+              },
+              {
+                image: (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: '10px', textTransform: 'none' }}>
+                    <img style={{ height: '28px', width: '28px' }} src={Centos} alt={Centos} />
+                    CentOS
+                  </Box>
+                ),
+                value: 'centos',
+              },
+              {
+                image: (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: '10px', textTransform: 'none' }}>
+                    <img style={{ height: '28px', width: '28px' }} src={RedHat} alt={RedHat} />
+                    RHEL
+                  </Box>
+                ),
+                value: 'rhel',
+              },
+              {
+                image: (
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'flex-start',
+                      gap: '10px',
+                      textTransform: 'none',
+                    }}
+                  >
+                    <img style={{ height: '28px', width: '28px' }} src={RockyLinux} alt={RockyLinux} />
+                    <Typography sx={{ flex: 1 }}>Rocky Linux</Typography>
+                  </Box>
+                ),
+                sx: { width: '158px !important' },
+                value: 'rockyLinux',
+              },
+            ]}
+          />
+        </Box>
+        <CheckboxLabel
+          label={<Typography variant="body2">Upgrade system on first boot</Typography>}
+          sx={{ marginBottom: '15px' }}
+        />
+        <SelectField
+          label="Operating System Profile"
+          helperText="Leave this field blank to use default operating system profile."
+          size="small"
+          value="osp-ubuntu"
+          items={['osp-ubuntu']}
+        />
+
+        <Box sx={{ marginTop: '18px' }}>
+          <Typography variant="body2" sx={{ marginBottom: '8px' }}>
+            Node Autoscalling
+          </Typography>
+          <TextField
+            label="Max Replicas"
+            helperText="The maximum number of replicas for autoscaling. Maximum value can be 1000."
+            required
+            size="small"
+            sx={{ marginBottom: '20px' }}
+          />
+          <TextField
+            label="Min Replicas"
+            helperText="The minimum number of replicas for autoscaling. Minimum value can be 1"
+            required
+            size="small"
+            sx={{ marginBottom: '20px' }}
+          />
+        </Box>
+
+        <Box sx={{ marginTop: '18px' }}>
+          <Typography variant="body2" sx={{ marginBottom: '8px' }}>
+            Node Labels
+          </Typography>
+          <Box sx={{ display: 'flex', gap: '10px' }}>
+            <TextField label="Key" required size="small" />
+            <TextField label="Value" required size="small" />
+          </Box>
+        </Box>
+
+        <Box sx={{ marginTop: '18px' }}>
+          <Typography variant="body2" sx={{ marginBottom: '8px' }}>
+            Node Taints
+          </Typography>
+          <Box sx={{ display: 'flex', gap: '10px' }}>
+            <TextField label="Key" required size="small" />
+            <TextField label="Value" required size="small" />
+            <SelectField label="Effect" required size="small" items={['NoSchedule', 'PreferNoSchedule', 'NoExecute']} />
+            <DeleteIconButton />
+          </Box>
+        </Box>
+      </Stack>
+    </Stack>
+  );
+
+  const footer = (
+    <AddButton
+      label="Add Machine Deployment"
+      className={commonStyle.kaasPrimaryColor}
+      size="large"
+      textTransform="none"
+    />
+  );
+  return (
+    <Dialog
+      title={<Typography variant="h6">Add Machine Deployment</Typography>}
+      isOpen={isOpen}
+      onClose={onClose}
+      closeBtn
+      content={content}
+      footer={footer}
+      sx={{
+        padding: '10px',
+        '& .MuiDialog-paper': { maxWidth: '660px', minWidth: '660px' },
+        '& .MuiDialogContent-root': { maxHeight: '60vh' },
+      }}
+    />
   );
 };
 

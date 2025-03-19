@@ -1,15 +1,17 @@
-import { Box, Collapse as CollapseBase } from '@mui/material';
+import { Collapse as CollapseBase } from '@mui/material';
 
 import style from './Collapse.module.scss';
 
-export interface CollapseProps {
+import clsx from 'clsx';
+
+export interface CollapseProps extends Omit<React.ComponentPropsWithoutRef<typeof CollapseBase>, 'in'> {
   isCollapse: boolean;
   data: any;
 }
 
-const Collapse = ({ isCollapse, data }: CollapseProps) => (
-  <CollapseBase in={!isCollapse}>
-    <Box className={style.collapseContent}>{data}</Box>
+const Collapse = ({ isCollapse, data, ...props }: CollapseProps) => (
+  <CollapseBase {...props} in={!isCollapse} className={clsx(style.collapseContent, props.className)}>
+    {data}
   </CollapseBase>
 );
 

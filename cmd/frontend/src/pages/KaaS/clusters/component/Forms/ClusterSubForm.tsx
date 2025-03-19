@@ -8,7 +8,6 @@ import { Box, FormGroup } from '@mui/material';
 import { head, isFunction, map } from 'lodash';
 
 import { createFormSchema } from '../../schemas';
-import style from './ClusterSubForm.module.scss';
 
 import AddButton from '@components/molecules/KaaS/Button/AddButton/AddButton';
 import DeleteIconButton from '@components/molecules/KaaS/Button/DeleteIconButton/DeleteIconButton';
@@ -17,7 +16,8 @@ import CheckboxLabel from '@components/molecules/KaaS/Form/CheckboxLabel';
 import SelectField from '@components/molecules/KaaS/Form/SelectField';
 import TextField from '@components/molecules/KaaS/Form/TextField';
 import ImageToggleButtonGroup from '@components/organisms/KaaS/ImageToggleButtonGroup/ImageToggleButtonGroup';
-import clsx from 'clsx';
+import Canal from '@resources/cni_canal.png';
+import Cilium from '@resources/cni_cilium.svg';
 
 export interface ClusterFormValue {
   name?: string;
@@ -57,8 +57,14 @@ interface ClusterFormProps {
 const ClusterSubForm = ({ values, handleSubmit, handleError }: ClusterFormProps) => {
   // cni plugins
   const cniPlugins = [
-    { value: 'cilium', image: <span className={clsx(style.pluginImage, style.cilium)} /> },
-    { value: 'canal', image: <span className={clsx(style.pluginImage, style.canal)} /> },
+    {
+      value: 'cilium',
+      image: <Box component="img" src={Cilium} alt={Cilium} sx={{ display: 'flex', width: '80px' }} />,
+    },
+    {
+      value: 'canal',
+      image: <Box component="img" src={Canal} alt={Canal} sx={{ display: 'flex', width: '50px' }} />,
+    },
     { value: 'none', image: 'None' },
   ];
 

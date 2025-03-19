@@ -1,12 +1,16 @@
-import Collapse, { CollapseProps } from '@components/atoms/KaaS/Collapse/Collapse';
+import Collapse from '@components/atoms/KaaS/Collapse/Collapse';
 import CollapseButton, { CollapseButtonProps } from '@components/molecules/KaaS/Button/CollapseButton/CollapseButton';
 
-interface ExpandSectionProps extends CollapseButtonProps, CollapseProps {}
+interface ExpandSectionProps
+  extends CollapseButtonProps,
+    Omit<React.ComponentPropsWithoutRef<typeof Collapse>, 'onChange'> {
+  contentPorps?: Omit<React.ComponentPropsWithoutRef<typeof Collapse>, 'isCollapse' | 'data'>;
+}
 
-const ExpandSection = ({ isCollapse, onChange, label, data }: ExpandSectionProps) => (
+const ExpandSection = ({ isCollapse, onChange, label, data, contentPorps }: ExpandSectionProps) => (
   <>
     <CollapseButton label={label} isCollapse={isCollapse} onChange={onChange} />
-    <Collapse isCollapse={isCollapse} data={data} />
+    <Collapse {...contentPorps} isCollapse={isCollapse} data={data} />
   </>
 );
 

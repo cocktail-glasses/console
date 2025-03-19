@@ -1,11 +1,19 @@
 import { TextField as TextFieldBase } from '@mui/material';
 
-interface TextFieldProps extends React.ComponentPropsWithoutRef<typeof TextFieldBase> {
-  required?: boolean;
-}
+import { get } from 'lodash';
 
-const TextField = ({ required = false, ...props }: TextFieldProps) => (
-  <TextFieldBase required={required} fullWidth variant="outlined" {...props} />
+import style from './Form.module.scss';
+
+import clsx from 'clsx';
+
+const TextField = ({ ...props }: React.ComponentPropsWithoutRef<typeof TextFieldBase>) => (
+  <TextFieldBase
+    {...props}
+    required={get(props, 'required', false)}
+    fullWidth={get(props, 'fullWidth', true)}
+    variant={get(props, 'variant', 'outlined')}
+    className={clsx(style.form, props.className)}
+  />
 );
 
 export default TextField;

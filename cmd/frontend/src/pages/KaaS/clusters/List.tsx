@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef, ChangeEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { Paper } from '@mui/material';
+import { Paper, Typography } from '@mui/material';
 
 import isUndefined from 'lodash/isUndefined';
 
@@ -54,7 +54,9 @@ export default function KaaSClusterList() {
 
   return (
     <Paper className={clsx(commonStyle.mainContainer, style.mainContainer)}>
-      <h2>KaaS 클러스터 관리</h2>
+      <Typography variant="h6" className={commonStyle.title}>
+        KaaS 클러스터 관리
+      </Typography>
       <ListContent tenantControlPlanes={tenantControlPlanes} isLoading={isLoading} />
     </Paper>
   );

@@ -96,7 +96,7 @@ export default function Create() {
           marginTop: '30px',
         }}
       >
-        <CancelButton onClick={() => navigate('/kaas/clusters')} variant={'contained'} />
+        <CancelButton onClick={() => navigate('/kaas/clusters')} />
         <Box sx={{ display: 'flex', gap: '10px' }}>
           <Button
             variant="outlined"

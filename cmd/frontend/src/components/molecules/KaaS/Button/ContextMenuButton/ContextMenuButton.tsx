@@ -1,10 +1,17 @@
 import { MoreVert } from '@mui/icons-material';
-import { Button } from '@mui/material';
 
 import style from './ContextMenuButton.module.scss';
 
-const ContextMenuButton = () => (
-  <Button variant="outlined" className={style.contextMenuBtn} aria-label="context-button">
+import Button from '@components/atoms/KaaS/Button/Button';
+import clsx from 'clsx';
+
+const ContextMenuButton = ({ ...props }: React.ComponentPropsWithoutRef<typeof Button>) => (
+  <Button
+    {...props}
+    variant={props.variant || 'outlined'}
+    className={clsx(style.contextMenuBtn, props.className)}
+    aria-label="context-button"
+  >
     <MoreVert className={style.contextIcon} />
   </Button>
 );

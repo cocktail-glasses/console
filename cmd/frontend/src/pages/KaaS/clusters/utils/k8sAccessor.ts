@@ -21,7 +21,7 @@ export const podRestart = (pod: KubePod) => {
   const restarts = reduce(containerStatus, (acc, cs) => acc + cs.restartCount, 0);
   const lastState = containerStatus
     .filter((cs) => has(cs, 'lastState.terminated.finishedAt'))
-    .map((cs) => cs.lastState?.terminated?.finishedAt)
+    .map((cs) => new Date(cs.lastState?.terminated?.finishedAt || new Date()))
     .sort()
     .reverse()[0];
 
