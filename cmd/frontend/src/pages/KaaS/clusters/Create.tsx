@@ -3,7 +3,9 @@ import { Controller, useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router';
 
 import { ArrowBack, ArrowForward } from '@mui/icons-material';
-import { Box, Button, Paper } from '@mui/material';
+import { Box, Button, Paper, Typography } from '@mui/material';
+
+import { isEmpty } from 'lodash';
 
 import commonStyle from './Common.module.scss';
 import style from './Create.module.scss';
@@ -26,15 +28,10 @@ export interface FormValue {
 export default function Create() {
   const {
     control,
-    watch,
     getValues,
-    formState: { errors },
+    formState: { isDirty, errors },
+    setError,
   } = useForm<FormValue>();
-
-  console.log(watch());
-  console.log('root form errors: ', errors);
-
-  const [hasError, setHasError] = useState(false);
 
   const stepDatas = [
     {
@@ -44,7 +41,11 @@ export default function Create() {
           name="cluster"
           control={control}
           render={({ field: { value, onChange } }) => (
-            <ClusterSubForm values={value} handleSubmit={onChange} handleError={setHasError} />
+            <ClusterSubForm
+              values={value}
+              handleSubmit={onChange}
+              handleError={(errors) => setError('cluster', errors)}
+            />
           )}
         />
       ),
@@ -84,7 +85,9 @@ export default function Create() {
 
   return (
     <Paper className={clsx(style.mainContainer, style.mainForm, commonStyle.mainContainer)}>
-      <h2>Create Cluster</h2>
+      <Typography variant="h5" sx={{ marginBottom: '20px' }}>
+        Create Cluster
+      </Typography>
 
       <ProgressStepperContent stepDatas={stepDatas} activeStepIndex={activeStepIndex} />
       {/* {JSON.stringify(hasError)} */}
@@ -115,7 +118,7 @@ export default function Create() {
               size="large"
               startIcon={<ArrowForward />}
               onClick={() => handleNext(activeStepIndex)}
-              disabled={hasError}
+              disabled={isDirty == false || isEmpty(errors)}
               className={commonStyle.kaasPrimaryColor}
             >
               Next

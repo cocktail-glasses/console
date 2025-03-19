@@ -1,9 +1,9 @@
-import { ReactElement } from 'react';
+import { ReactElement, useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 
-import { Box, FormGroup } from '@mui/material';
+import { Box, FormGroup, Typography } from '@mui/material';
 
 import { head, isFunction, map } from 'lodash';
 
@@ -14,8 +14,9 @@ import AddButton from '@components/molecules/KaaS/Button/AddButton/AddButton';
 import DeleteIconButton from '@components/molecules/KaaS/Button/DeleteIconButton/DeleteIconButton';
 import CheckSelectField from '@components/molecules/KaaS/Form/CheckSelectField';
 import CheckboxLabel from '@components/molecules/KaaS/Form/CheckboxLabel';
-import SelectField from '@components/molecules/KaaS/Form/SelectField';
 import TextField from '@components/molecules/KaaS/Form/TextField';
+import ControlledSelectField from '@components/organisms/KaaS/ControlledForm/ControlledSelectField';
+import ControlledTextField from '@components/organisms/KaaS/ControlledForm/ControlledTextField';
 import ImageToggleButtonGroup from '@components/organisms/KaaS/ImageToggleButtonGroup/ImageToggleButtonGroup';
 import Canal from '@resources/cni_canal.png';
 import Cilium from '@resources/cni_cilium.svg';
@@ -110,7 +111,7 @@ const ClusterSubForm = ({ values, handleSubmit, handleError }: ClusterFormProps)
   const {
     watch,
     control,
-    formState: { isValid },
+    formState: { errors, isValidating },
   } = useForm<ClusterFormValue>({
     defaultValues: {
       name: values?.name || '',
@@ -125,33 +126,37 @@ const ClusterSubForm = ({ values, handleSubmit, handleError }: ClusterFormProps)
   });
 
   watch((data) => {
+    // console.log('sub form state : ', formState.isValid, formState.isDirty, formState.errors);
+
     if (isFunction(handleSubmit)) handleSubmit(data);
 
-    if (isFunction(handleError)) handleError(isValid);
+    // if (isFunction(handleError)) handleError(!formState.isValid);
   });
 
-  console.log(watch());
+  useEffect(() => {
+    console.log(isValidating);
+
+    if (isValidating === false) {
+      console.log('gogo : ', errors);
+      isFunction(handleError) && handleError(errors);
+    }
+  }, [isValidating, errors]);
+
+  // isFunction(handleError) && handleError(!isEmpty(formState.errors));
+
+  console.log('gogo out : ', errors);
 
   return (
     <Box sx={{ display: 'flex', gap: '25px' }}>
       <Box sx={{ flex: '1' }}>
-        <h2>Clusters</h2>
-        <Controller
-          name="name"
-          control={control}
-          render={({ field: { value, onChange }, fieldState: { error, invalid } }) => (
-            <TextField
-              required
-              label="Name"
-              value={value}
-              onChange={onChange}
-              error={invalid}
-              helperText={error?.message}
-            />
-          )}
-        />
+        <Typography variant="h5" sx={{ marginY: '19.92px' }}>
+          Clusters
+        </Typography>
+        <ControlledTextField name="name" control={control} label="Name" required />
 
-        <h2>Network Configuration</h2>
+        <Typography variant="h5" sx={{ marginY: '19.92px' }}>
+          Network Configuration
+        </Typography>
         <Box sx={{ marginBottom: '22px' }}>
           <Controller
             name="cniPlugin"
@@ -162,22 +167,18 @@ const ClusterSubForm = ({ values, handleSubmit, handleError }: ClusterFormProps)
           />
         </Box>
         <Box sx={{ marginBottom: '10px' }}>
-          <Controller
+          <ControlledSelectField
             name="cniPluginVersion"
             control={control}
-            render={({ field: { value, onChange } }) => (
-              <SelectField
-                required
-                label="CNI Plugin Version"
-                value={value}
-                onChange={onChange}
-                items={ciliumVersions}
-              />
-            )}
+            required
+            label="CNI Plugin Version"
+            items={ciliumVersions}
           />
         </Box>
 
-        <h2>SSH Keys</h2>
+        <Typography variant="h5" sx={{ marginY: '19.92px' }}>
+          SSH Keys
+        </Typography>
         <Box sx={{ marginBottom: '10px' }}>
           <Controller
             name="sshKeys"
@@ -193,19 +194,23 @@ const ClusterSubForm = ({ values, handleSubmit, handleError }: ClusterFormProps)
       </Box>
 
       <Box sx={{ flex: '1' }}>
-        <h2>Specification</h2>
+        <Typography variant="h5" sx={{ marginY: '19.92px' }}>
+          Specification
+        </Typography>
         <Box sx={{ display: 'flex', gap: '10px', marginBottom: '30px' }}>
-          <SelectField
+          <ControlledSelectField
+            name="controlPlaneVersion"
+            control={control}
             required
             label="Control Plane Version"
             items={controlPlaneVersions}
-            defaultValue={head(controlPlaneVersions)}
           />
 
-          <SelectField
+          <ControlledSelectField
+            name="containerRuntime"
+            control={control}
             required
             label="Container Runtime"
-            value={head(containerRuntimes)}
             items={containerRuntimes}
             disabled
           />
@@ -237,7 +242,9 @@ const ClusterSubForm = ({ values, handleSubmit, handleError }: ClusterFormProps)
         </Box>
 
         <Box sx={{ marginBottom: '30px' }}>
-          <h2>Labels</h2>
+          <Typography variant="h5" sx={{ marginY: '19.92px' }}>
+            Labels
+          </Typography>
           <Box sx={{ display: 'flex', gap: '10px' }}>
             <TextField label="Key" />
             <TextField label="Value" />
