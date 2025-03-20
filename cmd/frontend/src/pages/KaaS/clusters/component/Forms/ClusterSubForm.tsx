@@ -7,6 +7,7 @@ import { Box, FormGroup } from '@mui/material';
 
 import { head, isFunction, map } from 'lodash';
 
+import commonStyle from '../../Common.module.scss';
 import { createFormSchema } from '../../schemas';
 
 import AddButton from '@components/molecules/KaaS/Button/AddButton/AddButton';
@@ -187,7 +188,7 @@ const ClusterSubForm = ({ values, handleSubmit, handleError }: ClusterFormProps)
           />
         </Box>
         <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-          <AddButton label="Add SSH Key" variant="outlined" color="success" size="large" />
+          <AddButton label="Add SSH Key" variant="outlined" className={commonStyle.kaasQuaternaryColor} size="large" />
         </Box>
       </Box>
 

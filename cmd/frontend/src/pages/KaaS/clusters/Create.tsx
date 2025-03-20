@@ -96,15 +96,15 @@ export default function Create() {
           marginTop: '30px',
         }}
       >
-        <CancelButton onClick={() => navigate('/kaas/clusters')} />
+        <CancelButton onClick={() => navigate('/kaas/clusters')} className={commonStyle.kaasTertiaryColor} />
         <Box sx={{ display: 'flex', gap: '10px' }}>
           <Button
             variant="outlined"
-            color="info"
             size="large"
             startIcon={<ArrowBack />}
             disabled={!hasBack(activeStepIndex)}
             onClick={() => handleBack(activeStepIndex)}
+            className={commonStyle.kaasTertiaryColor}
           >
             Back
           </Button>
@@ -116,6 +116,7 @@ export default function Create() {
               startIcon={<ArrowForward />}
               onClick={() => handleNext(activeStepIndex)}
               disabled={hasError}
+              className={commonStyle.kaasPrimaryColor}
             >
               Next
             </Button>

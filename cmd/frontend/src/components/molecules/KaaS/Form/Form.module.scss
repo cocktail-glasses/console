@@ -31,12 +31,16 @@
         border-color: var(--input-boder-color) !important;
       }
 
-      :disabled + fieldset {
-        --input-boder-color: var(--disabled-input-border-color);
-      }
+      //   :disabled + fieldset {
+      //     --input-boder-color: var(--disabled-input-border-color);
+      //   }
 
       &:hover {
         --input-boder-color: var(--global-color);
+      }
+
+      &.Mui-disabled {
+        --input-boder-color: var(--disabled-input-border-color);
       }
 
       &.Mui-focused {

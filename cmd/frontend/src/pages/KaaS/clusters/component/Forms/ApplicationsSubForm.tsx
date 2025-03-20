@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { OpenInNew } from '@mui/icons-material';
 import { Box, Link, Typography, Stack } from '@mui/material';
 
-// import '../../common.scss';
+import commonStyle from '../../Common.module.scss';
 import AddApplicationDialog from '../AddApplicationSearchList/AddApplicationDialog';
 
 import AddButton from '@components/molecules/KaaS/Button/AddButton/AddButton';
@@ -26,6 +26,7 @@ const ApplicationsSubForm = () => {
           variant="outlined"
           onClick={() => setIsOpenDialog(true)}
           sx={{ minHeight: '42px', maxHeight: '42px', textTransform: 'none' }}
+          className={commonStyle.kaasQuaternaryColor}
         />
       </Box>
 
