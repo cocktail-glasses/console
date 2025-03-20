@@ -15,6 +15,10 @@ import Argo from '@resources/app_argo.svg';
 import CertManager from '@resources/app_cert-manager.svg';
 import Falco from '@resources/app_falco.svg';
 import Flux2 from '@resources/app_flux2.svg';
+import Istio from '@resources/app_istio.svg';
+import Jaeger from '@resources/app_jaegertracing.svg';
+import Kiali from '@resources/app_kiali.svg';
+import Prometheus from '@resources/app_prometheus.svg';
 
 export interface Application {
   image: string;
@@ -28,6 +32,30 @@ interface AddApplicationSearchListProps {
 
 const AddApplicationSearchList = ({ onSelect }: AddApplicationSearchListProps) => {
   const applications = [
+    {
+      image: Istio,
+      title: 'istio',
+      summary:
+        'Istio is an open-source service mesh that provides a uniform way to secure, connect, and monitor microservices.',
+    },
+    {
+      image: Kiali,
+      title: 'kiali',
+      summary:
+        'Kiali is a management console for Istio-based service meshes, providing comprehensive visualization and monitoring capabilities to help operators understand and manage their microservices architecture.',
+    },
+    {
+      image: Prometheus,
+      title: 'prometheus',
+      summary:
+        'Prometheus is an open-source monitoring toolkit that collects metrics, uses PromQL for queries,  and integrates with Kubernetes for effective alerting and observability.',
+    },
+    {
+      image: Jaeger,
+      title: 'jaeger',
+      summary:
+        'Jaeger is an open-source distributed tracing system that operates within Kubernetes environments to monitor and visualize transactions across microservices.',
+    },
     { image: Argo, title: 'argocd', summary: 'Argo CD - Declarative, GitOps Continues Delivery Tool for Kubernetes.' },
     {
       image: CertManager,
@@ -71,7 +99,7 @@ const AddApplicationSearchList = ({ onSelect }: AddApplicationSearchListProps) =
 
   return (
     <Stack sx={{ gap: '10px' }}>
-      <Typography variant="body2" component="div" sx={{ display: 'flex', margin: '14px 0' }}>
+      <Typography variant="body2" component="div" sx={{ display: 'flex', margin: '14px 0', gap: '5px' }}>
         Install third party Applications into a cluster,
         <Link sx={{ display: 'flex', alignItems: 'center' }}>
           learn more about Applications
