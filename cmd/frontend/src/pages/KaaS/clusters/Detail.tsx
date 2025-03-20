@@ -17,6 +17,7 @@ import {
 import get from 'lodash/get';
 import isEmpty from 'lodash/isEmpty';
 import map from 'lodash/map';
+import size from 'lodash/size';
 
 import commonStyle from './Common.module.scss';
 import style from './Detail.module.scss';
@@ -297,6 +298,8 @@ const relateResourceQuery = (name: string, namespace: string): ApiListOptions =>
   labelSelector: labelSelectorToQuery({ matchLabels: { 'kamaji.clastix.io/name': name } }),
 });
 
+const MAX_PAGE_SIZE = 10;
+
 const TCPPods = ({ tenantControlPlane, openEditor }: OpenEditorProps) => {
   const namespace = tenantControlPlane?.metadata?.namespace || '';
   const name = tenantControlPlane?.metadata?.name || '';
@@ -315,7 +318,14 @@ const TCPPods = ({ tenantControlPlane, openEditor }: OpenEditorProps) => {
     columnHelper.accessor('spec.nodeName', { header: 'Node' }),
   ];
 
-  return <Table data={list || []} columns={columns} onClickRow={(obj) => openEditor(obj)} />;
+  return (
+    <Table
+      data={list || []}
+      columns={columns}
+      onClickRow={(obj) => openEditor(obj)}
+      paging={size(list) > MAX_PAGE_SIZE ? { pageIndex: 0, pageSize: MAX_PAGE_SIZE } : undefined}
+    />
+  );
 };
 
 const TCPDeployments = ({ tenantControlPlane, openEditor }: OpenEditorProps) => {
@@ -334,7 +344,14 @@ const TCPDeployments = ({ tenantControlPlane, openEditor }: OpenEditorProps) => 
     columnHelper.accessor(age, { header: 'AGE' }),
   ];
 
-  return <Table data={list || []} columns={columns} onClickRow={(obj) => openEditor(obj)} />;
+  return (
+    <Table
+      data={list || []}
+      columns={columns}
+      onClickRow={(obj) => openEditor(obj)}
+      paging={size(list) > MAX_PAGE_SIZE ? { pageIndex: 0, pageSize: MAX_PAGE_SIZE } : undefined}
+    />
+  );
 };
 
 const TCPServices = ({ tenantControlPlane, openEditor }: OpenEditorProps) => {
@@ -354,7 +371,14 @@ const TCPServices = ({ tenantControlPlane, openEditor }: OpenEditorProps) => {
     columnHelper.accessor(age, { header: 'AGE' }),
   ];
 
-  return <Table data={list || []} columns={columns} onClickRow={(obj) => openEditor(obj)} />;
+  return (
+    <Table
+      data={list || []}
+      columns={columns}
+      onClickRow={(obj) => openEditor(obj)}
+      paging={size(list) > MAX_PAGE_SIZE ? { pageIndex: 0, pageSize: MAX_PAGE_SIZE } : undefined}
+    />
+  );
 };
 
 const TCPSecrets = ({ tenantControlPlane, openEditor }: OpenEditorProps) => {
@@ -372,7 +396,14 @@ const TCPSecrets = ({ tenantControlPlane, openEditor }: OpenEditorProps) => {
     columnHelper.accessor(age, { header: 'AGE' }),
   ];
 
-  return <Table data={list || []} columns={columns} onClickRow={(obj) => openEditor(obj)} />;
+  return (
+    <Table
+      data={list || []}
+      columns={columns}
+      onClickRow={(obj) => openEditor(obj)}
+      paging={size(list) > MAX_PAGE_SIZE ? { pageIndex: 0, pageSize: MAX_PAGE_SIZE } : undefined}
+    />
+  );
 };
 
 const TCPConfigmaps = ({ tenantControlPlane, openEditor }: OpenEditorProps) => {
@@ -389,7 +420,14 @@ const TCPConfigmaps = ({ tenantControlPlane, openEditor }: OpenEditorProps) => {
     columnHelper.accessor(age, { header: 'AGE' }),
   ];
 
-  return <Table data={list || []} columns={columns} onClickRow={(obj) => openEditor(obj)} />;
+  return (
+    <Table
+      data={list || []}
+      columns={columns}
+      onClickRow={(obj) => openEditor(obj)}
+      paging={size(list) > MAX_PAGE_SIZE ? { pageIndex: 0, pageSize: MAX_PAGE_SIZE } : undefined}
+    />
+  );
 };
 
 // const ExpandSectionContent = () => {

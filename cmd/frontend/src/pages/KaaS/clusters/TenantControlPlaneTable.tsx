@@ -6,7 +6,7 @@ import { Box } from '@mui/material';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 
-import { identity, toLower } from 'lodash';
+import { identity, size, toLower } from 'lodash';
 
 import { getDotStatus } from './utils/utils';
 
@@ -100,11 +100,14 @@ const TenantControlPlaneTable = ({
     [columnHelper, onClickDelete]
   );
 
+  const MAX_PAGE_SIZE = 10;
+
   return (
     <Table
       data={tenantControlPlanes}
       columns={columns}
       filter
+      paging={size(tenantControlPlanes) > MAX_PAGE_SIZE ? { pageIndex: 0, pageSize: MAX_PAGE_SIZE } : undefined}
       searchValue={search}
       onClickRow={handleRowClick}
       isLoading={isLoading}
