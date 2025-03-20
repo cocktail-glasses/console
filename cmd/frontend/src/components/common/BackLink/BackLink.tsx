@@ -1,16 +1,15 @@
-import { useEffect } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 
 import { Icon } from '@iconify/react';
-import { Location } from 'history';
 
 export interface BackLinkProps {
   /** The location to go back to. If not provided, the browser's history will be used. */
-  to?: string | ReturnType<typeof useLocation> | undefined | Location<any>;
+  to?: string | ReturnType<typeof useLocation>;
 }
 
 export default function BackLink(props: BackLinkProps) {
@@ -19,13 +18,13 @@ export default function BackLink(props: BackLinkProps) {
   const navigate = useNavigate();
 
   // We only want to update when the backLink changes (not the history).
-  useEffect(() => {}, [backLink]);
+  React.useEffect(() => {}, [backLink]);
 
   return (
     <Button
       startIcon={<Icon icon="mdi:chevron-left" />}
       size="small"
-      sx={(theme: any) => ({ color: theme.palette.primaryColor })}
+      sx={(theme) => ({ color: theme.palette.primaryColor })}
       onClick={() => {
         // If there is no back link, go back in history.
         if (!backLink) {

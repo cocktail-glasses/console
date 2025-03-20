@@ -1,9 +1,14 @@
-import { useEffect, useState } from 'react';
+/* eslint-disable react-hooks/rules-of-hooks */
+import React, { useMemo } from 'react';
 
-import { CancellablePromise, ResourceClasses } from '.';
-import { ApiError, apiFactoryWithNamespace, QueryParameters } from './apiProxy';
+import { isEqual } from 'lodash';
+
+import { ResourceClasses } from '.';
+import { KubeMetadata } from './KubeMetadata';
+import { KubeObject } from './KubeObject';
+import { KubeObjectClass } from './KubeObject';
+import { ApiError, QueryParameters } from './apiProxy';
 import { request } from './apiProxy';
-import { KubeMetadata, KubeObject, makeKubeObject } from './cluster';
 
 export interface KubeEvent {
   type: string;
@@ -22,8 +27,12 @@ export interface KubeEvent {
   [otherProps: string]: any;
 }
 
-class Event extends makeKubeObject<KubeEvent>('Event') {
-  static apiEndpoint = apiFactoryWithNamespace('', 'v1', 'events');
+class Event extends KubeObject<KubeEvent> {
+  static kind = 'Event';
+  static apiName = 'events';
+  static apiVersion = 'v1';
+
+  static isNamespaced = true;
 
   // Max number of events to fetch from the API
   private static maxEventsLimit = 2000;
@@ -68,7 +77,7 @@ class Event extends makeKubeObject<KubeEvent>('Event') {
 
   get count() {
     const series = this.getValue('series');
-    if (!!series) {
+    if (series) {
       return series.count;
     }
 
@@ -77,22 +86,22 @@ class Event extends makeKubeObject<KubeEvent>('Event') {
 
   get lastOccurrence() {
     const series = this.getValue('series');
-    if (!!series) {
+    if (series) {
       return series.lastObservedTime;
     }
 
     const lastTimestamp = this.getValue('lastTimestamp');
-    if (!!lastTimestamp) {
+    if (lastTimestamp) {
       return lastTimestamp;
     }
 
     const eventTime = this.getValue('eventTime');
-    if (!!eventTime) {
+    if (eventTime) {
       return eventTime;
     }
 
     const firstTimestamp = this.getValue('firstTimestamp');
-    if (!!firstTimestamp) {
+    if (firstTimestamp) {
       return firstTimestamp;
     }
 
@@ -102,12 +111,12 @@ class Event extends makeKubeObject<KubeEvent>('Event') {
 
   get firstOccurrence() {
     const eventTime = this.getValue('eventTime');
-    if (!!eventTime) {
+    if (eventTime) {
       return eventTime;
     }
 
-    const firstTimestamp = this.firstTimestamp;
-    if (!!firstTimestamp) {
+    const firstTimestamp = this.getValue('firstTimestamp');
+    if (firstTimestamp) {
       return firstTimestamp;
     }
 
@@ -150,90 +159,77 @@ class Event extends makeKubeObject<KubeEvent>('Event') {
       return null;
     }
 
-    const InvolvedObjectClass = ResourceClasses[this.involvedObject.kind];
+    const InvolvedObjectClass = (ResourceClasses as Record<string, KubeObjectClass>)[this.involvedObject.kind];
     let objInstance: KubeObject | null = null;
-    if (!!InvolvedObjectClass) {
+    if (InvolvedObjectClass) {
       objInstance = new InvolvedObjectClass({
         kind: this.involvedObject.kind,
         metadata: {
           name: this.involvedObject.name,
-          namespace: this.involvedObject.namespace,
-        },
-        cluster: this.cluster,
+          namespace: InvolvedObjectClass.isNamespaced
+            ? (this.involvedObject.namespace ?? this.getNamespace())
+            : undefined,
+        } as KubeMetadata,
       });
     }
 
     return objInstance;
   }
 
-  static useListForClusters(clusterNames: string[], options?: { queryParams?: QueryParameters }) {
-    type EventErrorObj = {
+  /**
+   * Fetch events for given clusters
+   *
+   * Important! Make sure to have the parent component have clusters as a key
+   * so that component remounts when clusters change, instead of rerendering
+   * with different number of clusters
+   */
+  static useListForClusters(clusterNames: string[], options: { queryParams?: QueryParameters } = {}) {
+    // Calling hooks in a loop is usually forbidden
+    // But if we make sure that clusters don't change between renders it's fine
+    const queries = Event.useList({
+      clusters: clusterNames,
+      ...options.queryParams,
+    });
+
+    type EventsPerCluster = {
       [cluster: string]: {
         warnings: Event[];
         error?: ApiError | null;
       };
     };
-    const [clusters, setClusters] = useState<Set<string>>(new Set(clusterNames));
-    const [events, setEvents] = useState<EventErrorObj>({});
-    const queryParameters = Object.assign({ limit: this.maxEventsLimit }, options?.queryParams ?? {});
 
-    // Make sure we only update when there are different cluster names
-    useEffect(() => {
-      let shouldUpdate = false;
-      for (const cluster of clusterNames) {
-        if (!clusters.has(cluster)) {
-          shouldUpdate = true;
-          break;
+    const result = useMemo(() => {
+      const res: EventsPerCluster = {};
+
+      queries.errors?.forEach((error) => {
+        if (error.cluster) {
+          res[error.cluster] ??= { warnings: [] };
+          res[error.cluster].error = error;
         }
-      }
-      if (shouldUpdate) {
-        setClusters(new Set(clusterNames));
-      }
-    }, [clusters, clusterNames]);
+      });
 
-    useEffect(() => {
-      if (clusters.size === 0) {
-        console.debug('No clusters specified when fetching warnings');
-      }
-      const cancellables: CancellablePromise[] = [];
-      for (const cluster of clusters) {
-        const cancelFunc = Event.apiList(
-          (events: Event[]) => {
-            setEvents((prevWarnings) => ({
-              ...prevWarnings,
-              [cluster]: {
-                warnings: events,
-                error: null,
-              },
-            }));
-          },
-          (error) => {
-            setEvents((prevWarnings) => ({
-              ...prevWarnings,
-              [cluster]: {
-                warnings: [],
-                error,
-              },
-            }));
-          },
-          {
-            cluster: cluster,
-            queryParams: queryParameters,
-          }
-        )();
-        cancellables.push(cancelFunc);
-      }
-
-      return function cancelAllConnectedListings() {
-        for (const cancellable of cancellables) {
-          cancellable.then((c) => c());
+      Object.entries(queries.clusterResults ?? {}).forEach(([cluster, result]) => {
+        if (!res[cluster]) {
+          res[cluster] = { warnings: [] };
         }
-      };
-    }, [clusters]);
 
-    return events;
+        res[cluster].warnings = result.items ?? [];
+      });
+
+      return res;
+    }, [queries, clusterNames]);
+
+    return result;
   }
 
+  /**
+   * Fetch warning events for given clusters
+   * Amount is limited to {@link Event.maxEventsLimit}
+   *
+   * Important! Make sure to have the parent component have clusters as a key
+   * so that component remounts when clusters change, instead of rerendering
+   * with different number of clusters
+   */
   static useWarningList(clusters: string[], options?: { queryParams?: QueryParameters }) {
     const queryParameters = Object.assign(
       {
@@ -243,7 +239,19 @@ class Event extends makeKubeObject<KubeEvent>('Event') {
       options?.queryParams ?? {}
     );
 
-    return this.useListForClusters(clusters, { queryParams: queryParameters });
+    const newWarningsList = this.useListForClusters(clusters, { queryParams: queryParameters });
+    const [warningList, setWarningList] = React.useState<typeof newWarningsList>(newWarningsList);
+
+    // Only update the warnings if they actually differ
+    React.useEffect(() => {
+      if (isEqual(warningList, newWarningsList)) {
+        return;
+      }
+
+      setWarningList(newWarningsList);
+    }, [newWarningsList]);
+
+    return warningList;
   }
 }
 

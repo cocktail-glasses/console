@@ -1,15 +1,18 @@
-import { apiFactory } from './apiProxy';
-import RoleBinding from './roleBinding';
+import { makeKubeObject } from './KubeObject';
+import { KubeRoleBinding } from './roleBinding';
 
-class ClusterRoleBinding extends RoleBinding {
-  static apiEndpoint = apiFactory('rbac.authorization.k8s.io', 'v1', 'clusterrolebindings');
+class ClusterRoleBinding extends makeKubeObject<KubeRoleBinding>() {
+  static kind = 'ClusterRoleBinding';
+  static apiName = 'clusterrolebindings';
+  static apiVersion = 'rbac.authorization.k8s.io/v1';
+  static isNamespaced = false;
 
-  static get className(): string {
-    return 'ClusterRoleBinding';
+  get roleRef() {
+    return this.jsonData!.roleRef;
   }
 
-  get detailsRoute() {
-    return 'clusterRoleBinding';
+  get subjects(): KubeRoleBinding['subjects'] {
+    return this.jsonData!.subjects;
   }
 }
 

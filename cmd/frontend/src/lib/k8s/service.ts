@@ -1,6 +1,7 @@
 import { uniq } from 'lodash';
-import { apiFactoryWithNamespace } from './apiProxy';
-import { KubeCondition, KubeObjectInterface, makeKubeObject } from './cluster';
+
+import { KubeObject, KubeObjectInterface } from './KubeObject';
+import { KubeCondition } from './cluster';
 
 export interface KubePortStatus {
   error?: string;
@@ -17,7 +18,7 @@ export interface KubeLoadBalancerIngress {
 export interface KubeService extends KubeObjectInterface {
   spec: {
     clusterIP: string;
-    ports: {
+    ports?: {
       name: string;
       nodePort: number;
       port: number;
@@ -39,29 +40,51 @@ export interface KubeService extends KubeObjectInterface {
   };
 }
 
-class Service extends makeKubeObject<KubeService>('service') {
-  static apiEndpoint = apiFactoryWithNamespace('', 'v1', 'services');
+class Service extends KubeObject<KubeService> {
+  static kind = 'Service';
+  static apiName = 'services';
+  static apiVersion = 'v1';
+  static isNamespaced = true;
+
+  static getBaseObject(): KubeService {
+    const baseObject = super.getBaseObject() as KubeService;
+    baseObject.spec = {
+      clusterIP: '',
+      ports: [
+        {
+          name: '',
+          nodePort: 30000,
+          port: 80,
+          protocol: 'TCP',
+          targetPort: 80,
+        },
+      ],
+      type: 'ClusterIP',
+      externalIPs: [],
+      selector: {},
+    };
+    return baseObject;
+  }
 
   get spec(): KubeService['spec'] {
-    return this.jsonData!.spec;
+    return this.jsonData.spec;
   }
 
   get status() {
-    return this.jsonData!.status;
+    return this.jsonData.status;
   }
 
   getExternalAddresses() {
     return uniq(
       (
-        this.status?.loadBalancer?.ingress?.map(
-          (ingress: KubeLoadBalancerIngress) => ingress.hostname || ingress.ip
-        ) || []
+        this.status?.loadBalancer?.ingress?.map((ingress: KubeLoadBalancerIngress) => ingress.hostname || ingress.ip) ||
+        []
       ).concat(this.spec.externalIPs || [])
     ).join(', ');
   }
 
   getPorts() {
-    return this.spec?.ports?.map(port => port.port);
+    return this.spec?.ports?.map((port) => port.port);
   }
 
   getSelector() {

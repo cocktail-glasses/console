@@ -1,5 +1,4 @@
-import { apiFactoryWithNamespace } from './apiProxy';
-import { KubeObjectInterface, makeKubeObject } from './cluster';
+import { KubeObject, KubeObjectInterface } from './KubeObject';
 
 export interface KubePDB extends KubeObjectInterface {
   spec: {
@@ -36,15 +35,24 @@ export interface KubePDB extends KubeObjectInterface {
   };
 }
 
-class PDB extends makeKubeObject<KubePDB>('podDisruptionBudget') {
-  static apiEndpoint = apiFactoryWithNamespace(['policy', 'v1', 'poddisruptionbudgets']);
+class PDB extends KubeObject<KubePDB> {
+  static kind = 'PodDisruptionBudget';
+  static apiName = 'poddisruptionbudgets';
+  static apiVersion = 'policy/v1';
+  static isNamespaced = true;
+
+  static getBaseObject(): KubePDB {
+    const baseObject = super.getBaseObject() as KubePDB;
+    baseObject.spec = { selector: { matchLabels: {} } };
+    return baseObject;
+  }
 
   get spec(): KubePDB['spec'] {
-    return this.jsonData!.spec;
+    return this.jsonData.spec;
   }
 
   get status(): KubePDB['status'] {
-    return this.jsonData!.status;
+    return this.jsonData.status;
   }
 
   get selectors(): string[] {

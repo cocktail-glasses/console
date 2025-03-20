@@ -1,11 +1,6 @@
-import { apiFactoryWithNamespace } from './apiProxy';
-import {
-  KubeContainer,
-  KubeMetadata,
-  KubeObjectInterface,
-  LabelSelector,
-  makeKubeObject,
-} from './cluster';
+import { KubeContainer, LabelSelector } from './cluster';
+import { KubeMetadata } from './KubeMetadata';
+import { KubeObject, KubeObjectInterface } from './KubeObject';
 import { KubePodSpec } from './pod';
 
 export interface KubeDaemonSet extends KubeObjectInterface {
@@ -18,7 +13,7 @@ export interface KubeDaemonSet extends KubeObjectInterface {
     };
     selector: LabelSelector;
     template: {
-      metadata: KubeMetadata;
+      metadata?: KubeMetadata;
       spec: KubePodSpec;
     };
     [otherProps: string]: any;
@@ -28,15 +23,50 @@ export interface KubeDaemonSet extends KubeObjectInterface {
   };
 }
 
-class DaemonSet extends makeKubeObject<KubeDaemonSet>('DaemonSet') {
-  static apiEndpoint = apiFactoryWithNamespace('apps', 'v1', 'daemonsets');
+class DaemonSet extends KubeObject<KubeDaemonSet> {
+  static kind = 'DaemonSet';
+  static apiName = 'daemonsets';
+  static apiVersion = 'apps/v1';
+  static isNamespaced = true;
 
   get spec() {
-    return this.jsonData!.spec;
+    return this.jsonData.spec;
   }
 
   get status() {
-    return this.jsonData!.status;
+    return this.jsonData.status;
+  }
+
+  static getBaseObject(): KubeDaemonSet {
+    const baseObject = super.getBaseObject() as KubeDaemonSet;
+    baseObject.metadata = {
+      ...baseObject.metadata,
+      namespace: '',
+    };
+    baseObject.spec = {
+      updateStrategy: {
+        type: 'RollingUpdate',
+        rollingUpdate: {
+          maxUnavailable: 1,
+        },
+      },
+      selector: {
+        matchLabels: { app: 'headlamp' },
+      },
+      template: {
+        spec: {
+          containers: [
+            {
+              name: '',
+              image: '',
+              imagePullPolicy: 'Always',
+            },
+          ],
+          nodeName: '',
+        },
+      },
+    };
+    return baseObject;
   }
 
   getContainers(): KubeContainer[] {

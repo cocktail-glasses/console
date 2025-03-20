@@ -18,6 +18,7 @@ import ThemeProviderNexti18n from '@lib/ThemeProviderNexti18n';
 import { theme } from '@lib/stores';
 import themes, { getThemeName } from '@lib/themes';
 import ErrorComponent from '@pages/Common/ErrorPage';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 // TODO: ccambno, unused
 //import { Loader } from '@components/common';
@@ -42,14 +43,25 @@ function AppWithRedux(props: React.PropsWithChildren<{}>) {
   );
 }
 
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 3 * 60_000,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
+
 function App() {
   return (
     <ErrorBoundary fallback={<ErrorComponent />}>
       <Provider store={store}>
         <JProvider>
-          <AppWithRedux>
-            <AppContainer />
-          </AppWithRedux>
+          <QueryClientProvider client={queryClient}>
+            <AppWithRedux>
+              <AppContainer />
+            </AppWithRedux>
+          </QueryClientProvider>
         </JProvider>
       </Provider>
     </ErrorBoundary>

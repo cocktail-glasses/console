@@ -1,10 +1,15 @@
-import { useEffect, useState } from 'react';
+/* eslint-disable react-hooks/rules-of-hooks */
+import React, { useEffect } from 'react';
 
-import { KubeObject } from '@lib/k8s/cluster';
+import { KubeObject, KubeObjectClass } from '@lib/k8s/cluster';
+import { useQuery } from '@tanstack/react-query';
+
+/** List of valid request verbs. See https://kubernetes.io/docs/reference/access-authn-authz/authorization/#determine-the-request-verb. */
+const VALID_AUTH_VERBS = ['create', 'get', 'list', 'watch', 'update', 'patch', 'delete', 'deletecollection'];
 
 export interface AuthVisibleProps extends React.PropsWithChildren<{}> {
   /** The item for which auth will be checked or a resource class (e.g. Job). */
-  item: KubeObject;
+  item: KubeObject | KubeObjectClass | null;
   /** The verb associated with the permissions being verifying. See https://kubernetes.io/docs/reference/access-authn-authz/authorization/#determine-the-request-verb . */
   authVerb: string;
   /** The subresource for which the permissions are being verifyied (e.g. "log" when checking for a pod's log). */
@@ -26,40 +31,38 @@ export interface AuthVisibleProps extends React.PropsWithChildren<{}> {
  */
 export default function AuthVisible(props: AuthVisibleProps) {
   const { item, authVerb, subresource, namespace, onError, onAuthResult, children } = props;
-  const [visible, setVisible] = useState(false);
+
+  if (!VALID_AUTH_VERBS.includes(authVerb)) {
+    console.warn(`Invalid authVerb provided: "${authVerb}". Skipping authorization check.`);
+    return null;
+  }
+
+  const itemClass: KubeObjectClass | null = (item as KubeObject)?._class?.() ?? item;
+  const itemName = (item as KubeObject)?.getName?.();
+
+  const { data } = useQuery<any>({
+    enabled: !!item,
+    queryKey: ['authVisible', itemName, itemClass.apiName, itemClass.apiVersion, authVerb, subresource, namespace],
+    queryFn: async () => {
+      try {
+        const res = await item!.getAuthorization(authVerb, { subresource, namespace });
+        return res;
+      } catch (e: any) {
+        onError?.(e);
+      }
+    },
+  });
+
+  const visible = data?.status?.allowed ?? false;
 
   useEffect(() => {
-    let isMounted = true;
-    if (!!item) {
-      item
-        .getAuthorization(authVerb, { subresource, namespace })
-        .then((result: any) => {
-          if (isMounted) {
-            if (result.status?.allowed !== visible) {
-              setVisible(!!result.status?.allowed);
-            }
-            if (!!onAuthResult) {
-              onAuthResult({
-                allowed: result.status?.allowed,
-                reason: result.status?.reason || '',
-              });
-            }
-          }
-        })
-        .catch((err: Error) => {
-          if (isMounted) {
-            if (!!onError) {
-              onError(err);
-            }
-            setVisible(false);
-          }
-        });
+    if (data) {
+      onAuthResult?.({
+        allowed: visible,
+        reason: data.status?.reason ?? '',
+      });
     }
-
-    return function cleanup() {
-      isMounted = false;
-    };
-  }, [item, authVerb, namespace, onAuthResult, onError, subresource, visible]);
+  }, [data]);
 
   if (!visible) {
     return null;

@@ -1,17 +1,17 @@
-import { useState } from 'react';
-
-import { useConnectApi } from '.';
+import React from 'react';
 import { useErrorState } from '../util';
-import { ApiError, apiFactory, metrics } from './apiProxy';
-import { KubeCondition, KubeMetrics, KubeObjectInterface, makeKubeObject } from './cluster';
+import { useConnectApi } from '.';
+import { ApiError, metrics } from './apiProxy';
+import { KubeCondition, KubeMetrics } from './cluster';
+import { KubeObject, KubeObjectInterface } from './KubeObject';
 
 export interface KubeNode extends KubeObjectInterface {
   status: {
-    addresses: {
+    addresses?: {
       address: string;
       type: string;
     }[];
-    allocatable: {
+    allocatable?: {
       cpu: any;
       memory: any;
       ephemeralStorage: any;
@@ -19,7 +19,7 @@ export interface KubeNode extends KubeObjectInterface {
       hugepages_2Mi: any;
       pods: any;
     };
-    capacity: {
+    capacity?: {
       cpu: any;
       memory: any;
       ephemeralStorage: any;
@@ -27,10 +27,10 @@ export interface KubeNode extends KubeObjectInterface {
       hugepages_2Mi: any;
       pods: any;
     };
-    conditions: (Omit<KubeCondition, 'lastProbeTime' | 'lastUpdateTime'> & {
+    conditions?: (Omit<KubeCondition, 'lastProbeTime' | 'lastUpdateTime'> & {
       lastHeartbeatTime: string;
     })[];
-    nodeInfo: {
+    nodeInfo?: {
       architecture: string;
       bootID: string;
       containerRuntimeVersion: string;
@@ -53,19 +53,22 @@ export interface KubeNode extends KubeObjectInterface {
   };
 }
 
-class Node extends makeKubeObject<KubeNode>('node') {
-  static apiEndpoint = apiFactory('', 'v1', 'nodes');
+class Node extends KubeObject<KubeNode> {
+  static kind = 'Node';
+  static apiName = 'nodes';
+  static apiVersion = 'v1';
+  static isNamespaced = false;
 
   get status(): KubeNode['status'] {
-    return this.jsonData!.status;
+    return this.jsonData.status;
   }
 
   get spec(): KubeNode['spec'] {
-    return this.jsonData!.spec;
+    return this.jsonData.spec;
   }
 
   static useMetrics(): [KubeMetrics[] | null, ApiError | null] {
-    const [nodeMetrics, setNodeMetrics] = useState<KubeMetrics[] | null>(null);
+    const [nodeMetrics, setNodeMetrics] = React.useState<KubeMetrics[] | null>(null);
     const [error, setError] = useErrorState(setNodeMetrics);
 
     function setMetrics(metrics: KubeMetrics[]) {
@@ -82,11 +85,11 @@ class Node extends makeKubeObject<KubeNode>('node') {
   }
 
   getExternalIP(): string {
-    return this.status.addresses.find((address) => address.type === 'ExternalIP')?.address || '';
+    return this.status.addresses?.find(address => address.type === 'ExternalIP')?.address || '';
   }
 
   getInternalIP(): string {
-    return this.status.addresses.find((address) => address.type === 'InternalIP')?.address || '';
+    return this.status.addresses?.find(address => address.type === 'InternalIP')?.address || '';
   }
 }
 

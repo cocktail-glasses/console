@@ -1,5 +1,7 @@
-import { useEffect, useMemo, useState } from 'react';
+import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+
+import merge from 'lodash/merge';
 
 import { getCluster, getClusterPrefixedPath } from '@lib/cluster';
 import { ApiError } from '@lib/k8s/apiProxy';
@@ -128,6 +130,9 @@ export function getResourceStr(value: number, resourceType: 'cpu' | 'memory') {
 }
 
 export function getResourceMetrics(item: Node, metrics: KubeMetrics[], resourceType: 'cpu' | 'memory') {
+  if (item.status.capacity === undefined) {
+    return [0, 0];
+  }
   const resourceParsers: any = {
     cpu: parseCpu,
     memory: parseRam,
@@ -154,17 +159,28 @@ export function useFilterFunc<
   const filter = useTypedSelector((state) => state.filter);
 
   return (item: T, search?: string) => {
-    if (!!item.metadata) {
+    if (item?.metadata) {
       return filterResource(item as KubeObjectInterface | KubeEvent, filter, search, matchCriteria);
     }
     return filterGeneric<T>(item, search, matchCriteria);
   };
 }
 
-export function useErrorState(dependentSetter?: (...args: any) => void) {
-  const [error, setError] = useState<ApiError | null>(null);
+/**
+ * Gets clusters.
+ *
+ * @param returnWhenNoClusters return this value when no clusters are found.
+ * @returns the cluster group from the URL.
+ */
+export function getClusterGroup(returnWhenNoClusters: string[] = []): string[] {
+  const clusterFromURL = getCluster();
+  return clusterFromURL?.split('+') || returnWhenNoClusters;
+}
 
-  useEffect(
+export function useErrorState(dependentSetter?: (...args: any) => void) {
+  const [error, setError] = React.useState<ApiError | null>(null);
+
+  React.useEffect(
     () => {
       if (!!error && !!dependentSetter) {
         dependentSetter(null);
@@ -174,8 +190,43 @@ export function useErrorState(dependentSetter?: (...args: any) => void) {
     [error]
   );
 
-  // Adding "as any" here because it was getting difficult to validate the setter type.
-  return [error, setError as any];
+  return [error, setError] as const;
+}
+
+/**
+ * This function joins a list of items per cluster into a single list of items.
+ *
+ * @param args The list of objects per cluster to join.
+ * @returns The joined list of items, or null if there are no items.
+ */
+export function flattenClusterListItems<T>(...args: ({ [cluster: string]: T[] | null } | null)[]): T[] | null {
+  const flatItems = args
+    .filter(Boolean)
+    .flatMap((clusterItems) => Object.values(clusterItems ?? {}).flatMap((items) => items ?? []));
+
+  return flatItems.length > 0 ? flatItems : null;
+}
+
+/**
+ * Combines errors per cluster.
+ *
+ * @param args The list of errors per cluster to join.
+ * @returns The joint list of errors, or null if there are no errors.
+ */
+export function combineClusterListErrors(
+  ...args: ({ [cluster: string]: ApiError | null } | null)[]
+): { [cluster: string]: ApiError | null } | null {
+  const filteredArgs = args.map((clusterErrors) => {
+    if (clusterErrors === null) {
+      return {};
+    }
+    return Object.fromEntries(Object.entries(clusterErrors).filter(([, error]) => error !== null));
+  });
+
+  const errors = merge({}, ...filteredArgs);
+  const hasErrors = Object.values(errors).some((error) => error !== null);
+
+  return hasErrors ? errors : null;
 }
 
 type URLStateParams<T> = {
@@ -186,7 +237,6 @@ type URLStateParams<T> = {
   /** The prefix of the URL key to use for this state (a prefix 'my' with a key name 'key' will be used in the URL as 'my.key'). */
   prefix?: string;
 };
-
 export function useURLState(key: string, defaultValue: number): [number, React.Dispatch<React.SetStateAction<number>>];
 export function useURLState(
   key: string,
@@ -209,7 +259,7 @@ export function useURLState<T extends string | number | undefined = string>(
   const navigate = useNavigate();
   const location = useLocation();
   // Don't even use the prefix if the key is empty
-  const fullKey = !key ? '' : !!prefix ? prefix + '.' + key : key;
+  const fullKey = !key ? '' : prefix ? prefix + '.' + key : key;
 
   function getURLValue() {
     // An empty key means that we don't want to use the state from the URL.
@@ -233,16 +283,16 @@ export function useURLState<T extends string | number | undefined = string>(
     return newValue;
   }
 
-  const initialValue = useMemo(() => {
+  const initialValue = React.useMemo(() => {
     const newValue = getURLValue();
     if (newValue === null) {
       return defaultValue;
     }
     return newValue;
-  }, [defaultValue, getURLValue]);
-  const [value, setValue] = useState<T>(initialValue as T);
+  }, []);
+  const [value, setValue] = React.useState<T>(initialValue as T);
 
-  useEffect(
+  React.useEffect(
     () => {
       const newValue = getURLValue();
       if (newValue === null) {
@@ -254,10 +304,10 @@ export function useURLState<T extends string | number | undefined = string>(
       }
     },
     // eslint-disable-next-line
-    [navigate, defaultValue, getURLValue]
+    [history]
   );
 
-  useEffect(() => {
+  React.useEffect(() => {
     // An empty key means that we don't want to use the state from the URL.
     if (fullKey === '') {
       return;
@@ -287,7 +337,7 @@ export function useURLState<T extends string | number | undefined = string>(
     if (shouldUpdateURL) {
       navigate(urlParams.toString(), { replace: true });
     }
-  }, [value, defaultValue, fullKey, getURLValue, hideDefault, location.search, navigate]);
+  }, [value]);
 
   return [value, setValue] as [T, React.Dispatch<React.SetStateAction<T>>];
 }
@@ -382,7 +432,7 @@ export function normalizeUnit(resourceType: string, quantity: string) {
  * If UNDER_TEST is set to true, it will return the same ID every time, so snapshots do not get invalidated.
  */
 export function useId(prefix = '') {
-  const [id] = useState<string | undefined>(
+  const [id] = React.useState<string | undefined>(
     import.meta.env.UNDER_TEST === 'true' ? prefix + 'id' : prefix + Math.random().toString(16).slice(2)
   );
 

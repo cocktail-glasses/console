@@ -1,10 +1,11 @@
-import { Children, Fragment, useCallback, useEffect, useRef, useState } from 'react';
+import React, { isValidElement, PropsWithChildren } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 import { generatePath } from 'react-router';
 import { useNavigate } from 'react-router-dom';
 
+import { DialogActions, IconButton } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
 import Box from '@mui/material/Box';
 import ButtonBase from '@mui/material/ButtonBase';
@@ -12,31 +13,29 @@ import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Container from '@mui/material/Container';
 import Dialog, { DialogProps } from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import Grid from '@mui/material/Grid';
-import IconButton from '@mui/material/IconButton';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
-import { isNull } from 'lodash';
+import 'lodash';
 
-import ActionButton from '../../../components/common/ActionButton';
-import { DialogTitle } from '../../../components/common/Dialog';
-import ErrorBoundary from '../../../components/common/ErrorBoundary';
-import Loader from '../../../components/common/Loader';
 import ClusterChooser from './ClusterChooser';
 import ClusterChooserPopup from './ClusterChooserPopup';
 
+// import ActionButton from '@components/common/ActionButton';
+import { DialogTitle } from '@components/common/Dialog';
+import ErrorBoundary from '@components/common/ErrorBoundary';
+import Loader from '@components/common/Loader';
 import helpers from '@helpers';
 import { Icon, InlineIcon } from '@iconify/react';
 import { AppLogo } from '@lib/App/AppLogo';
 import { useClustersConf } from '@lib/k8s';
 import { Cluster } from '@lib/k8s/cluster';
-import { createRouteURL } from '@lib/router';
+// import { createRouteURL } from '@lib/router';
 import { getCluster, getClusterPrefixedPath } from '@lib/util';
 import { setVersionDialogOpen } from 'redux/actions/actions';
 import { useTypedSelector } from 'redux/reducers/reducers';
@@ -51,11 +50,11 @@ export interface ClusterTitleProps {
 
 export function ClusterTitle(props: ClusterTitleProps) {
   const { cluster, clusters, onClick } = props;
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const buttonRef = useRef<HTMLButtonElement>(null);
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const buttonRef = React.useRef<HTMLButtonElement>(null);
   const arePluginsLoaded = useTypedSelector((state) => state.plugins.loaded);
-  // const ChooserButton = useTypedSelector(state => state.ui.clusterChooserButtonComponent);
-  const ChooserButton = null;
+  const ChooserButton = useTypedSelector((state) => state.ui.clusterChooserButtonComponent);
+
   useHotkeys(
     'ctrl+shift+l',
     () => {
@@ -68,7 +67,7 @@ export function ClusterTitle(props: ClusterTitleProps) {
     return null;
   }
 
-  if (!arePluginsLoaded || isNull(ChooserButton)) {
+  if (!arePluginsLoaded || _.isNull(ChooserButton)) {
     return null;
   }
 
@@ -78,20 +77,19 @@ export function ClusterTitle(props: ClusterTitleProps) {
 
   return (
     <ErrorBoundary>
-      <>
-        {/* {ChooserButton ? (
-          isValidElement(ChooserButton) ? (
-            ChooserButton
-          ) : (
-            <ChooserButton
-              clickHandler={(e: React.MouseEvent<HTMLButtonElement, MouseEvent> | undefined) => {
-                onClick && onClick(e);
-                e?.currentTarget && setAnchorEl(e.currentTarget);
-              }}
-              cluster={cluster}
-            />
-          )
-        ) : ( */}
+      {ChooserButton ? (
+        isValidElement(ChooserButton) ? (
+          ChooserButton
+        ) : (
+          <ChooserButton
+            clickHandler={(e) => {
+              onClick && onClick(e);
+              e?.currentTarget && setAnchorEl(e.currentTarget);
+            }}
+            cluster={cluster}
+          />
+        )
+      ) : (
         <ClusterChooser
           ref={buttonRef}
           clickHandler={(e) => {
@@ -100,14 +98,13 @@ export function ClusterTitle(props: ClusterTitleProps) {
           }}
           cluster={cluster}
         />
-        {/* )} */}
-        <ClusterChooserPopup anchor={anchorEl} onClose={() => setAnchorEl(null)} />
-      </>
+      )}
+      <ClusterChooserPopup anchor={anchorEl} onClose={() => setAnchorEl(null)} />
     </ErrorBoundary>
   );
 }
 
-interface ClusterButtonProps extends React.PropsWithChildren<{}> {
+interface ClusterButtonProps extends PropsWithChildren<{}> {
   cluster: Cluster;
   onClick?: (...args: any[]) => void;
   focusedRef?: (node: any) => void;
@@ -160,7 +157,7 @@ interface ClusterListProps {
 function ClusterList(props: ClusterListProps) {
   const { clusters, onButtonClick } = props;
   const theme = useTheme();
-  const focusedRef = useCallback((node: any) => {
+  const focusedRef = React.useCallback((node: HTMLElement) => {
     if (node !== null) {
       node.focus();
     }
@@ -244,7 +241,7 @@ function ClusterList(props: ClusterListProps) {
   );
 }
 
-interface ClusterDialogProps extends React.PropsWithChildren<Omit<DialogProps, 'open' | 'onClose'>> {
+interface ClusterDialogProps extends PropsWithChildren<Omit<DialogProps, 'open' | 'onClose'>> {
   open?: boolean;
   onClose?: (() => void) | null;
   useCover?: boolean;
@@ -257,7 +254,7 @@ export function ClusterDialog(props: ClusterDialogProps) {
   const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
   const { open, onClose = null, useCover = false, showInfoButton = true, children = [], ...otherProps } = props;
   // Only used if open is not provided
-  const [show, setShow] = useState(true);
+  const [show, setShow] = React.useState(true);
   const dispatch = useDispatch();
 
   function handleClose() {
@@ -288,7 +285,6 @@ export function ClusterDialog(props: ClusterDialogProps) {
     >
       <DialogTitle
         sx={{
-          background: theme.palette.common.black,
           textAlign: 'center',
           alignItems: 'center',
           display: 'flex',
@@ -303,7 +299,7 @@ export function ClusterDialog(props: ClusterDialogProps) {
               }}
               size="small"
             >
-              <InlineIcon icon={'mdi:information-outline'} color={theme.palette.primary.contrastText} />
+              <InlineIcon icon={'mdi:information-outline'} />
             </IconButton>
           ),
         ]}
@@ -314,10 +310,10 @@ export function ClusterDialog(props: ClusterDialogProps) {
             height: '32px',
             width: 'auto',
           }}
-          themeName="dark"
         />
       </DialogTitle>
       <DialogContent
+        dividers
         sx={{
           [theme.breakpoints.up('sm')]: {
             minWidth: 500,
@@ -342,10 +338,10 @@ function Chooser(props: ClusterDialogProps) {
   const clusters = useClustersConf();
   const { open = null, onClose, children = [], ...otherProps } = props;
   // Only used if open is not provided
-  const [show, setShow] = useState(props.open);
+  const [show, setShow] = React.useState(props.open);
   const { t } = useTranslation();
 
-  useEffect(
+  React.useEffect(
     () => {
       if (open !== null && open !== show) {
         setShow(open);
@@ -365,17 +361,16 @@ function Chooser(props: ClusterDialogProps) {
   function handleButtonClick(cluster: Cluster) {
     if (cluster.name !== getCluster()) {
       helpers.setRecentCluster(cluster);
-      navigate(
-        generatePath(getClusterPrefixedPath(), {
+      navigate({
+        pathname: generatePath(getClusterPrefixedPath(), {
           cluster: cluster.name,
         }),
-        { replace: true }
-      );
+      });
     }
 
     setShow(false);
 
-    if (!!onClose) {
+    if (onClose) {
       onClose();
     }
   }
@@ -385,7 +380,7 @@ function Chooser(props: ClusterDialogProps) {
       setShow(false);
     }
 
-    if (!!onClose) {
+    if (onClose) {
       onClose();
     }
   }
@@ -409,7 +404,7 @@ function Chooser(props: ClusterDialogProps) {
         </DialogTitle>
 
         {clusterList.length === 0 ? (
-          <Fragment>
+          <React.Fragment>
             {clusters === null ? (
               <>
                 <DialogContentText>{t('Wait while fetching clusters…')}</DialogContentText>
@@ -419,16 +414,28 @@ function Chooser(props: ClusterDialogProps) {
               <>
                 <DialogContentText>{t('There seems to be no clusters configured…')}</DialogContentText>
                 <DialogContentText>{t('Please make sure you have at least one cluster configured.')}</DialogContentText>
+                {/* {helpers.isElectron() && (
+                  <DialogContentText>{t('Or try running Headlamp with a different kube config.')}</DialogContentText>
+                )} */}
               </>
             )}
-          </Fragment>
+          </React.Fragment>
         ) : (
           <ClusterList clusters={clusterList} onButtonClick={handleButtonClick} />
         )}
-        {Children.toArray(children).length > 0 && (
+        {/* {helpers.isElectron() ? (
+          <Box style={{ justifyContent: 'center', display: 'flex' }}>
+            <ActionButton
+              description={t('Load from a file')}
+              onClick={() => history.push(createRouteURL('loadKubeConfig'))}
+              icon="mdi:plus"
+            />
+          </Box>
+        ) : null} */}
+        {React.Children.toArray(children).length > 0 && (
           <DialogActions>
             <Grid container direction="row" justifyContent="space-between" alignItems="center">
-              {Children.toArray(children).map((child, index) => (
+              {React.Children.toArray(children).map((child, index) => (
                 <Grid item key={index}>
                   {child}
                 </Grid>

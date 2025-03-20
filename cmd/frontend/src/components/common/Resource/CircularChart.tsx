@@ -80,7 +80,7 @@ export function CircularChart(props: CircularChartProps) {
     <TileChart
       title={title}
       data={noMetrics ? null : makeData()}
-      legend={!!getLegend ? getLegend(used, available) : ''}
+      legend={getLegend ? getLegend(used, available) : ''}
       label={getLabel()}
       total={available}
       infoTooltip={noMetrics ? t('translation|Install the metrics-server to get usage data.') : null}

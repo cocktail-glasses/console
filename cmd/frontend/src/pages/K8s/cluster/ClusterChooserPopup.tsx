@@ -1,26 +1,21 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { generatePath } from 'react-router';
 import { useNavigate } from 'react-router-dom';
 
+import { ListItemIcon, ListSubheader, MenuItem, MenuList, Popover, useMediaQuery } from '@mui/material';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
+// import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
-import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import ListSubheader from '@mui/material/ListSubheader';
-import MenuItem from '@mui/material/MenuItem';
-import MenuList from '@mui/material/MenuList';
-import Popover from '@mui/material/Popover';
 import TextField from '@mui/material/TextField';
 import { useTheme } from '@mui/material/styles';
-import useMediaQuery from '@mui/material/useMediaQuery';
 
 import helpers from '@helpers';
 import { Icon } from '@iconify/react';
 import { useCluster, useClustersConf } from '@lib/k8s';
 import { Cluster } from '@lib/k8s/cluster';
-import { createRouteURL } from '@lib/router';
+// import { createRouteURL } from '@lib/router';
 import { getCluster, getClusterPrefixedPath } from '@lib/util';
 
 function ClusterListItem(props: { cluster: Cluster; onClick: () => void; selected?: boolean }) {
@@ -33,10 +28,7 @@ function ClusterListItem(props: { cluster: Cluster; onClick: () => void; selecte
       <ListItemIcon>
         <Icon icon="mdi:kubernetes" width={26} color={theme.palette.text.primary} />
       </ListItemIcon>
-      <ListItemText
-        primary={cluster.name}
-        secondary={!!cluster.isCurrent ? t('Current', { context: 'cluster' }) : ''}
-      />
+      <ListItemText primary={cluster.name} secondary={cluster.isCurrent ? t('Current', { context: 'cluster' }) : ''} />
     </MenuItem>
   );
 }
@@ -55,14 +47,14 @@ export interface ChooserPopupPros {
 function ClusterChooserPopup(props: ChooserPopupPros) {
   const { t } = useTranslation(['translation']);
   const { anchor, onClose, ...otherProps } = props;
-  const [filter, setFilter] = useState('');
+  const [filter, setFilter] = React.useState('');
   const clusters = useClustersConf();
   const navigate = useNavigate();
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
-  const [activeDescendantIndex, setActiveDescendantIndex] = useState<number>(-1);
+  const [activeDescendantIndex, setActiveDescendantIndex] = React.useState<number>(-1);
 
-  const focusedRef = useCallback((node: any) => {
+  const focusedRef = React.useCallback((node: HTMLElement) => {
     if (node !== null) {
       node.focus();
     }
@@ -72,18 +64,18 @@ function ClusterChooserPopup(props: ChooserPopupPros) {
   function handleClose() {
     setFilter('');
 
-    if (!!onClose) {
+    if (onClose) {
       onClose();
     }
   }
 
-  const [recentClusters, clustersToShow] = useMemo(() => {
+  const [recentClusters, clustersToShow] = React.useMemo(() => {
     let allClusters = Object.values(clusters || {});
     if (filter !== '') {
       allClusters = allClusters.filter((cluster) => cluster.name.includes(filter));
     }
 
-    const recentClustersNames = !!filter ? [] : helpers.getRecentClusters();
+    const recentClustersNames = filter ? [] : helpers.getRecentClusters();
 
     const clustersToShow: Cluster[] = [];
     const recentClusters: Cluster[] = [];
@@ -122,9 +114,9 @@ function ClusterChooserPopup(props: ChooserPopupPros) {
     });
 
     return [recentClusters, clustersToShow];
-  }, [clusters, currentCluster, filter, getActiveDescendantCluster]);
+  }, [clusters, currentCluster, filter]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     setActiveDescendantIndex(-1);
   }, [filter]);
 
@@ -133,15 +125,15 @@ function ClusterChooserPopup(props: ChooserPopupPros) {
 
     if (cluster.name !== getCluster()) {
       helpers.setRecentCluster(cluster);
-      navigate(
-        generatePath(getClusterPrefixedPath(), {
+      navigate({
+        pathname: generatePath(getClusterPrefixedPath(), {
           cluster: cluster.name,
-        })
-      );
+        }),
+      });
     }
   }
 
-  const activeDescendantProp = useMemo(() => {
+  const activeDescendantProp = React.useMemo(() => {
     const cluster = getActiveDescendantCluster();
 
     if (!cluster) {
@@ -174,7 +166,7 @@ function ClusterChooserPopup(props: ChooserPopupPros) {
       }
       case 'Enter': {
         const cluster = getActiveDescendantCluster();
-        if (!!cluster) {
+        if (cluster) {
           selectCluster(cluster);
         }
         break;
@@ -214,7 +206,7 @@ function ClusterChooserPopup(props: ChooserPopupPros) {
           size="small"
           fullWidth
           InputLabelProps={{ shrink: true }}
-          onChange={(event: React.ChangeEvent<HTMLInputElement>) => setFilter(event.target.value)}
+          onChange={(e) => setFilter(e.target.value)}
           inputRef={focusedRef}
           onKeyDown={onKeyDown}
           InputProps={{
@@ -279,6 +271,26 @@ function ClusterChooserPopup(props: ChooserPopupPros) {
           ))}
         </MenuList>
       </Box>
+      {/* {helpers.isElectron() && (
+        <>
+          <Button
+            sx={(theme) => ({
+              backgroundColor: theme.palette.sidebarBg,
+              color: theme.palette.mode === 'dark' ? theme.palette.text.primary : theme.palette.primary.contrastText,
+              '&:hover': {
+                color: theme.palette.text.secondary,
+              },
+              width: '100%',
+              borderTopLeftRadius: 0,
+              borderTopRightRadius: 0,
+              textTransform: 'none',
+            })}
+            onClick={() => navigate(createRouteURL('loadKubeConfig'))}
+          >
+            {t('translation|Add Cluster')}
+          </Button>
+        </>
+      )} */}
     </Popover>
   );
 }

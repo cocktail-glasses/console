@@ -1,6 +1,6 @@
 import { ResourceClasses } from '.';
-import { apiFactoryWithNamespace } from './apiProxy';
-import { KubeObject, KubeObjectInterface, makeKubeObject } from './cluster';
+import { KubeMetadata } from './KubeMetadata';
+import { KubeObject, KubeObjectClass, KubeObjectInterface } from './KubeObject';
 export interface CrossVersionObjectReference {
   apiVersion: string;
   kind: string;
@@ -120,32 +120,32 @@ interface HpaStatus {
   lastScaleTime: string;
   observedGeneration?: number;
   currentMetrics:
-  | {
-    type: string;
-    external?: {
-      current: MetricValueStatus;
-      metric: MetricIdentifier;
-    };
-    object?: {
-      current: MetricValueStatus;
-      metric: MetricIdentifier;
-      desiredObject: CrossVersionObjectReference;
-    };
-    pods?: {
-      current: MetricValueStatus;
-      metric: MetricIdentifier;
-    };
-    resource?: {
-      name: string;
-      current: MetricValueStatus;
-    };
-    containerResource?: {
-      container: string;
-      name: string;
-      current: MetricValueStatus;
-    };
-  }[]
-  | null;
+    | {
+        type: string;
+        external?: {
+          current: MetricValueStatus;
+          metric: MetricIdentifier;
+        };
+        object?: {
+          current: MetricValueStatus;
+          metric: MetricIdentifier;
+          desiredObject: CrossVersionObjectReference;
+        };
+        pods?: {
+          current: MetricValueStatus;
+          metric: MetricIdentifier;
+        };
+        resource?: {
+          name: string;
+          current: MetricValueStatus;
+        };
+        containerResource?: {
+          container: string;
+          name: string;
+          current: MetricValueStatus;
+        };
+      }[]
+    | null;
   conditions: {
     type: string;
     status: string;
@@ -166,15 +166,29 @@ interface HPAMetrics {
   shortValue: string;
 }
 
-class HPA extends makeKubeObject<KubeHPA>('horizontalPodAutoscaler') {
-  static apiEndpoint = apiFactoryWithNamespace('autoscaling', 'v2', 'horizontalpodautoscalers');
+class HPA extends KubeObject<KubeHPA> {
+  static kind = 'HorizontalPodAutoscaler';
+  static apiName = 'horizontalpodautoscalers';
+  static apiVersion = 'autoscaling/v2';
+  static isNamespaced = true;
+
+  static getBaseObject(): KubeHPA {
+    const baseObject = super.getBaseObject() as KubeHPA;
+    baseObject.spec = {
+      maxReplicas: 0,
+      minReplicas: 0,
+      scaleTargetRef: { apiVersion: '', kind: '', name: '' },
+      metrics: [],
+    };
+    return baseObject;
+  }
 
   get spec(): HpaSpec {
-    return this.jsonData!.spec;
+    return this.jsonData.spec;
   }
 
   get status(): HpaStatus {
-    return this.jsonData!.status;
+    return this.jsonData.status;
   }
 
   metrics(t: Function): HPAMetrics[] {
@@ -186,9 +200,11 @@ class HPA extends makeKubeObject<KubeHPA>('horizontalPodAutoscaler') {
         case 'External':
           {
             if (spec.external) {
-              const value = `${status && status.external
-                ? metricValueStatus(status.external.current, t)
-                : t('translation|<unknown>')}/${metricTargetValue(spec.external.target)}`;
+              const value = `${
+                status && status.external
+                  ? metricValueStatus(status.external.current, t)
+                  : t('translation|<unknown>')
+              }/${metricTargetValue(spec.external.target)}`;
               const definition = `"${spec.external.metric.name}" ${defineMetricTarget(
                 spec.external.target
               )}`;
@@ -204,9 +220,11 @@ class HPA extends makeKubeObject<KubeHPA>('horizontalPodAutoscaler') {
         case 'Object':
           {
             if (spec.object) {
-              const value = `${status && status.object
-                ? metricValueStatus(status.object.current, t)
-                : t('translation|<unknown>')}/${metricTargetValue(spec.object.target)}`;
+              const value = `${
+                status && status.object
+                  ? metricValueStatus(status.object.current, t)
+                  : t('translation|<unknown>')
+              }/${metricTargetValue(spec.object.target)}`;
               const definition = t(
                 'translation|"{{metricName}}" on {{objectKind}}/{{objectName}} {{metricTarget}}',
                 {
@@ -228,9 +246,11 @@ class HPA extends makeKubeObject<KubeHPA>('horizontalPodAutoscaler') {
         case 'Pods':
           {
             if (spec.pods) {
-              const value = `${status && status.pods
-                ? metricValueStatus(status.pods.current, t)
-                : t('translation|<unknown>')}/${metricTargetValue(spec.pods.target)}`;
+              const value = `${
+                status && status.pods
+                  ? metricValueStatus(status.pods.current, t)
+                  : t('translation|<unknown>')
+              }/${metricTargetValue(spec.pods.target)}`;
               const definition = t('translation|"{{metricName}}" on pods', {
                 metricName: spec.pods.metric.name,
               });
@@ -249,25 +269,37 @@ class HPA extends makeKubeObject<KubeHPA>('horizontalPodAutoscaler') {
               let definition = t('translation|resource {{resourceName}} on pods', {
                 resourceName: spec.resource.name,
               });
-              let value = '';
-              let shortValue = '';
+              let value = ``;
+              let shortValue = ``;
               if (spec.resource.target.type === 'AverageValue') {
-                value = `${status && status.resource
-                  ? metricValueStatus(status.resource.current, t)
-                  : t('translation|<unknown>')}/${metricTargetValue(spec.resource.target)}`;
-                shortValue = `${status && status.resource
-                  ? metricValueStatus(status.resource.current, t)
-                  : t('translation|<unknown>')}/${metricTargetValue(spec.resource.target)}`;
+                value = `${
+                  status && status.resource
+                    ? metricValueStatus(status.resource.current, t)
+                    : t('translation|<unknown>')
+                }/${metricTargetValue(spec.resource.target)}`;
+                shortValue = `${
+                  status && status.resource
+                    ? metricValueStatus(status.resource.current, t)
+                    : t('translation|<unknown>')
+                }/${metricTargetValue(spec.resource.target)}`;
               }
               if (spec.resource.target.type === 'Utilization') {
                 definition = `${definition} ${defineMetricTarget(spec.resource.target)}`;
                 if (status) {
-                  value = `${status.resource
-                    ? status.resource.current.averageUtilization
-                    : t('translation|<unknown>')}% (${status.resource ? status.resource.current.averageValue : t('translation|<unknown>')})/${metricTargetValue(spec.resource.target)}`;
-                  shortValue = `${status.resource
-                    ? status.resource.current.averageUtilization
-                    : t('translation|<unknown>')}% /${metricTargetValue(spec.resource.target)}`;
+                  value = `${
+                    status.resource
+                      ? status.resource.current.averageUtilization
+                      : t('translation|<unknown>')
+                  }% (${
+                    status.resource
+                      ? status.resource.current.averageValue
+                      : t('translation|<unknown>')
+                  })/${metricTargetValue(spec.resource.target)}`;
+                  shortValue = `${
+                    status.resource
+                      ? status.resource.current.averageUtilization
+                      : t('translation|<unknown>')
+                  }% /${metricTargetValue(spec.resource.target)}`;
                 } else {
                   value = `${t('translation|<unknown>')}/${metricTargetValue(
                     spec.resource.target
@@ -289,9 +321,11 @@ class HPA extends makeKubeObject<KubeHPA>('horizontalPodAutoscaler') {
         case 'ContainerResource':
           {
             if (spec.containerResource) {
-              const value = `${status && status.containerResource
-                ? metricValueStatus(status.containerResource.current, t)
-                : t('translation|<unknown>')}/${metricTargetValue(spec.containerResource.target)}`;
+              const value = `${
+                status && status.containerResource
+                  ? metricValueStatus(status.containerResource.current, t)
+                  : t('translation|<unknown>')
+              }/${metricTargetValue(spec.containerResource.target)}`;
               const definition = t(
                 'translation|resource {{resourceName}} of container {{containerName}} on pods',
                 {
@@ -314,12 +348,12 @@ class HPA extends makeKubeObject<KubeHPA>('horizontalPodAutoscaler') {
   }
 
   get referenceObject(): KubeObject | null {
-    const target = this.jsonData?.spec?.scaleTargetRef;
+    const target = this.jsonData.spec?.scaleTargetRef;
     if (!target) {
       return null;
     }
 
-    const TargetObjectClass = ResourceClasses[target.kind];
+    const TargetObjectClass = (ResourceClasses as Record<string, KubeObjectClass>)[target.kind];
     let objInstance: KubeObject | null = null;
     if (!!TargetObjectClass) {
       objInstance = new TargetObjectClass({
@@ -327,7 +361,7 @@ class HPA extends makeKubeObject<KubeHPA>('horizontalPodAutoscaler') {
         metadata: {
           name: target.name,
           namespace: this.getNamespace(),
-        },
+        } as KubeMetadata,
       });
     }
 

@@ -1,15 +1,16 @@
-import { forwardRef, ReactElement } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
-
 import Button from '@mui/material/Button';
-import { Theme } from '@mui/material/styles';
-import { styled } from '@mui/material/styles';
+import { styled } from '@mui/system';
+import React, { ReactElement } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 
 export interface ClusterChooserProps {
   clickHandler: (event?: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
   cluster?: string;
 }
-export type ClusterChooserType = React.ComponentType<ClusterChooserProps> | ReactElement;
+export type ClusterChooserType =
+  | React.ComponentType<ClusterChooserProps>
+  | ReactElement<ClusterChooserProps>
+  | null;
 
 const SpanClusterName = styled('span')({
   textOverflow: 'ellipsis',
@@ -18,7 +19,7 @@ const SpanClusterName = styled('span')({
   display: 'block',
 });
 
-const ClusterChooser = forwardRef(function ClusterChooser(
+const ClusterChooser = React.forwardRef(function ClusterChooser(
   { clickHandler, cluster }: ClusterChooserProps,
   ref: React.Ref<HTMLButtonElement>
 ) {
@@ -29,7 +30,7 @@ const ClusterChooser = forwardRef(function ClusterChooser(
       size="large"
       variant="contained"
       onClick={clickHandler}
-      sx={(theme: Theme) => ({
+      sx={theme => ({
         color: theme.palette.clusterChooser.button.color,
         background: theme.palette.clusterChooser.button.background,
         '&:hover': {

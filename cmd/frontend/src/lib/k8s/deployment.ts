@@ -1,11 +1,6 @@
-import { apiFactoryWithNamespace } from './apiProxy';
-import {
-  KubeContainer,
-  KubeMetadata,
-  KubeObjectInterface,
-  LabelSelector,
-  makeKubeObject,
-} from './cluster';
+import { KubeContainer, LabelSelector } from './cluster';
+import { KubeMetadata } from './KubeMetadata';
+import { KubeObject, KubeObjectInterface } from './KubeObject';
 import { KubePodSpec } from './pod';
 
 export interface KubeDeployment extends KubeObjectInterface {
@@ -26,8 +21,11 @@ export interface KubeDeployment extends KubeObjectInterface {
   };
 }
 
-class Deployment extends makeKubeObject<KubeDeployment>('Deployment') {
-  static apiEndpoint = apiFactoryWithNamespace('apps', 'v1', 'deployments', true);
+class Deployment extends KubeObject<KubeDeployment> {
+  static kind = 'Deployment';
+  static apiName = 'deployments';
+  static apiVersion = 'apps/v1';
+  static isNamespaced = true;
 
   get spec() {
     return this.getValue('spec');
@@ -44,6 +42,35 @@ class Deployment extends makeKubeObject<KubeDeployment>('Deployment') {
   getMatchLabelsList(): string[] {
     const labels = this.spec.selector.matchLabels || {};
     return Object.keys(labels).map(key => `${key}=${labels[key]}`);
+  }
+
+  static getBaseObject(): KubeDeployment {
+    const baseObject = super.getBaseObject() as KubeDeployment;
+    baseObject.metadata = {
+      ...baseObject.metadata,
+      namespace: '',
+      labels: { app: 'headlamp' },
+    };
+    baseObject.spec = {
+      selector: {
+        matchLabels: { app: 'headlamp' },
+      },
+      template: {
+        spec: {
+          containers: [
+            {
+              name: '',
+              image: '',
+              ports: [{ containerPort: 80 }],
+              imagePullPolicy: 'Always',
+            },
+          ],
+          nodeName: '',
+        },
+      },
+    };
+
+    return baseObject;
   }
 }
 

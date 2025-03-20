@@ -10,7 +10,7 @@ import MenuItem from '@mui/material/MenuItem';
 import Typography from '@mui/material/Typography';
 import { useTheme } from '@mui/material/styles';
 
-import BoxBoader from '@components/atoms/Box/BoxBoader';
+import BoxBasic from '@components/atoms/Box/BoxBasic';
 // import { useQuery } from '@tanstack/react-query';
 import { Link, SectionBox, SectionFilterHeader } from '@components/common';
 import ResourceTable from '@components/common/Resource/ResourceTable';
@@ -21,7 +21,6 @@ import { cocktailApi } from '@lib/api/constants';
 import { Cluster } from '@lib/k8s/cluster';
 import { createRouteURL } from '@lib/router';
 import { useId } from '@lib/util';
-
 
 function ClusterStatus({ error }: { error?: string | null }) {
   const { t } = useTranslation(['translation']);
@@ -136,7 +135,7 @@ function ContextMenu({ cluster }: { cluster: Cluster }) {
 }
 export default function Clusters() {
   const { t } = useTranslation(['glossary', 'translation']);
-  const [data, setData] = useState<any>(null)
+  const [data, setData] = useState<any>(null);
   useEffect(() => {
     apiRequest({
       ...cocktailApi.cluster.conditions,
@@ -211,7 +210,7 @@ export default function Clusters() {
         />
       }
     >
-      <BoxBoader>
+      <BoxBasic>
         <ResourceTable
           defaultSortingColumn={{ id: 'name', desc: false }}
           columns={[
@@ -247,7 +246,7 @@ export default function Clusters() {
           data={data}
           id="headlamp-home-clusters"
         />
-      </BoxBoader>
+      </BoxBasic>
     </SectionBox>
   );
 }

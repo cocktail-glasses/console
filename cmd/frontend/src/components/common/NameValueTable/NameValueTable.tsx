@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 
-import Grid, { GridProps } from '@mui/material/Grid';
+import Grid, { Grid2Props } from '@mui/material/Grid2';
 import { Theme } from '@mui/material/styles';
 
 import { ValueLabel } from '../Label';
@@ -14,14 +14,14 @@ export interface NameValueTableRow {
    * @param value and return a boolean) */
   hide?: boolean | ((value: NameValueTableRow['value']) => boolean);
   /** Extra properties to pass to the value cell */
-  valueCellProps?: GridProps;
+  valueCellProps?: Grid2Props;
   /** Whether to highlight the row (used for titles, separators, etc.). */
   withHighlightStyle?: boolean;
 }
 
 export interface NameValueTableProps {
   rows: NameValueTableRow[];
-  valueCellProps?: GridProps;
+  valueCellProps?: Grid2Props;
 }
 
 function Value({ value }: { value: string | JSX.Element | JSX.Element[] | undefined }): JSX.Element | null {
@@ -90,10 +90,8 @@ export default function NameValueTable(props: NameValueTableProps) {
 
         const items = [
           <Grid
-            item
+            size={{ xs: 12, sm: hideValueGridItem ? 12 : 4 }}
             key={i}
-            xs={12}
-            sm={hideValueGridItem ? 12 : 4}
             component="dt"
             className={className}
             sx={(theme: Theme) => {
@@ -133,10 +131,8 @@ export default function NameValueTable(props: NameValueTableProps) {
         if (!hideValueGridItem) {
           items.push(
             <Grid
-              item
               key={i + 10000}
-              xs={12}
-              sm={8}
+              size={{ xs: 12, sm: 8 }}
               component="dd"
               sx={(theme: Theme) => {
                 const extra = withHighlightStyle
