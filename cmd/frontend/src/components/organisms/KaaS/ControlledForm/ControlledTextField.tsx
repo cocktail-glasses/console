@@ -1,10 +1,14 @@
-import Controller from './Controller';
+import { useController, UseControllerProps } from 'react-hook-form';
+
+import { isUndefined } from 'lodash';
 
 import TextField from '@components/molecules/KaaS/Form/TextField';
 
 interface ControlledTextFieldProps
-  extends Omit<React.ComponentPropsWithRef<typeof Controller>, 'render'>,
-    Omit<React.ComponentPropsWithoutRef<typeof TextField>, 'name' | 'defaultValue'> {}
+  extends UseControllerProps,
+    Omit<React.ComponentPropsWithoutRef<typeof TextField>, 'name' | 'defaultValue'> {
+  control?: any;
+}
 
 const ControlledTextField = ({
   name,
@@ -15,17 +19,16 @@ const ControlledTextField = ({
   disabled,
   ...props
 }: ControlledTextFieldProps) => {
+  const {
+    field,
+    fieldState: { invalid, error },
+  } = useController({ name, control, defaultValue, rules, shouldUnregister, disabled });
   return (
-    <Controller
-      name={name}
-      control={control}
-      defaultValue={defaultValue}
-      rules={rules}
-      shouldUnregister={shouldUnregister}
-      disabled={disabled}
-      render={({ field, fieldState }) => (
-        <TextField {...props} {...field} error={fieldState.invalid} helperText={fieldState.error?.message} />
-      )}
+    <TextField
+      {...props}
+      {...field}
+      error={invalid}
+      helperText={isUndefined(error?.message) ? props.helperText : error?.message}
     />
   );
 };

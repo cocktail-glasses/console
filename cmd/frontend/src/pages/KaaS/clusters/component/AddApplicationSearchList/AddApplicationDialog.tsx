@@ -123,18 +123,22 @@ interface AddApplicationDialogProps {
 }
 
 const AddApplicationDialog = ({ isOpen = false, onClose }: AddApplicationDialogProps) => {
-  const [stepIndex, setStepIndex] = useState(0);
+  // const [stepIndex, setStepIndex] = useState(0);
 
   const handleSelectApplication = (application: Application) => {
     setStepIndex((prev) => prev + 1);
     console.log(application);
   };
 
-  const installApplicationStep = [
-    { label: 'Select Application', content: <AddApplicationSearchList onSelect={handleSelectApplication} /> },
-    { label: 'Settings', content: <></> },
-    { label: 'Application Values', content: <></> },
-  ];
+  // const installApplicationStep = [
+  //   { label: 'Select Application', content: <AddApplicationSearchList onSelect={handleSelectApplication} /> },
+  //   { label: 'Settings', content: <></> },
+  //   { label: 'Application Values', content: <></> },
+  // ];
+
+  const installApplicationStep = ['Select Application', 'Settings', 'Application Values'];
+
+  const contents = [<AddApplicationSearchList onSelect={handleSelectApplication} />, <></>, <></>];
 
   const [_isOpen, setIsOpen] = useState(isOpen);
   useEffect(() => {
@@ -157,7 +161,11 @@ const AddApplicationDialog = ({ isOpen = false, onClose }: AddApplicationDialogP
       closeBtn
       title="Add Application"
       content={
-        <ProgressStepperContent stepDatas={installApplicationStep} activeStepIndex={stepIndex} progressFitWidth />
+        <ProgressStepperContent steps={installApplicationStep} currentStep={0} fitWidth>
+          {(statusData) => (
+            <ProgressContext.Provider value={statusData}>{contents[statusData.currentStep]}</ProgressContext.Provider>
+          )}
+        </ProgressStepperContent>
       }
       sx={{ padding: '10px', '& .MuiDialog-paper': { maxWidth: '660px', minWidth: '660px' } }}
     />

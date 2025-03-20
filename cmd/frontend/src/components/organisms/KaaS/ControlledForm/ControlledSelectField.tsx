@@ -1,10 +1,16 @@
+import { useController } from 'react-hook-form';
+
+import { isUndefined } from 'lodash';
+
 import Controller from './Controller';
 
 import SelectField from '@components/molecules/KaaS/Form/SelectField';
 
 interface ControlledSelectFieldProps
   extends Omit<React.ComponentPropsWithRef<typeof Controller>, 'render'>,
-    Omit<React.ComponentPropsWithoutRef<typeof SelectField>, 'name' | 'defaultValue'> {}
+    Omit<React.ComponentPropsWithoutRef<typeof SelectField>, 'name' | 'defaultValue'> {
+  control?: any;
+}
 
 const ControlledSelectField = ({
   name,
@@ -15,17 +21,17 @@ const ControlledSelectField = ({
   disabled,
   ...props
 }: ControlledSelectFieldProps) => {
+  const {
+    field,
+    fieldState: { invalid, error },
+  } = useController({ name, control, defaultValue, rules, shouldUnregister, disabled });
+
   return (
-    <Controller
-      name={name}
-      control={control}
-      defaultValue={defaultValue}
-      rules={rules}
-      shouldUnregister={shouldUnregister}
-      disabled={disabled}
-      render={({ field, fieldState }) => (
-        <SelectField {...props} {...field} error={fieldState.invalid} helperText={fieldState.error?.message} />
-      )}
+    <SelectField
+      {...props}
+      {...field}
+      error={invalid}
+      helperText={isUndefined(error?.message) ? props.helperText : error?.message}
     />
   );
 };
