@@ -3,7 +3,8 @@ import { Controller, SubmitHandler, useFieldArray, useForm } from 'react-hook-fo
 
 import { zodResolver } from '@hookform/resolvers/zod';
 
-import { Box, FormGroup, Typography, useTheme } from '@mui/material';
+import { Box, FormGroup, Typography } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 
 import { head, map, merge, size } from 'lodash';
 
