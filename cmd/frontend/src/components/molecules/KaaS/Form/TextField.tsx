@@ -8,7 +8,7 @@ import style from './Form.module.scss';
 
 import clsx from 'clsx';
 
-const TextField = forwardRef(({ ...props }: React.ComponentPropsWithRef<typeof TextFieldBase>, ref: any) => (
+const TextField = forwardRef(({ ...props }: React.ComponentProps<typeof TextFieldBase>, ref: any) => (
   <TextFieldBase
     {...props}
     ref={ref}

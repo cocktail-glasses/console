@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router';
 import { ArrowBack, ArrowForward } from '@mui/icons-material';
 import { Box } from '@mui/material';
 
-import { get, identity } from 'lodash';
+import { identity } from 'lodash';
 
 import commonStyle from '../../Common.module.scss';
 import { ProgressContext } from '../../Create';
@@ -12,24 +12,25 @@ import { ProgressContext } from '../../Create';
 import Button from '@components/atoms/KaaS/Button/Button';
 import AddButton from '@components/molecules/KaaS/Button/AddButton/AddButton';
 import CancelButton from '@components/molecules/KaaS/Button/CancelButton/CancelButton';
-import { ProgressStatus } from '@components/organisms/KaaS/ProgressStepperContent/ProgressStepperContent';
+import { Controller } from '@components/molecules/KaaS/ProgressStepper/ProgressStepper';
 
 interface FormActionProps {
-  onSubmit: (e?: FormEvent<HTMLButtonElement>) => void;
+  onSave?: () => void;
+  onSubmit?: (e?: FormEvent<HTMLButtonElement>) => void;
   isValid: boolean;
 }
 
-const FormAction = ({ onSubmit, isValid }: FormActionProps) => {
-  const progressStatus = useContext<ProgressStatus | undefined>(ProgressContext);
+const FormAction = ({ onSave, onSubmit, isValid }: FormActionProps) => {
+  const progressStatus = useContext<Controller | undefined>(ProgressContext);
 
   const navigate = useNavigate();
   const handleCancel = () => navigate('/kaas/clusters');
 
-  const backBtnDisable = !get(progressStatus, 'hasPreviousStep', false);
-  const backBtnClick = get(progressStatus, 'prevStep', identity);
+  const backBtnDisable = !progressStatus?.hasPrev || false;
+  const backBtnClick = progressStatus?.onPrev || identity;
 
-  const hasNextStep = get(progressStatus, 'hasNextStep', false);
-  const nextBtnClick = get(progressStatus, 'nextStep', identity);
+  const hasNextStep = progressStatus?.hasNext || false;
+  const nextBtnClick = progressStatus?.onNext || identity;
 
   return (
     <Box
@@ -42,11 +43,16 @@ const FormAction = ({ onSubmit, isValid }: FormActionProps) => {
       <CancelButton onClick={handleCancel} className={commonStyle.kaasTertiaryColor} />
       <Box sx={{ display: 'flex', gap: '10px' }}>
         <Button
+          type="submit"
           variant="outlined"
           size="large"
           startIcon={<ArrowBack />}
           disabled={backBtnDisable}
-          onClick={backBtnClick}
+          onClick={(e) => {
+            e.preventDefault();
+            onSave && onSave();
+            backBtnClick();
+          }}
           className={commonStyle.kaasTertiaryColor}
         >
           Back
@@ -61,7 +67,7 @@ const FormAction = ({ onSubmit, isValid }: FormActionProps) => {
             disabled={!isValid}
             onClick={(e) => {
               e.preventDefault();
-              onSubmit();
+              onSave && onSave();
               nextBtnClick();
             }}
             className={commonStyle.kaasPrimaryColor}
@@ -76,7 +82,7 @@ const FormAction = ({ onSubmit, isValid }: FormActionProps) => {
             className={commonStyle.kaasPrimaryColor}
             onClick={(e) => {
               e.preventDefault();
-              onSubmit();
+              onSubmit && onSubmit();
             }}
           />
         )}

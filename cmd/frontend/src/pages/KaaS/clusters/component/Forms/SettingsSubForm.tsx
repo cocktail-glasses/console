@@ -4,6 +4,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 
 import { Box, ToggleButton, ToggleButtonGroup } from '@mui/material';
 
+import { merge } from 'lodash';
+
 import { settingsFormSchema, settingsFormValue } from '../../schemas';
 import FormAction from './FormAction';
 
@@ -16,16 +18,22 @@ import ControlledTextField from '@components/organisms/KaaS/ControlledForm/Contr
 
 interface SettingsFormProps {
   values?: settingsFormValue;
-  onSubmit: SubmitHandler<settingsFormValue>;
+  onSave: SubmitHandler<settingsFormValue>;
 }
 
-const SettingSubForm: React.FC<SettingsFormProps> = ({ values, onSubmit }) => {
+const SettingSubForm = ({ values, onSave }: SettingsFormProps) => {
+  const defaultValue = {
+    providerPreset: '',
+    domain: '',
+    credentialType: 'userCredential',
+  };
+
   const {
     control,
     formState: { isValid },
     handleSubmit,
   } = useForm<settingsFormValue>({
-    defaultValues: values,
+    defaultValues: merge({}, defaultValue, values),
     mode: 'onChange',
     resolver: zodResolver(settingsFormSchema),
   });
@@ -195,7 +203,7 @@ const SettingSubForm: React.FC<SettingsFormProps> = ({ values, onSubmit }) => {
           </Box>
         </Box>
       </Box>
-      <FormAction onSubmit={handleSubmit(onSubmit)} isValid={isValid} />
+      <FormAction onSave={handleSubmit(onSave)} isValid={isValid} />
     </Box>
   );
 };

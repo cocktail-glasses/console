@@ -5,7 +5,7 @@ import { IconButton, InputAdornment } from '@mui/material';
 
 import TextField from './TextField';
 
-const PasswordField = ({ ...props }: React.ComponentPropsWithoutRef<typeof TextField>) => {
+const PasswordField = ({ ...props }: React.ComponentPropsWithRef<typeof TextField>) => {
   // user credential password
   const [isPasswordShow, setIsPasswordShow] = useState(false);
 

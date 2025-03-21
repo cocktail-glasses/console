@@ -5,7 +5,7 @@ import { get } from 'lodash';
 
 import TextField from './TextField';
 
-const Searchbar = ({ ...props }: React.ComponentPropsWithoutRef<typeof TextField>) => {
+const Searchbar = ({ ...props }: React.ComponentPropsWithRef<typeof TextField>) => {
   return (
     <TextField
       {...props}

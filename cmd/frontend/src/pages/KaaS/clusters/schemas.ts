@@ -16,6 +16,11 @@ export enum CNIPlugins {
   NONE = 'none',
 }
 
+interface Label {
+  key: string;
+  value: string;
+}
+
 export interface createFormValue {
   name: string;
   cniPlugin?: string;
@@ -31,11 +36,11 @@ export interface createFormValue {
   userClusterLogging?: boolean;
   userClusterMonitoring?: boolean;
   userSSHKeyAgent?: boolean;
-  labels?: string[];
+  labels?: Label[];
 }
 
 export const createFormSchema = z.object({
-  name: z.string({ required_error: '이름을 입력해주세요.' }).min(1, '이름을 입력해주세요.'),
+  name: z.string().min(1, '이름을 입력해주세요.'),
   cniPlugin: z.nativeEnum(CNIPlugins, {
     errorMap: (issue, ctx) => {
       if (issue.code === ZodIssueCode.invalid_enum_value) {
@@ -56,6 +61,14 @@ export const createFormSchema = z.object({
   userClusterLogging: z.boolean().optional(),
   userClusterMonitoring: z.boolean().optional(),
   userSSHKeyAgent: z.boolean().optional(),
+  labels: z
+    .array(
+      z.object({
+        key: z.string().optional(),
+        value: z.string().optional(),
+      })
+    )
+    .optional(),
 });
 
 export interface settingsFormValue {
@@ -73,7 +86,7 @@ export interface settingsFormValue {
 }
 
 export const settingsFormSchema = z.object({
-  providerPreset: z.string({ required_error: '필수 값입니다.' }),
+  providerPreset: z.string().min(1, '필수 값입니다.'),
 });
 
 export const setttingFromSchema = z.object({});

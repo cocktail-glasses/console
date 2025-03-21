@@ -7,15 +7,15 @@ import FormAction from './FormAction';
 
 interface StaticNodeFormProps {
   values?: staticNodesFormValue;
-  onSubmit: SubmitHandler<staticNodesFormValue>;
+  onSave: SubmitHandler<staticNodesFormValue>;
 }
 
-const StaticNodeForm = ({ values, onSubmit }: StaticNodeFormProps) => {
-  console.log(values, onSubmit);
+const StaticNodeForm = ({ values, onSave }: StaticNodeFormProps) => {
+  console.log(values, onSave);
   return (
     <Box component="form">
       <p>static node</p>
-      <FormAction onSubmit={() => {}} isValid />
+      <FormAction onSave={() => {}} isValid />
     </Box>
   );
 };

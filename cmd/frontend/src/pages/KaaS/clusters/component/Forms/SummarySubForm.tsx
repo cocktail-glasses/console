@@ -2,6 +2,7 @@ import { SubmitHandler } from 'react-hook-form';
 
 import { Box, Step, Typography } from '@mui/material';
 
+import { chain } from 'lodash';
 import isEmpty from 'lodash/isEmpty';
 import map from 'lodash/map';
 
@@ -36,6 +37,20 @@ const SummarySubForm = ({ values, onSubmit }: SummaryFormProps) => {
                 'SSH Keys',
                 isEmpty(values?.cluster?.sshKeys) ? 'No assigned keys' : values?.cluster?.sshKeys?.join(', '),
               ],
+              [
+                'Cluster Labels',
+                chain(values?.cluster?.labels)
+                  .filter((label) => !(isEmpty(label.key) && isEmpty(label.value)))
+                  .map(
+                    (label) => `${label.key}: ${label.value}`
+                    // <Box>
+                    //   <Chip label={label.key} />
+                    //   <Chip label={label.value} />
+                    // </Box>
+                  )
+                  .value()
+                  .join(', '),
+              ],
             ],
           },
 
@@ -68,12 +83,13 @@ const SummarySubForm = ({ values, onSubmit }: SummaryFormProps) => {
         index: 2,
         contents: [['Preset', 'cocktail-preset']],
       },
+    ],
+    [
       {
         title: 'Static Nodes',
         index: 3,
+        contents: [['Static Node Names', 'cp-node-1, wk-node-1']],
       },
-    ],
-    [
       {
         title: 'Applications',
         index: 4,

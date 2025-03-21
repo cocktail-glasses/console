@@ -1,11 +1,11 @@
 import { ReactElement } from 'react';
-import { Controller, SubmitHandler, useForm } from 'react-hook-form';
+import { Controller, SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 
-import { Box, FormGroup, Typography } from '@mui/material';
+import { Box, FormGroup, Typography, useTheme } from '@mui/material';
 
-import { head, map, merge } from 'lodash';
+import { head, map, merge, size } from 'lodash';
 
 import commonStyle from '../../Common.module.scss';
 import { createFormSchema, createFormValue } from '../../schemas';
@@ -15,11 +15,11 @@ import AddButton from '@components/molecules/KaaS/Button/AddButton/AddButton';
 import DeleteIconButton from '@components/molecules/KaaS/Button/DeleteIconButton/DeleteIconButton';
 import CheckSelectField from '@components/molecules/KaaS/Form/CheckSelectField';
 import CheckboxLabel from '@components/molecules/KaaS/Form/CheckboxLabel';
-import TextField from '@components/molecules/KaaS/Form/TextField';
 import ControlledSelectField from '@components/organisms/KaaS/ControlledForm/ControlledSelectField';
 import ControlledTextField from '@components/organisms/KaaS/ControlledForm/ControlledTextField';
 import ImageToggleButtonGroup from '@components/organisms/KaaS/ImageToggleButtonGroup/ImageToggleButtonGroup';
 import Canal from '@resources/cni_canal.png';
+import CiliumDark from '@resources/cni_cilium-dark.svg';
 import Cilium from '@resources/cni_cilium.svg';
 
 interface Feature {
@@ -36,15 +36,25 @@ interface Feature {
 
 interface ClusterFormProps {
   values?: createFormValue;
-  onSubmit: SubmitHandler<createFormValue>;
+  onSave: SubmitHandler<createFormValue>;
 }
 
-const ClusterSubForm = ({ values, onSubmit }: ClusterFormProps) => {
+const ClusterSubForm = ({ values, onSave }: ClusterFormProps) => {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+
   // cni plugins
   const cniPlugins = [
     {
       value: 'cilium',
-      image: <Box component="img" src={Cilium} alt={Cilium} sx={{ display: 'flex', width: '80px' }} />,
+      image: (
+        <Box
+          component="img"
+          src={isDark ? CiliumDark : Cilium}
+          alt={isDark ? CiliumDark : Cilium}
+          sx={{ display: 'flex', width: '80px' }}
+        />
+      ),
     },
     {
       value: 'canal',
@@ -91,16 +101,19 @@ const ClusterSubForm = ({ values, onSubmit }: ClusterFormProps) => {
   ];
 
   const defaultValues = {
+    name: '',
+    cniPlugin: head(cniPlugins)?.value,
     cniPluginVersion: head(ciliumVersions),
     controlPlaneVersion: head(controlPlaneVersions),
     containerRuntime: head(containerRuntimes),
+    labels: [{ key: '', value: '' }],
   };
 
   // forms
   const {
-    watch,
+    // watch,
     control,
-    formState: { errors, isValid },
+    formState: { /* errors, */ isValid },
     handleSubmit,
   } = useForm<createFormValue>({
     defaultValues: merge({}, defaultValues, values),
@@ -108,11 +121,23 @@ const ClusterSubForm = ({ values, onSubmit }: ClusterFormProps) => {
     resolver: zodResolver(createFormSchema),
   });
 
-  watch((data) => {
-    console.log(errors);
-    console.log(data);
-    console.log(isValid);
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: 'labels',
   });
+
+  const labelSize = size(fields);
+  const handleLabelKeyChange = (index: number) => {
+    if (labelSize === index + 1) {
+      append({ key: '', value: '' });
+    }
+  };
+
+  // watch((data) => {
+  //   console.log(errors);
+  //   console.log(data);
+  //   console.log(isValid);
+  // });
 
   return (
     <Box component="form">
@@ -134,7 +159,7 @@ const ClusterSubForm = ({ values, onSubmit }: ClusterFormProps) => {
               render={({ field: { value, onChange } }) => (
                 <ImageToggleButtonGroup
                   value={value}
-                  onChange={(_, selected) => onChange(selected)}
+                  onChange={(_, selected) => selected && onChange(selected)}
                   items={cniPlugins}
                 />
               )}
@@ -155,11 +180,19 @@ const ClusterSubForm = ({ values, onSubmit }: ClusterFormProps) => {
             SSH Keys
           </Typography>
           <Box sx={{ marginBottom: '10px' }}>
+            {/* <ControlledField
+              control={control}
+              component={SelectField}
+              name="sshKeys"
+              label="SSH Keys"
+              items={sshKeys}
+              size="small"
+            /> */}
             <Controller
               name="sshKeys"
               control={control}
               render={({ field: { value, onChange } }) => (
-                <CheckSelectField label="SSH Keys" value={value} onChange={onChange} items={sshKeys} />
+                <CheckSelectField label="SSH Keys" value={value} onChange={onChange} items={sshKeys} size="small" />
               )}
             />
           </Box>
@@ -194,7 +227,7 @@ const ClusterSubForm = ({ values, onSubmit }: ClusterFormProps) => {
               required
               label="Container Runtime"
               items={containerRuntimes}
-              // disabled
+              disabled
               size="small"
             />
           </Box>
@@ -209,6 +242,7 @@ const ClusterSubForm = ({ values, onSubmit }: ClusterFormProps) => {
                   value={value}
                   onChange={onChange}
                   items={admissionPlugins}
+                  size="small"
                 />
               )}
             />
@@ -233,16 +267,24 @@ const ClusterSubForm = ({ values, onSubmit }: ClusterFormProps) => {
             <Typography variant="h5" sx={{ marginY: '19.92px' }}>
               Labels
             </Typography>
-            <Box sx={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-              <TextField label="Key" size="small" />
-              <TextField label="Value" size="small" />
-              <DeleteIconButton size="large" disabled />
-            </Box>
+            {fields.map((field, index) => (
+              <Box key={field.id} sx={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                <ControlledTextField
+                  name={`labels.${index}.key`}
+                  control={control}
+                  label="key"
+                  size="small"
+                  onChange={() => handleLabelKeyChange(index)}
+                />
+                <ControlledTextField name={`labels.${index}.value`} control={control} label="Value" size="small" />
+                <DeleteIconButton size="large" onClick={() => remove(index)} disabled={labelSize == 1} />
+              </Box>
+            ))}
           </Box>
         </Box>
       </Box>
 
-      <FormAction onSubmit={handleSubmit(onSubmit)} isValid={isValid} />
+      <FormAction onSave={handleSubmit(onSave)} isValid={isValid} />
     </Box>
   );
 };

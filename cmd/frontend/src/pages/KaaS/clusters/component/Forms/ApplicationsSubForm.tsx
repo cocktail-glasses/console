@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { SubmitHandler } from 'react-hook-form';
 
-import { OpenInNew } from '@mui/icons-material';
-import { Box, Link, Typography, Stack } from '@mui/material';
+import { Box, Typography, Stack } from '@mui/material';
 
 import commonStyle from '../../Common.module.scss';
 import { applicationsFormValue } from '../../schemas';
@@ -10,27 +9,24 @@ import AddApplicationDialog from '../AddApplicationSearchList/AddApplicationDial
 import FormAction from './FormAction';
 
 import AddButton from '@components/molecules/KaaS/Button/AddButton/AddButton';
+import LinkText from '@components/molecules/KaaS/Link/LinkText';
 
 interface ApplicationsSubFormProps {
   values?: applicationsFormValue;
-  onSubmit: SubmitHandler<applicationsFormValue>;
+  onSave: SubmitHandler<applicationsFormValue>;
 }
 
-const ApplicationsSubForm = ({ values, onSubmit }: ApplicationsSubFormProps) => {
+const ApplicationsSubForm = ({ values, onSave }: ApplicationsSubFormProps) => {
   const [isOpenDialog, setIsOpenDialog] = useState(false);
 
-  console.log(values, onSubmit);
+  console.log(values, onSave);
   return (
     <Box component="form">
-      <Stack>
+      <Stack sx={{ marginY: '19.92px' }}>
         <Typography variant="h6">Applications to Install</Typography>
         <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
           <p>
-            No application selected to install on cluster creation,{' '}
-            <Link sx={{ display: 'inline-flex', alignItems: 'center' }}>
-              learn more about Applicaitons
-              <OpenInNew sx={{ fontSize: 15 }} />
-            </Link>
+            No application selected to install on cluster creation, <LinkText>learn more about Applicaitons</LinkText>
           </p>
           <AddButton
             label="Add Application"
@@ -43,7 +39,7 @@ const ApplicationsSubForm = ({ values, onSubmit }: ApplicationsSubFormProps) => 
 
         <AddApplicationDialog isOpen={isOpenDialog} onClose={() => setIsOpenDialog(false)} />
       </Stack>
-      <FormAction onSubmit={() => {}} isValid />
+      <FormAction onSave={() => {}} isValid />
     </Box>
   );
 };
