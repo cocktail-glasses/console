@@ -46,11 +46,11 @@ import DeleteIconButton from '@components/molecules/KaaS/Button/DeleteIconButton
 import DownloadButton from '@components/molecules/KaaS/Button/DownloadButton/DownloadButton';
 import SearchButton from '@components/molecules/KaaS/Button/SearchButton/SearchButton';
 import Dialog from '@components/molecules/KaaS/Dialog/Dialog';
-import DrawerEditor from '@components/molecules/KaaS/DrawerEditor/DrawerEditor';
 import CheckboxLabel from '@components/molecules/KaaS/Form/CheckboxLabel';
 import SelectField from '@components/molecules/KaaS/Form/SelectField';
 import TextField from '@components/molecules/KaaS/Form/TextField';
 import Table from '@components/molecules/KaaS/Table/Table';
+import DrawerEditor from '@components/organisms/KaaS/DrawerEditor/DrawerEditor';
 import ExpandSection from '@components/organisms/KaaS/ExpandSection/ExpandSection';
 import ImageToggleButtonGroup from '@components/organisms/KaaS/ImageToggleButtonGroup/ImageToggleButtonGroup';
 import TabsContent from '@components/organisms/KaaS/TabsContent/TabsContent';
