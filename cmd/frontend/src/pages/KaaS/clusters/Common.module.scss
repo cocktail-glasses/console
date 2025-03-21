@@ -22,8 +22,27 @@
   padding-bottom: 50px;
 }
 
-:global(.drak) {
+:global(.dark) {
   .kaas-primary-color {
     background-color: #0072b0;
+
+    &:global(.Mui-disabled) {
+      background-color: rgba(255, 255, 255, 0.12);
+      color: rgba(255, 255, 255, 0.5) !important;
+    }
+  }
+
+  .kaas-tertiary-color {
+    border: 1px solid #b8b8b8;
+    color: #b8b8b8 !important;
+  }
+
+  .kaas-quaternary-color {
+    border: 1px solid #464647;
+    color: #ffffffd9;
+  }
+
+  .link-color {
+    color: #0072b0;
   }
 }
