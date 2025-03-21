@@ -1,12 +1,12 @@
 import { useState } from 'react';
 
-import { OpenInNew } from '@mui/icons-material';
-import { Box, Link, Stack, Switch, Typography } from '@mui/material';
+import { Box, Stack, Switch, Typography } from '@mui/material';
 
 import AddApplicationDialog from '../../AddApplicationSearchList/AddApplicationDialog';
 import style from './ApplicationsTabContent.module.scss';
 
 import AddButton from '@components/molecules/KaaS/Button/AddButton/AddButton';
+import LinkText from '@components/molecules/KaaS/Link/LinkText';
 
 const ApplicationsTabContent = () => {
   const [isOpenDialog, setIsOpenDialog] = useState(false);
@@ -15,11 +15,7 @@ const ApplicationsTabContent = () => {
     <Stack className={style.applicationsContent}>
       <Box className={style.menuContainer}>
         <p className={style.message}>
-          Install third party Applications into a cluster,{' '}
-          <Link className={style.link}>
-            learn more about Applicaitons
-            <OpenInNew className={style.icon} />.
-          </Link>
+          Install third party Applications into a cluster, <LinkText>learn more about Applicaitons</LinkText>
         </p>
         <Box
           sx={{

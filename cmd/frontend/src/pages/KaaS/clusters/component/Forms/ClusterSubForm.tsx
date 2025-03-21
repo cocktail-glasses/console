@@ -1,41 +1,26 @@
 import { ReactElement } from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller, SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 
-import { Box, FormGroup } from '@mui/material';
+import { Box, FormGroup, Typography, useTheme } from '@mui/material';
 
-import { head, isFunction, map } from 'lodash';
+import { head, map, merge, size } from 'lodash';
 
 import commonStyle from '../../Common.module.scss';
-import { createFormSchema } from '../../schemas';
+import { createFormSchema, createFormValue } from '../../schemas';
+import FormAction from './FormAction';
 
 import AddButton from '@components/molecules/KaaS/Button/AddButton/AddButton';
 import DeleteIconButton from '@components/molecules/KaaS/Button/DeleteIconButton/DeleteIconButton';
 import CheckSelectField from '@components/molecules/KaaS/Form/CheckSelectField';
 import CheckboxLabel from '@components/molecules/KaaS/Form/CheckboxLabel';
-import SelectField from '@components/molecules/KaaS/Form/SelectField';
-import TextField from '@components/molecules/KaaS/Form/TextField';
+import ControlledSelectField from '@components/organisms/KaaS/ControlledForm/ControlledSelectField';
+import ControlledTextField from '@components/organisms/KaaS/ControlledForm/ControlledTextField';
 import ImageToggleButtonGroup from '@components/organisms/KaaS/ImageToggleButtonGroup/ImageToggleButtonGroup';
 import Canal from '@resources/cni_canal.png';
+import CiliumDark from '@resources/cni_cilium-dark.svg';
 import Cilium from '@resources/cni_cilium.svg';
-
-export interface ClusterFormValue {
-  name?: string;
-  sshKeys?: string[];
-  cniPlugin?: string;
-  cniPluginVersion?: string;
-  controlPlaneVersion?: string;
-  containerRuntime?: string;
-  admissionPlugins?: string[];
-  auditLoggin?: boolean;
-  disableCSIDriver?: boolean;
-  kubernetesDashboard?: boolean;
-  opaIntegration?: boolean;
-  userClusterLogging?: boolean;
-  userClusterMonitoring?: boolean;
-  userSSHKeyAgent?: boolean;
-}
 
 interface Feature {
   value:
@@ -50,17 +35,26 @@ interface Feature {
 }
 
 interface ClusterFormProps {
-  values?: ClusterFormValue;
-  handleSubmit?: (...event: any[]) => void;
-  handleError?: (...event: any[]) => void;
+  values?: createFormValue;
+  onSave: SubmitHandler<createFormValue>;
 }
 
-const ClusterSubForm = ({ values, handleSubmit, handleError }: ClusterFormProps) => {
+const ClusterSubForm = ({ values, onSave }: ClusterFormProps) => {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+
   // cni plugins
   const cniPlugins = [
     {
       value: 'cilium',
-      image: <Box component="img" src={Cilium} alt={Cilium} sx={{ display: 'flex', width: '80px' }} />,
+      image: (
+        <Box
+          component="img"
+          src={isDark ? CiliumDark : Cilium}
+          alt={isDark ? CiliumDark : Cilium}
+          sx={{ display: 'flex', width: '80px' }}
+        />
+      ),
     },
     {
       value: 'canal',
@@ -106,145 +100,191 @@ const ClusterSubForm = ({ values, handleSubmit, handleError }: ClusterFormProps)
     { label: 'User SSH Key Agent', value: 'userSSHKeyAgent' },
   ];
 
+  const defaultValues = {
+    name: '',
+    cniPlugin: head(cniPlugins)?.value,
+    cniPluginVersion: head(ciliumVersions),
+    controlPlaneVersion: head(controlPlaneVersions),
+    containerRuntime: head(containerRuntimes),
+    labels: [{ key: '', value: '' }],
+  };
+
   // forms
   const {
-    watch,
+    // watch,
     control,
-    formState: { isValid },
-  } = useForm<ClusterFormValue>({
-    defaultValues: {
-      name: values?.name || '',
-      sshKeys: values?.sshKeys || [],
-      cniPlugin: values?.cniPlugin,
-      cniPluginVersion: values?.cniPluginVersion || head(ciliumVersions),
-      controlPlaneVersion: values?.controlPlaneVersion || head(controlPlaneVersions),
-      containerRuntime: values?.containerRuntime || head(containerRuntimes),
-    },
+    formState: { /* errors, */ isValid },
+    handleSubmit,
+  } = useForm<createFormValue>({
+    defaultValues: merge({}, defaultValues, values),
     mode: 'onChange',
     resolver: zodResolver(createFormSchema),
   });
 
-  watch((data) => {
-    if (isFunction(handleSubmit)) handleSubmit(data);
-
-    if (isFunction(handleError)) handleError(isValid);
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: 'labels',
   });
 
-  console.log(watch());
+  const labelSize = size(fields);
+  const handleLabelKeyChange = (index: number) => {
+    if (labelSize === index + 1) {
+      append({ key: '', value: '' });
+    }
+  };
+
+  // watch((data) => {
+  //   console.log(errors);
+  //   console.log(data);
+  //   console.log(isValid);
+  // });
 
   return (
-    <Box sx={{ display: 'flex', gap: '25px' }}>
-      <Box sx={{ flex: '1' }}>
-        <h2>Clusters</h2>
-        <Controller
-          name="name"
-          control={control}
-          render={({ field: { value, onChange }, fieldState: { error, invalid } }) => (
-            <TextField
-              required
-              label="Name"
-              value={value}
-              onChange={onChange}
-              error={invalid}
-              helperText={error?.message}
+    <Box component="form">
+      <Box sx={{ display: 'flex', gap: '25px' }}>
+        <Box sx={{ flex: '1' }}>
+          <Typography variant="h5" sx={{ marginY: '19.92px' }}>
+            Clusters
+          </Typography>
+
+          <ControlledTextField name="name" control={control} label="Name" required size="small" />
+
+          <Typography variant="h5" sx={{ marginY: '19.92px' }}>
+            Network Configuration
+          </Typography>
+          <Box sx={{ marginBottom: '22px' }}>
+            <Controller
+              name="cniPlugin"
+              control={control}
+              render={({ field: { value, onChange } }) => (
+                <ImageToggleButtonGroup
+                  value={value}
+                  onChange={(_, selected) => selected && onChange(selected)}
+                  items={cniPlugins}
+                />
+              )}
             />
-          )}
-        />
+          </Box>
+          <Box sx={{ marginBottom: '10px' }}>
+            <ControlledSelectField
+              name="cniPluginVersion"
+              control={control}
+              required
+              label="CNI Plugin Version"
+              items={ciliumVersions}
+              size="small"
+            />
+          </Box>
 
-        <h2>Network Configuration</h2>
-        <Box sx={{ marginBottom: '22px' }}>
-          <Controller
-            name="cniPlugin"
-            control={control}
-            render={({ field: { value, onChange } }) => (
-              <ImageToggleButtonGroup value={value} onChange={(_, selected) => onChange(selected)} items={cniPlugins} />
-            )}
-          />
-        </Box>
-        <Box sx={{ marginBottom: '10px' }}>
-          <Controller
-            name="cniPluginVersion"
-            control={control}
-            render={({ field: { value, onChange } }) => (
-              <SelectField
-                required
-                label="CNI Plugin Version"
-                value={value}
-                onChange={onChange}
-                items={ciliumVersions}
-              />
-            )}
-          />
-        </Box>
-
-        <h2>SSH Keys</h2>
-        <Box sx={{ marginBottom: '10px' }}>
-          <Controller
-            name="sshKeys"
-            control={control}
-            render={({ field: { value, onChange } }) => (
-              <CheckSelectField label="SSH Keys" value={value} onChange={onChange} items={sshKeys} />
-            )}
-          />
-        </Box>
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-          <AddButton label="Add SSH Key" variant="outlined" className={commonStyle.kaasQuaternaryColor} size="large" />
-        </Box>
-      </Box>
-
-      <Box sx={{ flex: '1' }}>
-        <h2>Specification</h2>
-        <Box sx={{ display: 'flex', gap: '10px', marginBottom: '30px' }}>
-          <SelectField
-            required
-            label="Control Plane Version"
-            items={controlPlaneVersions}
-            defaultValue={head(controlPlaneVersions)}
-          />
-
-          <SelectField
-            required
-            label="Container Runtime"
-            value={head(containerRuntimes)}
-            items={containerRuntimes}
-            disabled
-          />
+          <Typography variant="h5" sx={{ marginY: '19.92px' }}>
+            SSH Keys
+          </Typography>
+          <Box sx={{ marginBottom: '10px' }}>
+            {/* <ControlledField
+              control={control}
+              component={SelectField}
+              name="sshKeys"
+              label="SSH Keys"
+              items={sshKeys}
+              size="small"
+            /> */}
+            <Controller
+              name="sshKeys"
+              control={control}
+              render={({ field: { value, onChange } }) => (
+                <CheckSelectField label="SSH Keys" value={value} onChange={onChange} items={sshKeys} size="small" />
+              )}
+            />
+          </Box>
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <AddButton
+              label="Add SSH Key"
+              variant="outlined"
+              size="large"
+              textTransform="none"
+              className={commonStyle.kaasQuaternaryColor}
+            />
+          </Box>
         </Box>
 
-        <Box sx={{ marginBottom: '30px' }}>
-          <Controller
-            name="admissionPlugins"
-            control={control}
-            render={({ field: { value, onChange } }) => (
-              <CheckSelectField label="Admission Plugins" value={value} onChange={onChange} items={admissionPlugins} />
-            )}
-          />
-        </Box>
+        <Box sx={{ flex: '1' }}>
+          <Typography variant="h5" sx={{ marginY: '19.92px' }}>
+            Specification
+          </Typography>
+          <Box sx={{ display: 'flex', gap: '10px', marginBottom: '30px' }}>
+            <ControlledSelectField
+              name="controlPlaneVersion"
+              control={control}
+              required
+              label="Control Plane Version"
+              items={controlPlaneVersions}
+              size="small"
+            />
 
-        <Box sx={{ marginBottom: '30px' }}>
-          <FormGroup>
-            {map(features, (feature) => (
-              <Controller
-                key={feature.value}
-                name={feature.value}
-                control={control}
-                render={({ field: { value = false, onChange } }) => (
-                  <CheckboxLabel label={feature.label} checked={value} onChange={onChange} />
-                )}
-              />
+            <ControlledSelectField
+              name="containerRuntime"
+              control={control}
+              required
+              label="Container Runtime"
+              items={containerRuntimes}
+              disabled
+              size="small"
+            />
+          </Box>
+
+          <Box sx={{ marginBottom: '30px' }}>
+            <Controller
+              name="admissionPlugins"
+              control={control}
+              render={({ field: { value, onChange } }) => (
+                <CheckSelectField
+                  label="Admission Plugins"
+                  value={value}
+                  onChange={onChange}
+                  items={admissionPlugins}
+                  size="small"
+                />
+              )}
+            />
+          </Box>
+
+          <Box sx={{ marginBottom: '30px' }}>
+            <FormGroup>
+              {map(features, (feature) => (
+                <Controller
+                  key={feature.value}
+                  name={feature.value}
+                  control={control}
+                  render={({ field: { value = false, onChange } }) => (
+                    <CheckboxLabel label={feature.label} checked={value} onChange={onChange} />
+                  )}
+                />
+              ))}
+            </FormGroup>
+          </Box>
+
+          <Box sx={{ marginBottom: '30px' }}>
+            <Typography variant="h5" sx={{ marginY: '19.92px' }}>
+              Labels
+            </Typography>
+            {fields.map((field, index) => (
+              <Box key={field.id} sx={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                <ControlledTextField
+                  name={`labels.${index}.key`}
+                  control={control}
+                  label="key"
+                  size="small"
+                  onChange={() => handleLabelKeyChange(index)}
+                />
+                <ControlledTextField name={`labels.${index}.value`} control={control} label="Value" size="small" />
+                <DeleteIconButton size="large" onClick={() => remove(index)} disabled={labelSize == 1} />
+              </Box>
             ))}
-          </FormGroup>
-        </Box>
-
-        <Box sx={{ marginBottom: '30px' }}>
-          <h2>Labels</h2>
-          <Box sx={{ display: 'flex', gap: '10px' }}>
-            <TextField label="Key" />
-            <TextField label="Value" />
-            <DeleteIconButton size="large" disabled />
           </Box>
         </Box>
       </Box>
+
+      <FormAction onSave={handleSubmit(onSave)} isValid={isValid} />
     </Box>
   );
 };

@@ -3,13 +3,16 @@ import { useEffect, useState } from 'react';
 import { OpenInNew } from '@mui/icons-material';
 import { Box, Link, Typography, Stack, Card, CardContent, CardMedia } from '@mui/material';
 
-import { concat, includes, isFunction, range, reduce } from 'lodash';
+import { concat, includes, isFunction, map, omit, range, reduce } from 'lodash';
 import isEmpty from 'lodash/isEmpty';
 
 import style from './AddApplicationDialog.module.scss';
+import { value } from './istioValue';
 
+import Button from '@components/atoms/KaaS/Button/Button';
 import Dialog from '@components/molecules/KaaS/Dialog/Dialog';
-import ProgressStepperContent from '@components/organisms/KaaS/ProgressStepperContent/ProgressStepperContent';
+import Editor from '@components/molecules/KaaS/Editor/Editor';
+import ProgressStepper, { Controller } from '@components/molecules/KaaS/ProgressStepper/ProgressStepper';
 import SearchList from '@components/organisms/KaaS/SearchList/SearchList';
 import Argo from '@resources/app_argo.svg';
 import CertManager from '@resources/app_cert-manager.svg';
@@ -24,6 +27,7 @@ export interface Application {
   image: string;
   title: string;
   summary: string;
+  values?: string;
 }
 
 interface AddApplicationSearchListProps {
@@ -37,6 +41,7 @@ const AddApplicationSearchList = ({ onSelect }: AddApplicationSearchListProps) =
       title: 'istio',
       summary:
         'Istio is an open-source service mesh that provides a uniform way to secure, connect, and monitor microservices.',
+      values: value,
     },
     {
       image: Kiali,
@@ -123,17 +128,47 @@ interface AddApplicationDialogProps {
 }
 
 const AddApplicationDialog = ({ isOpen = false, onClose }: AddApplicationDialogProps) => {
-  const [stepIndex, setStepIndex] = useState(0);
-
-  const handleSelectApplication = (application: Application) => {
-    setStepIndex((prev) => prev + 1);
-    console.log(application);
-  };
-
+  const [app, setApp] = useState<Application>();
   const installApplicationStep = [
-    { label: 'Select Application', content: <AddApplicationSearchList onSelect={handleSelectApplication} /> },
-    { label: 'Settings', content: <></> },
-    { label: 'Application Values', content: <></> },
+    {
+      label: 'Select Application',
+      content: ({ onNext }: Controller) => {
+        const handleSelectApplication = (application: Application) => {
+          onNext();
+          setApp(application);
+        };
+
+        return <AddApplicationSearchList onSelect={handleSelectApplication} />;
+      },
+    },
+    {
+      label: 'Settings',
+      content: (c: Controller) => {
+        return (
+          <Stack sx={{ marginY: '30px', gap: '10px' }}>
+            <Editor value={app?.values} height={'1095px'} />
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <Button onClick={c.onPrev}>Back</Button>
+              <Button onClick={c.onNext}>Next</Button>
+            </Box>
+          </Stack>
+        );
+      },
+    },
+    {
+      label: 'Application Values',
+      content: (c: Controller) => {
+        return (
+          <Stack sx={{ marginY: '30px', gap: '10px' }}>
+            <Editor value={''} height={'1095px'} />
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <Button onClick={c.onPrev}>Back</Button>
+              <Button onClick={c.onNext}>Next</Button>
+            </Box>
+          </Stack>
+        );
+      },
+    },
   ];
 
   const [_isOpen, setIsOpen] = useState(isOpen);
@@ -141,13 +176,20 @@ const AddApplicationDialog = ({ isOpen = false, onClose }: AddApplicationDialogP
     setIsOpen(isOpen);
   }, [isOpen]);
 
-  useEffect(() => {
-    if (_isOpen) setStepIndex(0);
-  }, [_isOpen]);
-
   const handleOnClose = () => {
     setIsOpen(false);
     if (isFunction(onClose)) onClose();
+  };
+
+  const [currentStep, setCurrentStep] = useState(0);
+  const defaultWidth = {
+    maxWidth: '660px',
+    minWidth: '660px',
+  };
+
+  const editorWidth = {
+    maxWidth: '1080px',
+    minWidth: '1080px',
   };
 
   return (
@@ -157,9 +199,19 @@ const AddApplicationDialog = ({ isOpen = false, onClose }: AddApplicationDialogP
       closeBtn
       title="Add Application"
       content={
-        <ProgressStepperContent stepDatas={installApplicationStep} activeStepIndex={stepIndex} progressFitWidth />
+        <ProgressStepper
+          steps={map(installApplicationStep, (step) => omit(step, 'content'))}
+          currentStep={currentStep}
+          onChangeCurrentStep={setCurrentStep}
+          fitWidth
+          Render={(controller) => {
+            const { currentStep } = controller;
+
+            return installApplicationStep[currentStep].content(controller);
+          }}
+        />
       }
-      sx={{ padding: '10px', '& .MuiDialog-paper': { maxWidth: '660px', minWidth: '660px' } }}
+      sx={{ padding: '10px', '& .MuiDialog-paper': currentStep == 0 ? defaultWidth : editorWidth }}
     />
   );
 };

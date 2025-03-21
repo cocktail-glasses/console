@@ -1,19 +1,23 @@
+import { SubmitHandler } from 'react-hook-form';
+
 import { Box, Step, Typography } from '@mui/material';
 
+import { chain } from 'lodash';
 import isEmpty from 'lodash/isEmpty';
 import map from 'lodash/map';
 
 import { FormValue } from '../../Create';
 import style from '../../Create.module.scss';
+import FormAction from './FormAction';
 
-// import '../../common.scss';
 import DescriptionItem from '@components/atoms/KaaS/DescriptionItem/DescriptionItem';
 
 interface SummaryFormProps {
-  formValue: FormValue;
+  values?: FormValue;
+  onSubmit: SubmitHandler<FormValue>;
 }
 
-const SummarySubForm: React.FC<SummaryFormProps> = ({ formValue }) => {
+const SummarySubForm = ({ values, onSubmit }: SummaryFormProps) => {
   interface SummaryGroup extends Array<Step> {}
   interface SummaryLayout extends Array<SummaryGroup> {}
 
@@ -26,12 +30,26 @@ const SummarySubForm: React.FC<SummaryFormProps> = ({ formValue }) => {
           {
             title: 'GENERAL',
             contents: [
-              ['Name', formValue.cluster?.name],
-              ['Version', formValue.cluster?.controlPlaneVersion],
-              ['Container Runtime', formValue.cluster?.containerRuntime],
+              ['Name', values?.cluster?.name],
+              ['Version', values?.cluster?.controlPlaneVersion],
+              ['Container Runtime', values?.cluster?.containerRuntime],
               [
                 'SSH Keys',
-                isEmpty(formValue.cluster?.sshKeys) ? 'No assigned keys' : formValue.cluster.sshKeys?.join(', '),
+                isEmpty(values?.cluster?.sshKeys) ? 'No assigned keys' : values?.cluster?.sshKeys?.join(', '),
+              ],
+              [
+                'Cluster Labels',
+                chain(values?.cluster?.labels)
+                  .filter((label) => !(isEmpty(label.key) && isEmpty(label.value)))
+                  .map(
+                    (label) => `${label.key}: ${label.value}`
+                    // <Box>
+                    //   <Chip label={label.key} />
+                    //   <Chip label={label.value} />
+                    // </Box>
+                  )
+                  .value()
+                  .join(', '),
               ],
             ],
           },
@@ -39,8 +57,8 @@ const SummarySubForm: React.FC<SummaryFormProps> = ({ formValue }) => {
           {
             title: 'NETWORK CONFIGURATION',
             contents: [
-              ['CNI Plugin', formValue.cluster?.cniPlugin],
-              ['CNI Plugin Version', formValue.cluster?.cniPluginVersion],
+              ['CNI Plugin', values?.cluster?.cniPlugin],
+              ['CNI Plugin Version', values?.cluster?.cniPluginVersion],
               ['Proxy Mode', 'ebpf'],
               ['Expose Strategy', 'NodePort'],
               ['Allowed IP Ranges for Node Ports', undefined],
@@ -65,12 +83,13 @@ const SummarySubForm: React.FC<SummaryFormProps> = ({ formValue }) => {
         index: 2,
         contents: [['Preset', 'cocktail-preset']],
       },
+    ],
+    [
       {
         title: 'Static Nodes',
         index: 3,
+        contents: [['Static Node Names', 'cp-node-1, wk-node-1']],
       },
-    ],
-    [
       {
         title: 'Applications',
         index: 4,
@@ -79,14 +98,17 @@ const SummarySubForm: React.FC<SummaryFormProps> = ({ formValue }) => {
   ];
 
   return (
-    <Box className={style.summary}>
-      {map(summaryData, (group, groupIndex) => (
-        <Box className={style.group} key={groupIndex}>
-          {map(group, (step) => (
-            <SummaryStep key={step.title} stepData={step} />
-          ))}
-        </Box>
-      ))}
+    <Box component="form">
+      <Box className={style.summary}>
+        {map(summaryData, (group, groupIndex) => (
+          <Box className={style.group} key={groupIndex}>
+            {map(group, (step) => (
+              <SummaryStep key={step.title} stepData={step} />
+            ))}
+          </Box>
+        ))}
+      </Box>
+      <FormAction onSubmit={() => values && onSubmit(values)} isValid />
     </Box>
   );
 };

@@ -1,47 +1,23 @@
-import { ReactNode } from 'react';
-
-import {
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
-  FormHelperText,
-  OutlinedInput,
-  Checkbox,
-  ListItemText,
-  SelectChangeEvent,
-} from '@mui/material';
+import { MenuItem, Checkbox, ListItemText } from '@mui/material';
 
 import { map } from 'lodash';
+
+import TextField from './TextField';
 
 export interface SelectItem {
   label: string;
   value: string;
 }
 
-interface CheckSelectFieldProps {
-  required?: boolean;
-  label: string;
+interface CheckSelectFieldProps extends React.ComponentPropsWithRef<typeof TextField> {
   value?: string[];
-  onChange?: (event: SelectChangeEvent<string[]>, child: ReactNode) => void;
   displayFn?: (selected: string[]) => string;
-  error?: boolean;
-  errorMessage?: string;
   items: SelectItem[];
 }
 
 const defaultDisplayFn = (selected: string[]) => selected.join(', ');
 
-const CheckSelectField = ({
-  required = false,
-  label,
-  value = [],
-  onChange,
-  displayFn = defaultDisplayFn,
-  error,
-  errorMessage,
-  items,
-}: CheckSelectFieldProps) => {
+const CheckSelectField = ({ value = [], displayFn = defaultDisplayFn, items, ...props }: CheckSelectFieldProps) => {
   const ITEM_HEIGHT = 48;
   const ITEM_PADDING_TOP = 8;
   const MenuProps = {
@@ -54,27 +30,25 @@ const CheckSelectField = ({
   };
 
   return (
-    <FormControl required={required} fullWidth error={error}>
-      <InputLabel variant="outlined">{label}</InputLabel>
-      <Select
-        aria-label="check select"
-        variant="outlined"
-        multiple
-        value={value}
-        onChange={onChange}
-        input={<OutlinedInput label={label} />}
-        renderValue={displayFn}
-        MenuProps={MenuProps}
-      >
-        {map(items, (item) => (
-          <MenuItem value={item.value} key={item.label}>
-            <Checkbox checked={value?.includes(item.value)} />
-            <ListItemText primary={item.label} />
-          </MenuItem>
-        ))}
-      </Select>
-      <FormHelperText>{errorMessage}</FormHelperText>
-    </FormControl>
+    <TextField
+      {...props}
+      select
+      slotProps={{
+        select: {
+          multiple: true,
+          value: value,
+          renderValue: (s: any) => displayFn(s),
+          MenuProps: MenuProps,
+        },
+      }}
+    >
+      {map(items, (item) => (
+        <MenuItem value={item.value} key={item.label}>
+          <Checkbox checked={value?.includes(item.value)} />
+          <ListItemText primary={item.label} />
+        </MenuItem>
+      ))}
+    </TextField>
   );
 };
 

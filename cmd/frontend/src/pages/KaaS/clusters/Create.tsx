@@ -1,130 +1,68 @@
-import { useState } from 'react';
-import { Controller, useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router';
+import { createContext, useEffect, useState } from 'react';
 
-import { ArrowBack, ArrowForward } from '@mui/icons-material';
-import { Box, Button, Paper } from '@mui/material';
+import { Paper, Typography } from '@mui/material';
+
+import { curry, get } from 'lodash';
 
 import commonStyle from './Common.module.scss';
 import style from './Create.module.scss';
 import ApplicationsSubForm from './component/Forms/ApplicationsSubForm';
-import ClusterSubForm, { ClusterFormValue } from './component/Forms/ClusterSubForm';
-import SettingSubForm, { SettingsFormValue } from './component/Forms/SettingsSubForm';
+import ClusterSubForm from './component/Forms/ClusterSubForm';
+import SettingSubForm from './component/Forms/SettingsSubForm';
 import StaticNodeForm from './component/Forms/StaticNodeSubForm';
 import SummarySubForm from './component/Forms/SummarySubForm';
+import { applicationsFormValue, createFormValue, settingsFormValue, staticNodesFormValue } from './schemas';
 
-import AddButton from '@components/molecules/KaaS/Button/AddButton/AddButton';
-import CancelButton from '@components/molecules/KaaS/Button/CancelButton/CancelButton';
-import ProgressStepperContent from '@components/organisms/KaaS/ProgressStepperContent/ProgressStepperContent';
+import ProgressStepper, { Controller } from '@components/molecules/KaaS/ProgressStepper/ProgressStepper';
 import clsx from 'clsx';
 
 export interface FormValue {
-  cluster: ClusterFormValue;
-  settings: SettingsFormValue;
+  cluster?: createFormValue;
+  settings?: settingsFormValue;
+  statisNodes?: staticNodesFormValue;
+  applications?: applicationsFormValue;
 }
 
+export const ProgressContext = createContext<Controller | undefined>(undefined);
+
 export default function Create() {
-  const {
-    control,
-    watch,
-    getValues,
-    formState: { errors },
-  } = useForm<FormValue>();
+  const [formValue, setFormValue] = useState<FormValue>({});
+  useEffect(() => {
+    console.log(formValue);
+  }, [formValue]);
 
-  console.log(watch());
-  console.log('root form errors: ', errors);
+  const handleSubmitFormValue = curry((field: string, data: any) =>
+    setFormValue((prev: FormValue) => ({ ...prev, [field]: data }))
+  );
 
-  const [hasError, setHasError] = useState(false);
-
-  const stepDatas = [
-    {
-      label: 'Cluster',
-      content: (
-        <Controller
-          name="cluster"
-          control={control}
-          render={({ field: { value, onChange } }) => (
-            <ClusterSubForm values={value} handleSubmit={onChange} handleError={setHasError} />
-          )}
-        />
-      ),
-    },
-    {
-      label: 'Settings',
-      content: (
-        <Controller
-          name="settings"
-          control={control}
-          render={({ field: { onChange } }) => <SettingSubForm handleSubmit={onChange} />}
-        />
-      ),
-    },
-    {
-      label: 'Static Nodes',
-      content: <StaticNodeForm />,
-    },
-    {
-      label: 'Applications',
-      content: <ApplicationsSubForm />,
-    },
-    {
-      label: 'Summary',
-      content: <SummarySubForm formValue={getValues()} />,
-    },
+  const steps = [
+    { label: 'Cluster' },
+    { label: 'Settings' },
+    { label: 'Static Nodes' },
+    { label: 'Applications' },
+    { label: 'Summary' },
   ];
-  const [activeStepIndex, setActiveStep] = useState(0);
-
-  const hasBack = (currentStepIndex: number) => currentStepIndex > 0;
-  const hasNext = (currentStepIndex: number, totalStepSize: number) => currentStepIndex < totalStepSize - 1;
-  const handleBack = (currentStepIndex: number) => hasBack(currentStepIndex) && setActiveStep((prev) => prev - 1);
-  const handleNext = (currentStepIndex: number) =>
-    hasNext(currentStepIndex, stepDatas.length) && setActiveStep((prev) => prev + 1);
-
-  const navigate = useNavigate();
+  const contents = [
+    <ClusterSubForm values={get(formValue, 'cluster')} onSave={handleSubmitFormValue('cluster')} />,
+    <SettingSubForm values={get(formValue, 'settings')} onSave={handleSubmitFormValue('settings')} />,
+    <StaticNodeForm values={get(formValue, 'statisNodes')} onSave={handleSubmitFormValue('statisNodes')} />,
+    <ApplicationsSubForm values={get(formValue, 'applications')} onSave={handleSubmitFormValue('applications')} />,
+    <SummarySubForm values={formValue} onSubmit={(e) => console.log(e)} />,
+  ];
 
   return (
     <Paper className={clsx(style.mainContainer, style.mainForm, commonStyle.mainContainer)}>
-      <h2>Create Cluster</h2>
+      <Typography variant="h5" sx={{ marginBottom: '20px' }}>
+        Create Cluster
+      </Typography>
 
-      <ProgressStepperContent stepDatas={stepDatas} activeStepIndex={activeStepIndex} />
-      {/* {JSON.stringify(hasError)} */}
-
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          marginTop: '30px',
-        }}
-      >
-        <CancelButton onClick={() => navigate('/kaas/clusters')} className={commonStyle.kaasTertiaryColor} />
-        <Box sx={{ display: 'flex', gap: '10px' }}>
-          <Button
-            variant="outlined"
-            size="large"
-            startIcon={<ArrowBack />}
-            disabled={!hasBack(activeStepIndex)}
-            onClick={() => handleBack(activeStepIndex)}
-            className={commonStyle.kaasTertiaryColor}
-          >
-            Back
-          </Button>
-
-          {hasNext(activeStepIndex, stepDatas.length) ? (
-            <Button
-              variant="contained"
-              size="large"
-              startIcon={<ArrowForward />}
-              onClick={() => handleNext(activeStepIndex)}
-              disabled={hasError}
-              className={commonStyle.kaasPrimaryColor}
-            >
-              Next
-            </Button>
-          ) : (
-            <AddButton label="Create Cluster" onClick={() => handleNext(activeStepIndex)} />
-          )}
-        </Box>
-      </Box>
+      <ProgressStepper
+        steps={steps}
+        currentStep={0}
+        Render={(c: Controller) => (
+          <ProgressContext.Provider value={c}>{contents[c.currentStep]}</ProgressContext.Provider>
+        )}
+      />
     </Paper>
   );
 }

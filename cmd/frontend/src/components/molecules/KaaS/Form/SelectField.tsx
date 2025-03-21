@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { forwardRef, ReactNode } from 'react';
 
 import { MenuItem } from '@mui/material';
 
@@ -11,11 +11,11 @@ export interface SelectItem {
   value: string;
 }
 
-interface SelectFieldProps extends React.ComponentPropsWithoutRef<typeof TextField> {
+interface SelectFieldProps extends React.ComponentPropsWithRef<typeof TextField> {
   items: SelectItem[] | string[];
 }
 
-const SelectField = ({ items, ...props }: SelectFieldProps) => {
+const SelectField = forwardRef(({ items, ...props }: SelectFieldProps, ref: any) => {
   const isSelectItem = (item: any): item is SelectItem => {
     if (!isObject(item)) return false;
 
@@ -23,7 +23,7 @@ const SelectField = ({ items, ...props }: SelectFieldProps) => {
   };
 
   return (
-    <TextField select {...props}>
+    <TextField select {...props} ref={ref}>
       {map(items, (item) =>
         isSelectItem(item) ? (
           <MenuItem value={item.value} key={item.value}>
@@ -37,6 +37,6 @@ const SelectField = ({ items, ...props }: SelectFieldProps) => {
       )}
     </TextField>
   );
-};
+});
 
 export default SelectField;

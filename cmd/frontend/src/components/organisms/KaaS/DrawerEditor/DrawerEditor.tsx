@@ -2,7 +2,7 @@ import { Box, Drawer, Typography } from '@mui/material';
 
 import { merge } from 'lodash';
 
-import Editor, { EditorProps } from '../Editor/Editor';
+import Editor, { EditorProps } from '../../../molecules/KaaS/Editor/Editor';
 
 import Button from '@components/atoms/KaaS/Button/Button';
 
