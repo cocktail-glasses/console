@@ -1,7 +1,8 @@
 // import helpers from '@helpers';
-import { matchPath } from "react-router-dom";
+import { matchPath } from 'react-router-dom';
 
-import { Auth } from "./auth";
+import { Auth } from './auth';
+
 // import { CLUSTERS_PREFIX } from './k8s/apiProxy';
 
 /**
@@ -10,11 +11,12 @@ import { Auth } from "./auth";
  * The given path does not start with a /, it will be added.
  */
 export function getClusterPrefixedPath(path?: string | null) {
-  const baseClusterPath = "/clusters/:cluster";
+  // const baseClusterPath = "/clusters/:cluster";
+  const baseClusterPath = '/clusters';
   if (!path) {
     return baseClusterPath;
   }
-  return baseClusterPath + (path[0] === "/" ? "" : "/") + path;
+  return baseClusterPath + (path[0] === '/' ? '' : '/') + path;
 }
 
 /**
@@ -28,13 +30,13 @@ export function getCluster(url?: string): string | null {
       caseSensitive: false,
       end: false,
     },
-    urlPath,
+    urlPath
   );
   return (!!clusterURLMatch && clusterURLMatch.params.cluster) || null;
 }
 
 export function getClustersPrefix() {
-  console.log("getClustersPrefix()", Auth.getInstance().getAccountSeq);
+  console.log('getClustersPrefix()', Auth.getInstance().getAccountSeq);
   // const urlPath = window.location.pathname;
   // const clusterURLMatch = matchPath(
   //   {
@@ -53,5 +55,5 @@ export function getClustersPrefix() {
   // }
   // console.log('3', account)
   // return `/${Auth.getInstance().getAccountSeq}`;
-  return "/";
+  return '/';
 }
