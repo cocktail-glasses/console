@@ -260,7 +260,7 @@ export function PureSidebar({
               value={getSidebarGroup}
               exclusive
               onChange={(event: React.MouseEvent<HTMLElement>, newAlignment: string) => {
-                setSidebarGroup(newAlignment);
+                newAlignment && setSidebarGroup(newAlignment);
               }}
               sx={(theme) => ({ background: theme.palette.sidebarGroupBg })}
               aria-label="Platform"
