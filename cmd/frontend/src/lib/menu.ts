@@ -215,6 +215,50 @@ export const Menus: MenuType[] = [
   },
 
   {
+    id: 'gateway',
+    label: 'Gateway',
+    icon: 'mdi:folder-network-outline',
+    route: 'gateways',
+    group: 'k8s',
+  },
+
+  {
+    id: 'gateways',
+    label: 'Gateways',
+    icon: 'mdi:folder-network-outline',
+    route: 'gateways',
+    parent: 'gateway',
+    group: 'k8s',
+  },
+
+  {
+    id: 'gatewayclasses',
+    label: 'Gateway Classes',
+    icon: 'mdi:folder-network-outline',
+    route: 'gatewayclasses',
+    parent: 'gateway',
+    group: 'k8s',
+  },
+
+  {
+    id: 'httproutes',
+    label: 'HTTP Routes',
+    icon: 'mdi:folder-network-outline',
+    route: 'httproutes',
+    parent: 'gateway',
+    group: 'k8s',
+  },
+
+  {
+    id: 'grpcroutes',
+    label: 'GRPC Routes',
+    icon: 'mdi:folder-network-outline',
+    route: 'grpcroutes',
+    parent: 'gateway',
+    group: 'k8s',
+  },
+
+  {
     id: 'security',
     label: 'Security',
     icon: 'mdi:lock',

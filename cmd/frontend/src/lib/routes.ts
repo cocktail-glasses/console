@@ -19,6 +19,14 @@ import k8sDaemonsetList from '@pages/K8s/daemonset/List';
 import k8sDeploymentsList from '@pages/K8s/deployments/List';
 import k8sEndpointsDetails from '@pages/K8s/endpoints/Details';
 import k8sEndpointsList from '@pages/K8s/endpoints/List';
+import k8sGatewayClassDetails from '@pages/K8s/gateway/ClassDetails';
+import k8sGatewayClassList from '@pages/K8s/gateway/ClassList';
+import k8sGrpcRouteDetails from '@pages/K8s/gateway/GRPCRouteDetails';
+import k8sGrpcRouteList from '@pages/K8s/gateway/GRPCRouteList';
+import k8sGatewayDetails from '@pages/K8s/gateway/GatewayDetails';
+import k8sGatewayList from '@pages/K8s/gateway/GatewayList';
+import k8sHttpRouteDetails from '@pages/K8s/gateway/HTTPRouteDetails';
+import k8sHttpRouteList from '@pages/K8s/gateway/HTTPRouteList';
 import k8sHorizontalPodAutoscalerDetails from '@pages/K8s/horizontalPodAutoscaler/Details';
 import k8sHorizontalPodAutoscalerList from '@pages/K8s/horizontalPodAutoscaler/List';
 import k8sIngressClassDetails from '@pages/K8s/ingress/ClassDetails';
@@ -449,6 +457,74 @@ export const Routes: RoutesType[] = [
         path: '/clusters/networkPolicy/:namespace/:name',
         page: 'K8s/networkpolicy/Details',
         element: k8sNetworkpolicyDetails,
+      },
+    ],
+  },
+
+  {
+    id: 'gateways',
+    routes: [
+      {
+        path: '/clusters/gateways',
+        page: 'K8s/gateway/GatewayList',
+        element: k8sGatewayList,
+        index: true,
+      },
+      {
+        path: '/clusters/gateway:namespace/:name',
+        page: 'K8s/gateway/GatewayDetails',
+        element: k8sGatewayDetails,
+      },
+    ],
+  },
+
+  {
+    id: 'gatewayclasses',
+    routes: [
+      {
+        path: '/clusters/gatewayclasses',
+        page: 'K8s/gateway/GatewayClassList',
+        element: k8sGatewayClassList,
+        index: true,
+      },
+      {
+        path: '/clusters/gatewayclass/:name',
+        page: 'K8s/gateway/GatewayClassDetails',
+        element: k8sGatewayClassDetails,
+      },
+    ],
+  },
+
+  {
+    id: 'httproutes',
+    routes: [
+      {
+        path: '/clusters/httproutes',
+        page: 'K8s/gateway/HttpRouteList',
+        element: k8sHttpRouteList,
+        index: true,
+      },
+      {
+        path: '/clusters/httproute/:namespace/:name',
+        page: 'K8s/gateway/HttpRouteDetails',
+        element: k8sHttpRouteDetails,
+      },
+    ],
+  },
+
+  {
+    id: 'grpcroutes',
+    routes: [
+      {
+        path: '/clusters/grpcroutes',
+        page: 'K8s/gateway/GrpcRouteList',
+        element: k8sGrpcRouteList,
+        index: true,
+      },
+      {
+        path: '/clusters/grpcroute/:namespace/:name',
+        page: 'K8s/gateway/GrpcRouteDetails',
+        element: k8sGrpcRouteDetails,
       },
     ],
   },
