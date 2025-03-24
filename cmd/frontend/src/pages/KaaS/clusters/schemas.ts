@@ -16,7 +16,7 @@ export enum CNIPlugins {
   NONE = 'none',
 }
 
-interface Label {
+export interface Label {
   key: string;
   value: string;
 }

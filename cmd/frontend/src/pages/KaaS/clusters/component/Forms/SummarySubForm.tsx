@@ -2,12 +2,12 @@ import { SubmitHandler } from 'react-hook-form';
 
 import { Box, Step, Typography } from '@mui/material';
 
-import { chain } from 'lodash';
 import isEmpty from 'lodash/isEmpty';
 import map from 'lodash/map';
 
 import { FormValue } from '../../Create';
 import style from '../../Create.module.scss';
+import { Label } from '../../schemas';
 import FormAction from './FormAction';
 
 import DescriptionItem from '@components/atoms/KaaS/DescriptionItem/DescriptionItem';
@@ -39,16 +39,15 @@ const SummarySubForm = ({ values, onSubmit }: SummaryFormProps) => {
               ],
               [
                 'Cluster Labels',
-                chain(values?.cluster?.labels)
-                  .filter((label) => !(isEmpty(label.key) && isEmpty(label.value)))
+                values?.cluster?.labels
+                  ?.filter((label: Label) => !(isEmpty(label.key) && isEmpty(label.value)))
                   .map(
-                    (label) => `${label.key}: ${label.value}`
+                    (label: Label) => `${label.key}: ${label.value}`
                     // <Box>
                     //   <Chip label={label.key} />
                     //   <Chip label={label.value} />
                     // </Box>
                   )
-                  .value()
                   .join(', '),
               ],
             ],
