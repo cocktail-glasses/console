@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { ReactNode, useMemo } from 'react';
 
 import Grid, { Grid2Props } from '@mui/material/Grid2';
 import { Theme } from '@mui/material/styles';
@@ -7,9 +7,9 @@ import { ValueLabel } from '../Label';
 
 export interface NameValueTableRow {
   /** The name (key) for this row */
-  name: string | JSX.Element;
+  name: ReactNode;
   /** The value for this row */
-  value?: string | JSX.Element | JSX.Element[];
+  value?: ReactNode;
   /** Whether this row should be hidden (can be a boolean or a function that will take the
    * @param value and return a boolean) */
   hide?: boolean | ((value: NameValueTableRow['value']) => boolean);

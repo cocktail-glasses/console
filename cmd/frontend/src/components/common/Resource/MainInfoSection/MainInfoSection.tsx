@@ -15,13 +15,13 @@ import { KubeObject } from '@lib/k8s/cluster';
 import { createRouteURL } from '@lib/router';
 import { HeaderAction } from 'redux/actionButtonsSlice';
 
-export interface MainInfoSectionProps {
-  resource: KubeObject | null;
-  headerSection?: ((resource: KubeObject | null) => React.ReactNode) | React.ReactNode;
+export interface MainInfoSectionProps<T extends KubeObject = KubeObject> {
+  resource: T | null;
+  headerSection?: ((resource: T | null) => React.ReactNode) | React.ReactNode;
   title?: string;
-  extraInfo?: ((resource: KubeObject | null) => NameValueTableRow[] | null) | NameValueTableRow[] | null;
+  extraInfo?: ((resource: T | null) => NameValueTableRow[] | null) | NameValueTableRow[] | null;
   actions?:
-    | ((resource: KubeObject | any | null) => React.ReactNode[] | null | HeaderAction[])
+    | ((resource: T | any | null) => React.ReactNode[] | null | HeaderAction[])
     | React.ReactNode[]
     | null
     | HeaderAction[];
@@ -56,7 +56,7 @@ export function MainInfoSection(props: MainInfoSectionProps) {
       return backLink;
     }
 
-    if (!!resource) {
+    if (resource) {
       return createRouteURL(resource.listRoute);
     }
   }
@@ -77,7 +77,7 @@ export function MainInfoSection(props: MainInfoSectionProps) {
       backLink={getBackLink()}
     >
       {resource === null ? (
-        !!error ? (
+        error ? (
           <Paper variant="outlined">
             <Empty color="error">{error.toString()}</Empty>
           </Paper>

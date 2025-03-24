@@ -32,7 +32,14 @@ import SimpleTable, { NameValueTable } from '@components/common/SimpleTable';
 import { Icon } from '@iconify/react';
 import { labelSelectorToQuery, ResourceClasses } from '@lib/k8s';
 import { ApiError } from '@lib/k8s/apiProxy';
-import { KubeCondition, KubeContainer, KubeContainerStatus, KubeObject, KubeObjectInterface } from '@lib/k8s/cluster';
+import {
+  KubeCondition,
+  KubeContainer,
+  KubeContainerStatus,
+  KubeObject,
+  KubeObjectClass,
+  KubeObjectInterface,
+} from '@lib/k8s/cluster';
 import Pod, { KubePod, KubeVolume } from '@lib/k8s/pod';
 import { createRouteURL, RouteURLProps } from '@lib/router';
 import { getThemeName } from '@lib/themes';
@@ -72,27 +79,31 @@ export function ResourceLink(props: ResourceLinkProps) {
   );
 }
 
-export interface DetailsGridProps extends React.PropsWithChildren<Omit<MainInfoSectionProps, 'resource'>> {
+export interface DetailsGridProps<T extends KubeObjectClass>
+  extends React.PropsWithChildren<Omit<MainInfoSectionProps<InstanceType<T>>, 'resource'>> {
   /** Resource type to fetch (from the ResourceClasses). */
-  resourceType: KubeObject;
+  resourceType: T;
   /** Name of the resource. */
   name: string | undefined;
   /** Namespace of the resource. If not provided, it's assumed the resource is not namespaced. */
   namespace?: string;
   /** Sections to show in the details grid (besides the default ones). */
-  extraSections?: ((item: KubeObject) => boolean | DetailsViewSection[]) | boolean | DetailsViewSection[];
+  extraSections?:
+    | ((item: InstanceType<T>) => boolean | DetailsViewSection[] | React.ReactNode[])
+    | boolean
+    | DetailsViewSection[];
   /** @deprecated Use extraSections instead. */
-  sectionsFunc?: (item: KubeObject) => React.ReactNode | DetailsViewSection[];
+  sectionsFunc?: (item: InstanceType<T>) => React.ReactNode | DetailsViewSection[];
   /** If true, will show the events section. */
   withEvents?: boolean;
   /** Called when the resource instance is created/updated, or there is an error. */
-  onResourceUpdate?: (resource: KubeObject, error: ApiError) => void;
+  onResourceUpdate?: (resource: InstanceType<T>, error: ApiError) => void;
 }
 
 /** Renders the different parts that constibute an actual resource's details view.
  * Those are: the back link, the header, the main info section, the extra sections, and the events section.
  */
-export function DetailsGrid(props: DetailsGridProps) {
+export function DetailsGrid<T extends KubeObjectClass>(props: DetailsGridProps<T>) {
   const {
     // sectionsFunc,
     resourceType,
@@ -116,8 +127,8 @@ export function DetailsGrid(props: DetailsGridProps) {
   const { extraInfo, actions, noDefaultActions, headerStyle, backLink, title, headerSection } =
     otherMainInfoSectionProps;
 
-  const [item, error] = resourceType.useGet(name, namespace);
-  const prevItemRef = useRef<{ uid?: string; version?: string; error?: ApiError }>({});
+  const [item, error] = resourceType.useGet(name || '', namespace) as [InstanceType<T> | null, ApiError | null];
+  const prevItemRef = useRef<{ uid?: string; version?: string; error?: ApiError | null }>({});
 
   useEffect(() => {
     if (item) {
@@ -137,7 +148,7 @@ export function DetailsGrid(props: DetailsGridProps) {
     // infinite loops.
     const prevItem = prevItemRef.current;
     if (
-      prevItem?.uid === item?.metatada?.uid &&
+      prevItem?.uid === item?.metadata?.uid &&
       prevItem?.version === item?.metadata?.resourceVersion &&
       error === prevItem.error
     ) {
@@ -145,20 +156,20 @@ export function DetailsGrid(props: DetailsGridProps) {
     }
 
     prevItemRef.current = {
-      uid: item?.metatada?.uid,
+      uid: item?.metadata?.uid,
       version: item?.metadata?.resourceVersion,
       error,
     };
-    onResourceUpdate?.(item, error);
+    onResourceUpdate?.(item as InstanceType<T>, error!);
   }, [item, error, onResourceUpdate]);
 
-  const actualBackLink: string | Location<any> | undefined = useMemo(() => {
+  const actualBackLink: string | Location | undefined = useMemo(() => {
     if (!!backLink || backLink === '') {
       return backLink;
     }
 
     const stateLink = location.state?.backLink || null;
-    if (!!stateLink) {
+    if (stateLink) {
       return generatePath(stateLink.pathname);
     }
 
@@ -169,11 +180,11 @@ export function DetailsGrid(props: DetailsGridProps) {
 
     let route;
 
-    if (!!item) {
+    if (item) {
       route = item.listRoute;
     } else {
       try {
-        route = new resourceType().listRoute;
+        route = new resourceType({} as any).listRoute;
       } catch (err) {
         console.error(`Error creating route for details grid (resource type=${resourceType}): ${err}`);
 
@@ -212,7 +223,7 @@ export function DetailsGrid(props: DetailsGridProps) {
   // Error / Loading or Metadata
   if (item === null) {
     sections.push(
-      !!error
+      error
         ? {
             id: DefaultDetailsViewSection.ERROR,
             section: (
@@ -251,7 +262,7 @@ export function DetailsGrid(props: DetailsGridProps) {
   //   });
   // }
 
-  if (!!extraSections) {
+  if (extraSections) {
     let actualExtraSections: DetailsViewSection[] = [];
     if (Array.isArray(extraSections)) {
       actualExtraSections = extraSections;
@@ -266,7 +277,7 @@ export function DetailsGrid(props: DetailsGridProps) {
   }
 
   // Children
-  if (!!children) {
+  if (children) {
     sections.push({
       id: DefaultDetailsViewSection.CHILDREN,
       section: children,
@@ -274,7 +285,7 @@ export function DetailsGrid(props: DetailsGridProps) {
   }
 
   // Plugin appended details views
-  if (!!detailViews) {
+  if (detailViews) {
     sections.push(...detailViews);
   }
 
@@ -613,7 +624,7 @@ export function ContainerInfo(props: ContainerInfoProps) {
   const [startedDate, finishDate, lastStateStartedDate, lastStateFinishDate] = useMemo(() => {
     function getStartedDate(state?: KubeContainerStatus['state']) {
       let startedDate = state?.running?.startedAt || state?.terminated?.startedAt || '';
-      if (!!startedDate) {
+      if (startedDate) {
         startedDate = localeDate(startedDate);
       }
       return startedDate;
@@ -621,7 +632,7 @@ export function ContainerInfo(props: ContainerInfoProps) {
 
     function getFinishDate(state?: KubeContainerStatus['state']) {
       let finishDate = state?.terminated?.finishedAt || '';
-      if (!!finishDate) {
+      if (finishDate) {
         finishDate = localeDate(finishDate);
       }
       return finishDate;
@@ -647,14 +658,14 @@ export function ContainerInfo(props: ContainerInfoProps) {
         return [stateDetails, label, statusType];
       }
 
-      if (!!state.waiting) {
+      if (state.waiting) {
         stateDetails = state.waiting;
         statusType = 'warning';
         label = t('translation|Waiting');
-      } else if (!!state.running) {
+      } else if (state.running) {
         statusType = 'success';
         label = t('translation|Running');
-      } else if (!!state.terminated) {
+      } else if (state.terminated) {
         stateDetails = state.terminated;
         if (state.terminated.exitCode === 0) {
           statusType = '';
@@ -677,7 +688,7 @@ export function ContainerInfo(props: ContainerInfoProps) {
     return (
       <Box>
         <Box>
-          <StatusLabel status={statusType} aria-describedby={!!stateDetails?.message ? tooltipID : undefined}>
+          <StatusLabel status={statusType} aria-describedby={stateDetails?.message ? tooltipID : undefined}>
             {label + (stateDetails?.reason ? ` (${stateDetails.reason})` : '')}
           </StatusLabel>
           {!!stateDetails && stateDetails.message && (
@@ -1112,9 +1123,9 @@ export function VolumeSection(props: VolumeSectionProps) {
         };
 
         const volumeNameKey = volumeKindNames[volumeKind as keyof typeof volumeKindNames];
-        if (!!volumeNameKey) {
+        if (volumeNameKey) {
           const detailName = volume[volumeKind][volumeNameKey];
-          if (!!detailName) {
+          if (detailName) {
             return (
               <Link routeName={volumeRoute} params={{ namespace: volumeNamespace, name: detailName }}>
                 {volumeName}

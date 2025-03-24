@@ -11,11 +11,11 @@ import { NameValueTable, NameValueTableRow } from '@components/common/SimpleTabl
 import { LightTooltip } from '@components/common/Tooltip';
 import { Icon } from '@iconify/react';
 import { ResourceClasses } from '@lib/k8s';
-import { KubeObject, KubeObjectInterface, KubeOwnerReference } from '@lib/k8s/cluster';
+import { KubeObject, KubeOwnerReference } from '@lib/k8s/cluster';
 import Theme from '@lib/themes';
 import { localeDate } from '@lib/util';
 
-type ExtraRowsFunc = (resource: KubeObjectInterface) => NameValueTableRow[] | null;
+type ExtraRowsFunc<T extends KubeObject> = (resource: T) => NameValueTableRow[] | null;
 
 export const metadataStyles = (theme: typeof Theme.light) => ({
   color: theme.palette.text.primary,
@@ -31,15 +31,15 @@ export const metadataStyles = (theme: typeof Theme.light) => ({
   textOverflow: 'ellipsis',
 });
 
-export interface MetadataDisplayProps {
-  resource: KubeObject;
-  extraRows?: ExtraRowsFunc | NameValueTableRow[] | null;
+export interface MetadataDisplayProps<T extends KubeObject = KubeObject> {
+  resource: T;
+  extraRows?: ExtraRowsFunc<T> | NameValueTableRow[] | null;
 }
 
-export function MetadataDisplay(props: MetadataDisplayProps) {
+export function MetadataDisplay<T extends KubeObject>(props: MetadataDisplayProps<T>) {
   const { resource, extraRows } = props;
   const { t } = useTranslation();
-  let makeExtraRows: ExtraRowsFunc;
+  let makeExtraRows: ExtraRowsFunc<T>;
 
   function makeOwnerReferences(ownerReferences: KubeOwnerReference[]) {
     if (!resource || ownerReferences === undefined) {
@@ -56,7 +56,7 @@ export function MetadataDisplay(props: MetadataDisplayProps) {
         if (ownerRef.kind in ResourceClasses) {
           let routeName;
           try {
-            routeName = new ResourceClasses[ownerRef.kind]().detailsRoute;
+            routeName = ResourceClasses[ownerRef.kind as keyof typeof ResourceClasses].detailsRoute;
           } catch (e) {
             console.error('Error getting routeName for {ownerRef.kind}', e);
             return null;
