@@ -217,7 +217,7 @@ export const Menus: MenuType[] = [
   {
     id: 'gateway',
     label: 'Gateway',
-    icon: 'mdi:folder-network-outline',
+    icon: 'mdi:lan-connect',
     route: 'gateways',
     group: 'k8s',
   },
@@ -225,7 +225,7 @@ export const Menus: MenuType[] = [
   {
     id: 'gateways',
     label: 'Gateways',
-    icon: 'mdi:folder-network-outline',
+    icon: 'mdi:lan-connect',
     route: 'gateways',
     parent: 'gateway',
     group: 'k8s',
@@ -234,7 +234,7 @@ export const Menus: MenuType[] = [
   {
     id: 'gatewayclasses',
     label: 'Gateway Classes',
-    icon: 'mdi:folder-network-outline',
+    icon: 'mdi:lan-connect',
     route: 'gatewayclasses',
     parent: 'gateway',
     group: 'k8s',
@@ -243,7 +243,7 @@ export const Menus: MenuType[] = [
   {
     id: 'httproutes',
     label: 'HTTP Routes',
-    icon: 'mdi:folder-network-outline',
+    icon: 'mdi:lan-connect',
     route: 'httproutes',
     parent: 'gateway',
     group: 'k8s',
@@ -252,7 +252,7 @@ export const Menus: MenuType[] = [
   {
     id: 'grpcroutes',
     label: 'GRPC Routes',
-    icon: 'mdi:folder-network-outline',
+    icon: 'mdi:lan-connect',
     route: 'grpcroutes',
     parent: 'gateway',
     group: 'k8s',
