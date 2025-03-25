@@ -269,12 +269,12 @@ export default function Table<RowItem extends Record<string, any>>({
     muiTopToolbarProps: {
       sx: {
         height: '3.5rem',
-        backgroundColor: undefined,
+        // backgroundColor: undefined,
       },
     },
     muiBottomToolbarProps: {
       sx: {
-        backgroundColor: undefined,
+        // backgroundColor: undefined,
         boxShadow: undefined,
       },
     },
