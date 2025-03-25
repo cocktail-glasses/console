@@ -13,7 +13,7 @@ import Grid from '@mui/material/Grid2';
 import List from '@mui/material/List';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
-import SelectContent from './SelectContent';
+import ClusterChooser from './ClusterChooser';
 import { PureSidebarProps } from './SidebarInterface';
 
 import { ActionButton } from '@components/common';
@@ -302,7 +302,7 @@ export function PureSidebar({
     </>
   );
 
-  const selectContent = (
+  const clusterChooser = (
     <>
       <Box
         sx={{
@@ -311,7 +311,7 @@ export function PureSidebar({
           p: 1.5,
         }}
       >
-        <SelectContent />
+        <ClusterChooser />
       </Box>
       <Divider />
     </>
@@ -381,7 +381,7 @@ export function PureSidebar({
         {...conditionalProps}
       >
         {topContent}
-        {selectContent}
+        {getSidebarGroup == 'k8s' && clusterChooser}
         {contents}
       </Drawer>
     </Box>
