@@ -24,7 +24,7 @@ export interface NameValueTableProps {
   valueCellProps?: Grid2Props;
 }
 
-function Value({ value }: { value: string | JSX.Element | JSX.Element[] | undefined }): JSX.Element | null {
+function Value({ value }: { value: ReactNode }): ReactNode {
   if (typeof value === 'undefined') {
     return null;
   } else if (typeof value === 'string') {
@@ -90,7 +90,8 @@ export default function NameValueTable(props: NameValueTableProps) {
 
         const items = [
           <Grid
-            size={{ xs: 12, sm: hideValueGridItem ? 12 : 4 }}
+            size={hideValueGridItem ? 12 : 4}
+            // size={{ xs: 6, sm: hideValueGridItem ? 12 : 6 }}
             key={i}
             component="dt"
             className={className}
@@ -132,7 +133,8 @@ export default function NameValueTable(props: NameValueTableProps) {
           items.push(
             <Grid
               key={i + 10000}
-              size={{ xs: 12, sm: 8 }}
+              size={8}
+              // size={{ xs: 12, sm: 8 }}
               component="dd"
               sx={(theme: Theme) => {
                 const extra = withHighlightStyle
@@ -143,12 +145,13 @@ export default function NameValueTable(props: NameValueTableProps) {
                     }
                   : {};
                 return {
-                  width: '100%',
+                  // width: '100%',
                   verticalAlign: 'top',
                   fontSize: '1rem',
                   overflowWrap: 'anywhere',
                   padding: '7px 12px',
                   borderBottom: last ? 'none' : `1px solid ${theme.palette.divider}`,
+                  marginLeft: 0,
                   [theme.breakpoints.down('sm')]: {
                     color: theme.palette.text.secondary,
                     minWidth: '100%',
