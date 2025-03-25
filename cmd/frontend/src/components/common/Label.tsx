@@ -1,3 +1,4 @@
+import { Chip } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import Typography, { TypographyProps } from '@mui/material/Typography';
 import { SxProps, Theme, useTheme } from '@mui/material/styles';
@@ -70,38 +71,100 @@ export interface StatusLabelProps {
 }
 
 export function StatusLabel(props: StatusLabelProps) {
-  const { status, sx, className = '', ...other } = props;
+  const { status, sx, className = '', children, ...other } = props;
   const theme = useTheme();
 
-  const statuses = ['success', 'warning', 'error'];
+  // const statuses = ['success', 'warning', 'error'];
+
+  const colorSet = {
+    success: {
+      borderColor: 'hsl(120, 75%, 87%)',
+      backgroundColor: 'hsl(120, 80%, 98%)',
+      color: 'hsl(120, 59%, 30%);',
+    },
+
+    warning: {
+      borderColor: 'hsl(45, 75%, 87%)',
+      backgroundColor: 'hsl(45, 80%, 98%)',
+      color: 'hsl(45, 59%, 30%);',
+    },
+
+    error: {
+      borderColor: 'hsl(0, 75%, 87%)',
+      backgroundColor: 'hsl(0, 80%, 98%)',
+      color: 'hsl(0, 59%, 30%);',
+    },
+
+    '': {
+      borderColor: 'hsl(210, 16%, 82%)',
+      backgroundColor: 'hsl(210, 16%, 97%)',
+      color: 'hsl(210, 16%, 20%)',
+    },
+  };
+
+  const darkColorSet = {
+    success: {
+      borderColor: 'hsl(120, 84%, 10%)',
+      backgroundColor: 'hsl(120, 87%, 6%)',
+      color: 'hsl(120, 61%, 77%)',
+    },
+    warning: {
+      borderColor: 'hsl(45, 84%, 10%)',
+      backgroundColor: 'hsl(45, 87%, 6%)',
+      color: 'hsl(45, 61%, 77%)',
+    },
+    error: {
+      borderColor: 'hsl(0, 84%, 10%)',
+      backgroundColor: 'hsl(0, 87%, 6%)',
+      color: 'hsl(0, 61%, 77%)',
+    },
+    '': {
+      borderColor: 'hsl(210, 84%, 10%)',
+      backgroundColor: 'hsl(210, 87%, 6%)',
+      color: 'hsl(210, 61%, 77%)',
+    },
+  };
 
   // Assign to a status color if it exists.
-  const bgColor = statuses.includes(status) ? theme.palette[status].light : theme.palette.normalEventBg;
+  // const bgColor = statuses.includes(status) ? theme.palette[status].light : theme.palette.normalEventBg;
   // const color = statuses.includes(status) ? theme.palette[status].main : theme.palette.text.primary;
-  const color = theme.palette.text.primary;
+  // const color = theme.palette.text.primary;
+
+  const chipColor = theme.palette.mode === 'light' ? colorSet[status] : darkColorSet[status];
   return (
-    <Typography
+    <Chip
+      label={children}
+      variant="outlined"
       sx={{
-        color: theme.palette.primary.contrastText,
-        fontSize: theme.typography.pxToRem(14),
-        paddingLeft: theme.spacing(1),
-        paddingRight: theme.spacing(1),
-        paddingTop: theme.spacing(0.5),
-        paddingBottom: theme.spacing(0.5),
-        display: 'inline-block',
-        textAlign: 'center',
-        alignItems: 'center',
-        borderRadius: theme.spacing(2),
+        ...chipColor,
+        fontWeight: 'bold',
         ...sx,
       }}
       className={className}
-      style={{
-        backgroundColor: bgColor,
-        color,
-      }}
-      component="span"
       {...other}
     />
+    // <Typography
+    //   sx={{
+    //     color: theme.palette.primary.contrastText,
+    //     fontSize: theme.typography.pxToRem(14),
+    //     paddingLeft: theme.spacing(1),
+    //     paddingRight: theme.spacing(1),
+    //     paddingTop: theme.spacing(0.5),
+    //     paddingBottom: theme.spacing(0.5),
+    //     display: 'inline-block',
+    //     textAlign: 'center',
+    //     alignItems: 'center',
+    //     borderRadius: theme.spacing(2),
+    //     ...sx,
+    //   }}
+    //   className={className}
+    //   style={{
+    //     backgroundColor: bgColor,
+    //     color,
+    //   }}
+    //   component="span"
+    //   {...other}
+    // />
   );
 }
 
