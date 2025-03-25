@@ -418,6 +418,14 @@ export const Menus: MenuType[] = [
     parent: 'crds',
     group: 'k8s',
   },
+
+  {
+    id: 'maps',
+    label: 'Map',
+    icon: 'mdi:map',
+    route: 'maps',
+    group: 'k8s',
+  },
 ];
 
 export interface GroupType {

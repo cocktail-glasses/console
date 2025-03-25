@@ -366,11 +366,14 @@ function TolerationsSection(props: { tolerations: any[] }) {
 
 export interface PodDetailsProps {
   showLogsDefault?: boolean;
+  name?: string;
+  namespace?: string;
 }
 
 export default function PodDetails(props: PodDetailsProps) {
   const { showLogsDefault } = props;
-  const { namespace, name } = useParams<{ namespace: string; name: string }>();
+  const params = useParams<{ namespace: string; name: string }>();
+  const { name = params.name, namespace = params.namespace } = props;
   const [showLogs, setShowLogs] = useState(!!showLogsDefault);
   const [showTerminal, setShowTerminal] = useState(false);
   const { t } = useTranslation('glossary');

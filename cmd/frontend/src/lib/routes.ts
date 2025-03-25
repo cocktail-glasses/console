@@ -1,3 +1,5 @@
+import { lazy } from 'react';
+
 import DaemonSet from '@lib/k8s/daemonSet';
 import Deployment from '@lib/k8s/deployment';
 import Job from '@lib/k8s/job';
@@ -52,6 +54,7 @@ import k8sPodDisruptionBudgetList from '@pages/K8s/podDisruptionBudget/List';
 import k8sPriorityClassDetails from '@pages/K8s/priorityClass/Details';
 import k8sPriorityClassList from '@pages/K8s/priorityClass/List';
 import k8sReplicasetList from '@pages/K8s/replicaset/List';
+// import k8sResourceMap from '@pages/K8s/resourceMap/GraphView';
 import k8sResourceQuotaDetails from '@pages/K8s/resourceQuota/Details';
 import k8sResourceQuotaList from '@pages/K8s/resourceQuota/List';
 import k8sRoleBindingDetails from '@pages/K8s/role/BindingDetails';
@@ -87,6 +90,8 @@ import KaaSDetail from '@pages/KaaS/clusters/Detail';
 import KaaSList from '@pages/KaaS/clusters/List';
 import Settings from '@pages/Settings';
 import { UsersDetail, UsersList } from '@pages/Users';
+
+const k8sResourceMap = lazy(() => import('@pages/K8s/resourceMap/GraphView').then((it) => ({ default: it.default })));
 
 export interface RoutesType {
   id: string;
@@ -809,6 +814,19 @@ export const Routes: RoutesType[] = [
         path: '/clusters/crs',
         page: 'K8s/crd/CustomResourceInstancesList',
         element: k8sCrsInstanceList,
+        index: true,
+      },
+    ],
+  },
+
+  {
+    id: 'maps',
+    routes: [
+      {
+        path: '/clusters/maps',
+        page: 'K8s/resourceMap/GraphView',
+        element: k8sResourceMap,
+        props: { height: 'calc(100vh - 64px)' },
         index: true,
       },
     ],

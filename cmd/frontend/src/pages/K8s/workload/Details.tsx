@@ -8,13 +8,16 @@ import {
   MetadataDictGrid,
   OwnedPodsSection,
 } from '@components/common/Resource';
-import { KubeObject, Workload } from '@lib/k8s/cluster';
+import { WorkloadClass } from '@lib/k8s/Workload';
+import { Workload } from '@lib/k8s/cluster';
 
-interface WorkloadDetailsProps {
-  workloadKind: KubeObject;
+interface WorkloadDetailsProps<T extends WorkloadClass> {
+  workloadKind: T;
+  name?: string;
+  namespace?: string;
 }
 
-export default function WorkloadDetails(props: WorkloadDetailsProps) {
+export default function WorkloadDetails<T extends WorkloadClass>(props: WorkloadDetailsProps<T>) {
   const { namespace, name } = useParams<{ namespace: string; name: string }>();
   const { workloadKind } = props;
   const { t } = useTranslation(['glossary', 'translation']);
