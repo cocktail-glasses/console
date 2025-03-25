@@ -5,6 +5,8 @@ import { Provider } from 'react-redux';
 
 import { Provider as JProvider } from 'jotai';
 import { useAtomValue } from 'jotai';
+import { DevTools } from 'jotai-devtools';
+import 'jotai-devtools/styles.css';
 
 import './i18n/config';
 import i18n from './i18n/config';
@@ -57,6 +59,7 @@ function App() {
     <ErrorBoundary fallback={<ErrorComponent />}>
       <Provider store={store}>
         <JProvider>
+          <DevTools />
           <QueryClientProvider client={queryClient}>
             <AppWithRedux>
               <AppContainer />
