@@ -8,10 +8,11 @@ import Home from '@pages/Home';
 import k8sClusterOverview from '@pages/K8s/cluster/Overview';
 import k8sConfigmapDetails from '@pages/K8s/configmap/Details';
 import k8sConfigmapList from '@pages/K8s/configmap/List';
-import k8sCrdCustomResourceDetails from '@pages/K8s/crd/CustomResourceDetails';
-import k8sCrdCustomResourceList from '@pages/K8s/crd/CustomResourceList';
-import k8sCrdDetails from '@pages/K8s/crd/Details';
-import k8sCrdList from '@pages/K8s/crd/List';
+import k8sCustomResourceDetails from '@pages/K8s/crd/CustomResourceDetails';
+import k8sCrsInstanceList from '@pages/K8s/crd/CustomResourceInstancesList';
+import k8sCustomResourceList from '@pages/K8s/crd/CustomResourceList';
+import k8sCustomResourceDefinitionDetails from '@pages/K8s/crd/Details';
+import k8sCustomResourceDefinitionList from '@pages/K8s/crd/List';
 import k8sCronjobDetails from '@pages/K8s/cronjob/Details';
 import k8sCronjobList from '@pages/K8s/cronjob/List';
 import k8sDaemonsetDetails from '@pages/K8s/daemonset/Details';
@@ -173,32 +174,6 @@ export const Routes: RoutesType[] = [
         path: '/clusters/node/:name',
         page: 'K8s/node/Details',
         element: k8sNodeDetails,
-      },
-    ],
-  },
-  {
-    id: 'crds',
-    routes: [
-      {
-        path: '/clusters/crds',
-        page: 'K8s/crd/List',
-        element: k8sCrdList,
-        index: true,
-      },
-      {
-        path: '/clusters/crds/:name',
-        page: 'K8s/crd/Details',
-        element: k8sCrdDetails,
-      },
-      {
-        path: '/clusters/customresources/:crd',
-        page: 'K8s/crd/CustomResourceList',
-        element: k8sCrdCustomResourceList,
-      },
-      {
-        path: '/clusters/customresources/:crd/:namespace/:crName',
-        page: 'K8s/crd/CustomResourceDetails',
-        element: k8sCrdCustomResourceDetails,
       },
     ],
   },
@@ -798,6 +773,43 @@ export const Routes: RoutesType[] = [
         path: '/kaas/clusters/create',
         page: 'KaaS/clusters/Create',
         element: KaaSCreate,
+      },
+    ],
+  },
+  {
+    id: 'crds',
+    routes: [
+      {
+        path: '/clusters/crds',
+        page: 'K8s/crd/List',
+        element: k8sCustomResourceDefinitionList,
+        index: true,
+      },
+      {
+        path: '/clusters/crds/:name',
+        page: 'K8s/crd/Details',
+        element: k8sCustomResourceDefinitionDetails,
+      },
+      {
+        path: '/clusters/customresources/:crd/:namespace/:crName',
+        page: 'K8s/crd/CustomResourceDetails',
+        element: k8sCustomResourceDetails,
+      },
+      {
+        path: '/clusters/customresources/:crd',
+        page: 'K8s/crd/CustomResourceList',
+        element: k8sCustomResourceList,
+      },
+    ],
+  },
+  {
+    id: 'crs',
+    routes: [
+      {
+        path: '/clusters/crs',
+        page: 'K8s/crd/CustomResourceInstancesList',
+        element: k8sCrsInstanceList,
+        index: true,
       },
     ],
   },

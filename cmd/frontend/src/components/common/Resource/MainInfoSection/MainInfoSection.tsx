@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
+import { Fragment } from 'react/jsx-runtime';
 
 import Paper from '@mui/material/Paper';
 
@@ -85,10 +86,10 @@ export function MainInfoSection(props: MainInfoSectionProps) {
           <Loader title={t('translation|Loading resource data')} />
         )
       ) : (
-        <React.Fragment>
+        <Fragment>
           {header}
           <MetadataDisplay resource={resource} extraRows={extraInfo} />
-        </React.Fragment>
+        </Fragment>
       )}
     </SectionBox>
   );

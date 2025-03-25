@@ -8,6 +8,7 @@ import Empty from '@components/common/EmptyContent';
 import Loader from '@components/common/Loader';
 import { ConditionsTable, MainInfoSection, PageGrid } from '@components/common/Resource';
 import { ResourceClasses } from '@lib/k8s';
+import { KubeObject } from '@lib/k8s/KubeObject';
 import { ApiError } from '@lib/k8s/apiProxy';
 import CustomResourceDefinition, { KubeCRD } from '@lib/k8s/crd';
 import { localeDate } from '@lib/util';
@@ -33,12 +34,12 @@ export function CustomResourceDetails(props: CustomResourceDetailsProps) {
   const { t } = useTranslation('glossary');
 
   const namespace = ns === '-' ? undefined : ns;
-  const CRD = ResourceClasses.CustomResourceDefinition as CustomResourceDefinition;
+  const CRD = ResourceClasses.CustomResourceDefinition;
 
   CRD.useApiGet(setCRD, crdName, undefined, setError);
 
   return !crd ? (
-    !!error ? (
+    error ? (
       <Empty color="error">
         {t('translation|Error getting custom resource definition {{ crdName }}: {{ errorMessage }}', {
           crdName,
@@ -89,7 +90,7 @@ function getExtraInfo(extraInfoSpec: AdditionalPrinterColumns, item: KubeCRD) {
 
     extraInfo.push({
       name: spec.name,
-      value: !!desc ? <HoverInfoLabel label={value || ''} hoverInfo={desc} /> : value,
+      value: desc ? <HoverInfoLabel label={value || ''} hoverInfo={desc} /> : value,
       hide: value === '' || value === undefined,
     });
   });
@@ -105,7 +106,7 @@ export interface CustomResourceDetailsRendererProps {
 
 function CustomResourceDetailsRenderer(props: CustomResourceDetailsRendererProps) {
   const { crd, crName, namespace } = props;
-  const [item, setItem] = useState<KubeCRD | null>(null);
+  const [item, setItem] = useState<KubeObject | null>(null);
   const [error, setError] = useState<ApiError | null>(null);
 
   const { t } = useTranslation('glossary');
@@ -120,7 +121,7 @@ function CustomResourceDetailsRenderer(props: CustomResourceDetailsRendererProps
   const extraColumns: AdditionalPrinterColumns = getExtraColumns(crd, apiVersion) || [];
 
   return !item ? (
-    !!error ? (
+    error ? (
       <Empty color="error">
         {t('translation|Error getting custom resource {{ crName }}: {{ errorMessage }}', {
           crName,
@@ -139,7 +140,7 @@ function CustomResourceDetailsRenderer(props: CustomResourceDetailsRendererProps
             name: t('glossary|Definition'),
             value: (
               <Link
-                routeName="crd"
+                routeName="crds"
                 params={{
                   name: crd.metadata.name,
                 }}

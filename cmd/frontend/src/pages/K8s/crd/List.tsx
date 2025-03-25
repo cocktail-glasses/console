@@ -52,7 +52,7 @@ export default function CustomResourceDefinitionList() {
           getValue: (crd) => crd.metadata.name,
           render: (crd) => (
             <Link
-              routeName="crd"
+              routeName="crds"
               params={{
                 name: crd.metadata.name,
               }}

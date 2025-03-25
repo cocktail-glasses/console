@@ -61,14 +61,6 @@ export const Menus: MenuType[] = [
     parent: 'cluster',
     group: 'k8s',
   },
-  {
-    id: 'crds',
-    label: 'Custom Resources',
-    icon: 'mdi:hexagon-multiple-outline',
-    route: 'crds',
-    parent: 'cluster',
-    group: 'k8s',
-  },
 
   {
     id: 'workloads',
@@ -400,6 +392,31 @@ export const Menus: MenuType[] = [
     icon: 'mdi:hexagon-multiple-outline',
     route: 'tenantClusters',
     group: 'kaas',
+  },
+
+  {
+    id: 'crds',
+    label: 'Custom Resources',
+    icon: 'mdi:hexagon-multiple-outline',
+    route: 'crds',
+    group: 'k8s',
+  },
+
+  {
+    id: 'crds',
+    label: 'Custom Resources',
+    icon: 'mdi:puzzle',
+    route: 'crds',
+    group: 'k8s',
+  },
+
+  {
+    id: 'crs',
+    label: 'Instances',
+    icon: 'mdi:puzzle',
+    route: 'crs',
+    parent: 'crds',
+    group: 'k8s',
   },
 ];
 

@@ -92,11 +92,11 @@ function CrInstancesView({ crds }: { crds: CRD[]; key: string }) {
             render: (cr) => {
               return (
                 <Link
-                  routeName="customresource"
+                  routeName="customresources"
                   params={{
-                    crName: cr.metadata.name,
                     crd: getCRDForCR(cr).metadata.name,
                     namespace: cr.metadata.namespace ?? '-',
+                    crName: cr.metadata.name,
                   }}
                 >
                   {cr.metadata.name}
@@ -112,7 +112,7 @@ function CrInstancesView({ crds }: { crds: CRD[]; key: string }) {
             render: (cr) => {
               return (
                 <Link
-                  routeName="crd"
+                  routeName="crds"
                   params={{
                     name: getCRDForCR(cr).metadata.name,
                   }}
@@ -122,7 +122,7 @@ function CrInstancesView({ crds }: { crds: CRD[]; key: string }) {
               );
             },
           },
-          'cluster',
+          // 'cluster',
           {
             label: 'Categories',
             getValue: (cr) => {
@@ -138,7 +138,7 @@ function CrInstancesView({ crds }: { crds: CRD[]; key: string }) {
   );
 }
 
-export function CrInstanceList() {
+export default function CrInstanceList() {
   const { t } = useTranslation(['glossary', 'translation']);
   const { items: crds, error: crdsError, isLoading: isLoadingCRDs } = CRD.useList({ namespace: useNamespaces() });
 

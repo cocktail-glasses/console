@@ -23,7 +23,7 @@ export default function CustomResourceList() {
     return <Loader title={t('translation|Loading custom resource definition')} />;
   }
 
-  if (!!error) {
+  if (error) {
     return (
       <Empty color="error">
         {t('translation|Error getting custom resource definition {{ crdName }}: {{ errorMessage }}', {
@@ -34,20 +34,20 @@ export default function CustomResourceList() {
     );
   }
 
-  return <CustomResourceListRenderer crd={crd} />;
+  return <CustomResourceListRenderer crd={crd!} />;
 }
 
-function CustomResourceLink(props: { resource: KubeCRD; crd: CRD; [otherProps: string]: any }) {
+function CustomResourceLink(props: { resource: KubeObject<KubeCRD>; crd: CRD; [otherProps: string]: any }) {
   const { resource, crd, ...otherProps } = props;
 
   return (
     <Link
       sx={{ cursor: 'pointer' }}
-      routeName="customresource"
+      routeName="customresources"
       params={{
-        crName: resource.metadata.name,
         crd: crd.metadata.name,
         namespace: resource.metadata.namespace || '-',
+        crName: resource.metadata.name,
       }}
       {...otherProps}
     >
@@ -71,7 +71,7 @@ function CustomResourceListRenderer(props: CustomResourceListProps) {
         title={crd.spec.names.kind}
         actions={[
           <Box mr={2}>
-            <Link routeName="crd" params={{ name: crd.metadata.name }}>
+            <Link routeName="crds" params={{ name: crd.metadata.name }}>
               {t('glossary|CRD: {{ crdName }}', { crdName: crd.metadata.name })}
             </Link>
           </Box>,
@@ -109,13 +109,9 @@ export function CustomResourceListTable(props: CustomResourceTableProps) {
     return crd.getMainAPIGroup();
   }, [crd]);
 
-  const CRClass = useMemo(() => {
+  const CRClass: typeof KubeObject<KubeCRD> = useMemo(() => {
     return crd.makeCRClass();
   }, [crd]);
-
-  if (!CRClass) {
-    return <Empty>{t('translation|No custom resources found')}</Empty>;
-  }
 
   const additionalPrinterCols = useMemo(() => {
     const currentVersion = apiGroup[1];
@@ -148,15 +144,15 @@ export function CustomResourceListTable(props: CustomResourceTableProps) {
   }, [crd, apiGroup]);
 
   const cols = useMemo(() => {
-    const colsToDisplay: ResourceTableProps<KubeCRD>['columns'] = [
+    const colsToDisplay = [
       {
         label: t('translation|Name'),
         getValue: (resource) => resource.metadata.name,
-        render: (resource: KubeObject) => <CustomResourceLink resource={resource} crd={crd} />,
+        render: (resource) => <CustomResourceLink resource={resource} crd={crd} />,
       },
       ...additionalPrinterCols,
       'age',
-    ];
+    ] as ResourceTableProps<KubeObject<KubeCRD>>['columns'];
 
     if (crd.isNamespacedScope) {
       colsToDisplay.splice(1, 0, 'namespace');
@@ -164,6 +160,10 @@ export function CustomResourceListTable(props: CustomResourceTableProps) {
 
     return colsToDisplay;
   }, [crd, additionalPrinterCols, t]);
+
+  if (!CRClass) {
+    return <Empty>{t('translation|No custom resources found')}</Empty>;
+  }
 
   return (
     <ResourceListView
