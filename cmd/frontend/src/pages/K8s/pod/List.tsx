@@ -6,9 +6,12 @@ import Box from '@mui/material/Box';
 import { LightTooltip, Link, SimpleTableProps, StatusLabel, StatusLabelProps } from '@components/common';
 import ResourceListView from '@components/common/Resource/ResourceListView';
 import { Icon } from '@iconify/react';
+import { METRIC_REFETCH_INTERVAL_MS, PodMetrics } from '@lib/k8s/PodMetrics';
 import { ApiError } from '@lib/k8s/apiProxy';
 import Pod from '@lib/k8s/pod';
+import { parseCpu, parseRam, unparseCpu, unparseRam } from '@lib/units';
 import { timeAgo } from '@lib/util';
+import { useNamespaces } from 'redux/filterSlice';
 import { HeadlampEventType, useEventCallback } from 'redux/headlampEventSlice';
 
 export function makePodStatusLabel(pod: Pod) {
@@ -68,15 +71,30 @@ function getReadinessGatesStatus(pods: Pod) {
 
 export interface PodListProps {
   pods: Pod[] | null;
-  error: ApiError | null;
+  metrics: PodMetrics[] | null;
   hideColumns?: ('namespace' | 'restarts')[];
   reflectTableInURL?: SimpleTableProps['reflectInURL'];
   noNamespaceFilter?: boolean;
+  errors?: ApiError[] | null;
 }
 
 export function PodListRenderer(props: PodListProps) {
-  const { pods, error, hideColumns = [], reflectTableInURL = 'pods', noNamespaceFilter } = props;
+  const { pods, metrics, hideColumns = [], /* reflectTableInURL = 'pods', */ noNamespaceFilter, errors } = props;
   const { t } = useTranslation(['glossary', 'translation']);
+
+  const getCpuUsage = (pod: Pod) => {
+    const metric = metrics?.find((it) => it.getName() === pod.getName());
+    if (!metric) return;
+
+    return metric?.jsonData.containers.map((it) => parseCpu(it.usage.cpu)).reduce((a, b) => a + b, 0) ?? 0;
+  };
+
+  const getMemoryUsage = (pod: Pod) => {
+    const metric = metrics?.find((it) => it.getName() === pod.getName());
+    if (!metric) return;
+
+    return metric?.jsonData.containers.map((it) => parseRam(it.usage.memory)).reduce((a, b) => a + b, 0) ?? 0;
+  };
 
   return (
     <ResourceListView
@@ -85,7 +103,7 @@ export function PodListRenderer(props: PodListProps) {
         noNamespaceFilter,
       }}
       hideColumns={hideColumns}
-      errorMessage={Pod.getErrorMessage(error)}
+      errors={errors}
       columns={[
         'name',
         'namespace',
@@ -115,6 +133,37 @@ export function PodListRenderer(props: PodListProps) {
           getValue: (pod) => pod.getDetailedStatus().reason,
           render: makePodStatusLabel,
         },
+        ...(metrics?.length
+          ? [
+              {
+                id: 'cpu',
+                label: t('CPU'),
+                // gridTemplate: 'min-content',
+                render: (pod: Pod) => {
+                  const cpu = getCpuUsage(pod);
+                  if (cpu === undefined) return;
+
+                  const { value, unit } = unparseCpu(String(cpu));
+
+                  return `${value} ${unit}`;
+                },
+                getValue: (pod: Pod) => getCpuUsage(pod) ?? 0,
+              },
+              {
+                id: 'memory',
+                label: t('Memory'),
+                // gridTemplate: 'min-content',
+                render: (pod: Pod) => {
+                  const memory = getMemoryUsage(pod);
+                  if (memory === undefined) return;
+                  const { value, unit } = unparseRam(memory);
+
+                  return `${value} ${unit}`;
+                },
+                getValue: (pod: Pod) => getMemoryUsage(pod) ?? 0,
+              },
+            ]
+          : []),
         {
           id: 'ip',
           label: t('glossary|IP'),
@@ -197,23 +246,28 @@ export function PodListRenderer(props: PodListProps) {
         'age',
       ]}
       data={pods}
-      reflectInURL={reflectTableInURL}
+      // reflectInURL={reflectTableInURL}
       id="headlamp-pods"
     />
   );
 }
 
 export default function PodList() {
-  const [pods, error] = Pod.useList();
+  const { items, errors } = Pod.useList({ namespace: useNamespaces() });
+  const { items: podMetrics } = PodMetrics.useList({
+    namespace: useNamespaces(),
+    refetchInterval: METRIC_REFETCH_INTERVAL_MS,
+  });
+
   const dispatchHeadlampEvent = useEventCallback(HeadlampEventType.LIST_VIEW);
 
   useEffect(() => {
     dispatchHeadlampEvent({
-      resources: pods,
+      resources: items ?? [],
       resourceKind: 'Pod',
-      error: error || undefined,
+      error: errors?.[0] || undefined,
     });
-  }, [pods, error, dispatchHeadlampEvent]);
+  }, [items, errors, dispatchHeadlampEvent]);
 
-  return <PodListRenderer pods={pods} error={error} reflectTableInURL />;
+  return <PodListRenderer pods={items} errors={errors} metrics={podMetrics} />;
 }

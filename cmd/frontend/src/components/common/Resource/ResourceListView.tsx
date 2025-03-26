@@ -31,21 +31,30 @@ export default function ResourceListView(
   props: ResourceListViewProps<any> | ResourceListViewWithResourceClassProps<any>
 ) {
   const { title, children, headerProps, ...tableProps } = props;
-  const withNamespaceFilter = 'resourceClass' in props && (props.resourceClass as KubeObject)?.isNamespaced;
+  const withNamespaceFilter = 'resourceClass' in props && props.resourceClass?.isNamespaced;
+  // const resourceClass = (props as ResourceListViewWithResourceClassProps<any>).resourceClass as KubeObjectClass;
 
   return (
     <SectionBox
       title={
         typeof title === 'string' ? (
-          <SectionFilterHeader title={title} noNamespaceFilter={!withNamespaceFilter} {...headerProps} />
+          <SectionFilterHeader
+            title={title}
+            noNamespaceFilter={!withNamespaceFilter}
+            // titleSideActions={
+            //   headerProps?.titleSideActions ||
+            //   (resourceClass ? [<CreateResourceButton resourceClass={resourceClass} />] : undefined)
+            // }
+            {...headerProps}
+          />
         ) : (
           title
         )
       }
     >
-      <Box sx={(theme) => ({ backgroundColor: theme.palette.background.paper, borderRadius: 1 })}>
-        <ResourceTable {...tableProps} />
-      </Box>
+      {/* <Box sx={(theme) => ({ backgroundColor: theme.palette.background.paper, borderRadius: 1 })}> */}
+      <ResourceTable enableRowActions enableRowSelection {...tableProps} />
+      {/* </Box> */}
       {children}
     </SectionBox>
   );

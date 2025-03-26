@@ -10,6 +10,7 @@ import { DateLabel } from '@components/common/Label';
 import Link from '@components/common/Link';
 import Table, { TableColumn } from '@components/common/Table';
 import helpers from '@helpers';
+import { ApiError } from '@lib/k8s/apiProxy';
 import { KubeObject, KubeObjectClass } from '@lib/k8s/cluster';
 import { useFilterFunc } from '@lib/util';
 import { useSettings } from '@pages/Settings/hook';
@@ -76,6 +77,11 @@ type ColumnType = 'age' | 'name' | 'namespace' | 'type' | 'kind';
 export interface ResourceTableProps<RowItem> {
   /** The columns to be rendered, like used in Table, or by name. */
   columns: (ResourceTableColumn<RowItem> | ColumnType)[];
+  /** Show or hide row actions @default false*/
+  enableRowActions?: boolean;
+  /** Show or hide row selections and actions @default false*/
+  enableRowSelection?: boolean;
+  // actions?: null | RowAction[];
   /** Provide a list of columns that won't be shown and cannot be turned on */
   hideColumns?: string[] | null;
   /** ID for the table. Will be used by plugins to identify this table.
@@ -97,12 +103,15 @@ export interface ResourceTableProps<RowItem> {
   filterFunction?: (item: RowItem) => boolean;
   /** Display an error message. Table will be hidden even if data is present */
   errorMessage?: string | null;
+  /** Display an errors */
+  errors?: ApiError[] | null;
   /** State of the Table (page, rows per page) is reflected in the url */
   reflectInURL?: string | boolean;
 }
 
-export interface ResourceTableFromResourceClassProps<RowItem> extends Omit<ResourceTableProps<RowItem>, 'data'> {
-  resourceClass: KubeObject;
+export interface ResourceTableFromResourceClassProps<KubeClass extends KubeObjectClass>
+  extends Omit<ResourceTableProps<InstanceType<KubeClass>>, 'data'> {
+  resourceClass: KubeClass;
 }
 
 export default function ResourceTable<KubeClass extends KubeObjectClass>(
@@ -113,7 +122,7 @@ export default function ResourceTable<KubeClass extends KubeObjectClass>(
     return <TableFromResourceClass resourceClass={resourceClass!} {...otherProps} />;
   }
 
-  return <ResourceTableContent {...(props as ResourceTableProps<KubeClass>)} />;
+  return <ResourceTableContent {...(props as ResourceTableProps<InstanceType<KubeClass>>)} />;
 }
 
 function TableFromResourceClass<KubeClass extends KubeObjectClass>(
@@ -127,7 +136,7 @@ function TableFromResourceClass<KubeClass extends KubeObjectClass>(
 
   useEffect(() => {
     dispatchHeadlampEvent({
-      resources: items,
+      resources: items!,
       resourceKind: resourceClass.className,
       error: error || undefined,
     });
@@ -215,7 +224,7 @@ export function useThrottle(value: any, interval = 1000): any {
   return throttledValue;
 }
 
-function ResourceTableContent<RowItem>(props: ResourceTableProps<RowItem>) {
+function ResourceTableContent<RowItem extends KubeObject>(props: ResourceTableProps<RowItem>) {
   const {
     columns,
     defaultSortingColumn,
@@ -251,7 +260,7 @@ function ResourceTableContent<RowItem>(props: ResourceTableProps<RowItem>) {
       });
     }
     const allColumns = processedColumns
-      .map((col, index): TableColumn<KubeObject> => {
+      .map((col, index): TableColumn<RowItem> => {
         const indexId = String(index);
 
         if (typeof col !== 'string') {
@@ -259,7 +268,7 @@ function ResourceTableContent<RowItem>(props: ResourceTableProps<RowItem>) {
 
           const sort = column.sort ?? true;
 
-          const mrtColumn: TableColumn<KubeObject> = {
+          const mrtColumn: TableColumn<RowItem> = {
             id: column.id ?? indexId,
             header: column.label,
             filterVariant: column.filterVariant,
@@ -270,25 +279,21 @@ function ResourceTableContent<RowItem>(props: ResourceTableProps<RowItem>) {
               ...column.cellProps,
               // Make sure column don't override width, it'll mess up the layout
               // the layout is controlled only through the gridTemplate property
-              sx: {
-                ...(column.cellProps?.sx ?? {}),
-                width: 'unset',
-                minWidth: 'unset',
-              },
+              sx: { ...(column.cellProps?.sx ?? {}), width: 'unset', minWidth: 'unset' },
             },
             gridTemplate: column.gridTemplate ?? 1,
             filterSelectOptions: column.filterSelectOptions,
           };
 
           if ('getValue' in column) {
-            mrtColumn.accessorFn = column.getValue;
+            mrtColumn.accessorFn = (item) => column.getValue?.(item) ?? '';
           } else if ('getter' in column) {
             mrtColumn.accessorFn = column.getter;
           } else {
-            mrtColumn.accessorFn = (item: KubeObject) => item[column.datum];
+            mrtColumn.accessorFn = (item: RowItem) => item[column.datum];
           }
           if ('render' in column) {
-            mrtColumn.Cell = ({ row }: { row: MRT_Row<any> }) => column.render?.(row.original) ?? null;
+            mrtColumn.Cell = ({ row }: { row: MRT_Row<RowItem> }) => column.render?.(row.original) ?? null;
           }
           if (sort && typeof sort === 'function') {
             mrtColumn.sortingFn = sortingFn(sort);
@@ -303,20 +308,20 @@ function ResourceTableContent<RowItem>(props: ResourceTableProps<RowItem>) {
               id: 'name',
               header: t('translation|Name'),
               gridTemplate: 1.5,
-              accessorFn: (item: KubeObject) => item.metadata.name,
-              Cell: ({ row }: { row: MRT_Row<any> }) => row.original && <Link kubeObject={row.original} />,
+              accessorFn: (item: RowItem) => item.metadata.name,
+              Cell: ({ row }: { row: MRT_Row<RowItem> }) => row.original && <Link kubeObject={row.original} />,
             };
           case 'age':
             return {
               id: 'age',
               header: t('translation|Age'),
               gridTemplate: 'min-content',
-              accessorFn: (item: KubeObject) => -new Date(item.metadata.creationTimestamp).getTime(),
+              accessorFn: (item: RowItem) => -new Date(item.metadata.creationTimestamp).getTime(),
               enableColumnFilter: false,
               muiTableBodyCellProps: {
                 align: 'right',
               },
-              Cell: ({ row }: { row: MRT_Row<KubeObject> }) =>
+              Cell: ({ row }: { row: MRT_Row<RowItem> }) =>
                 row.original && (
                   <DateLabel
                     date={row.original.metadata.creationTimestamp}
@@ -329,9 +334,9 @@ function ResourceTableContent<RowItem>(props: ResourceTableProps<RowItem>) {
             return {
               id: 'namespace',
               header: t('glossary|Namespace'),
-              accessorFn: (item: KubeObject) => item.getNamespace(),
+              accessorFn: (item: RowItem) => item.getNamespace(),
               filterVariant: 'multi-select',
-              Cell: ({ row }: { row: MRT_Row<KubeObject> }) =>
+              Cell: ({ row }: { row: MRT_Row<RowItem> }) =>
                 row.original?.getNamespace() ? (
                   <Link
                     routeName="namespace"
@@ -351,7 +356,7 @@ function ResourceTableContent<RowItem>(props: ResourceTableProps<RowItem>) {
             return {
               id: 'kind',
               header: t('translation|Type'),
-              accessorFn: (resource: KubeObject) => String(resource?.kind),
+              accessorFn: (resource: RowItem) => String(resource?.kind),
               filterVariant: 'multi-select',
             };
           default:
@@ -359,7 +364,7 @@ function ResourceTableContent<RowItem>(props: ResourceTableProps<RowItem>) {
         }
       })
       .filter((col) => !hideColumns?.includes(col.id ?? '')) as Array<
-      TableColumn<KubeObject> & { gridTemplate?: string | number }
+      TableColumn<RowItem> & { gridTemplate?: string | number }
     >;
 
     let sort = undefined;
@@ -436,6 +441,7 @@ function ResourceTableContent<RowItem>(props: ResourceTableProps<RowItem>) {
         }}
         globalFilterFn="kubeObjectSearch"
         filterFunction={filterFunc as any}
+        getRowId={(item) => item?.metadata?.uid}
       />
     </>
   );
