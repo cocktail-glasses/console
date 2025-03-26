@@ -59,7 +59,7 @@ function App() {
     <ErrorBoundary fallback={<ErrorComponent />}>
       <Provider store={store}>
         <JProvider>
-          <DevTools />
+          <DevTools position="bottom-right" />
           <QueryClientProvider client={queryClient}>
             <AppWithRedux>
               <AppContainer />
