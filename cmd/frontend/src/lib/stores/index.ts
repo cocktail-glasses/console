@@ -1,7 +1,9 @@
 import { atom } from 'jotai';
 import { atomWithStorage, createJSONStorage } from 'jotai/utils';
 
+import { SidebarMenuType } from '@lib/Layout/Sidebar/Sidebar';
 import { SidebarItemProps } from '@lib/Layout/Sidebar/SidebarInterface';
+import { MenuType } from '@lib/menu';
 
 // sidebar sub 메뉴
 export const sidebarSub = atom<SidebarItemProps[]>([]);
@@ -28,13 +30,13 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 // 메뉴 목록
-export const sidebarMenus = atom<{ [key: string]: any }>({});
+export const sidebarMenus = atom<SidebarMenuType[]>();
 if (process.env.NODE_ENV !== 'production') {
   sidebarMenus.debugLabel = 'sidebarMenus';
 }
 
 // 선택된 메뉴 정보
-export const sidebarMenuSelected = atom<{ [key: string]: any }>({});
+export const sidebarMenuSelected = atom<MenuType>();
 if (process.env.NODE_ENV !== 'production') {
   sidebarMenuSelected.debugLabel = 'sidebarMenuSelected';
 }

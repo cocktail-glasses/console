@@ -1,5 +1,6 @@
-import { IconProps } from '@iconify/react';
 import { ListItemProps } from '@mui/material/ListItem';
+
+import { IconProps } from '@iconify/react';
 
 export interface PureSidebarProps {
   /** If the sidebar is fully expanded open or shrunk. */
@@ -7,7 +8,7 @@ export interface PureSidebarProps {
   /** If the user has selected to open/shrink the sidebar */
   openUserSelected?: boolean;
   /** To show in the sidebar. */
-  items: SidebarEntry[];
+  items: SidebarItemProps[];
   /** The selected route name of the sidebar open. */
   selectedName: string | null;
   /** If the sidebar is the temporary one (full sidebar when user selects it in mobile). */
@@ -60,8 +61,8 @@ export interface SidebarEntry {
 }
 
 export interface SidebarItemProps extends ListItemProps, SidebarEntry {
-  /** The route name which is selected. */
-  selectedName?: string | null;
+  /** Whether this item is selected. */
+  isSelected?: boolean;
   /** The navigation is a child. */
   hasParent?: boolean;
   /** Displayed wide with icon and text, otherwise with just a small icon. */

@@ -13,12 +13,15 @@ import Grid from '@mui/material/Grid2';
 import List from '@mui/material/List';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
+import { has } from 'lodash';
+
 import ClusterChooser from './ClusterChooser';
-import { PureSidebarProps } from './SidebarInterface';
+import { PureSidebarProps, SidebarItemProps } from './SidebarInterface';
 
 import { ActionButton } from '@components/common';
 import { Icon } from '@iconify/react';
 import SidebarItem from '@lib/Layout/Sidebar/SidebarItem';
+import { MenuType } from '@lib/menu';
 import { sidebarGroupId, sidebarGroups, sidebarMenus, sidebarMenuSelected, sidebarIsOpen } from '@lib/stores';
 import { useTypedSelector } from 'redux/reducers/reducers';
 
@@ -29,7 +32,7 @@ export const mobileDrawerWidth = 320;
 export const drawerWidthClosed = 64;
 
 function useSidebarInfo() {
-  const isSidebarOpen = useAtomValue(sidebarIsOpen);
+  const [isSidebarOpen, setIsSidebarOpen] = useAtom(sidebarIsOpen);
   const isTemporary = useMediaQuery('(max-width:599px)');
   const isNarrowOnly = useMediaQuery('(max-width:960px) and (min-width:600px)');
   const temporarySideBarOpen = isSidebarOpen === true && isTemporary; // && isSidebarOpenUserSelected === true;
@@ -40,6 +43,7 @@ function useSidebarInfo() {
   return {
     isCollapsed: !temporarySideBarOpen && !isNarrowOnly,
     isOpen,
+    setIsOpen: setIsSidebarOpen,
     isNarrow: !isSidebarOpen || isNarrowOnly,
     canExpand: !isNarrowOnly,
     isTemporary,
@@ -115,69 +119,80 @@ function DefaultLinkArea(props: { sidebarName: string; isOpen: boolean }) {
   // );
 }
 
+export interface SidebarMenuType extends MenuType {
+  url: string;
+  sub?: SidebarMenuType[];
+  isOnlyTab?: boolean;
+}
+
 export default function Sidebar() {
   const menus = useAtomValue(sidebarMenus);
-  const menu = useAtomValue(sidebarMenuSelected);
+  const selectedMenu = useAtomValue(sidebarMenuSelected);
 
-  const [, setOpen] = useAtom(sidebarIsOpen);
   const groupID = useAtomValue(sidebarGroupId);
   const params = useParams();
 
   // const sidebar = useTypedSelector(state => state.sidebar);
-  const sidebar = {
-    selected: { sidebar: 'HOME', item: 'settings' },
-    entries: [],
-    filters: [],
-    isVisible: true,
-  };
-  const { isOpen, isUserOpened, isNarrow, canExpand, isTemporary: isTemporaryDrawer } = useSidebarInfo();
+  // const sidebar = {
+  //   selected: { sidebar: 'HOME', item: 'settings' },
+  //   entries: [],
+  //   filters: [],
+  //   isVisible: true,
+  // };
+  const { isOpen, setIsOpen, isUserOpened, isNarrow, canExpand, isTemporary: isTemporaryDrawer } = useSidebarInfo();
   const isNarrowOnly = isNarrow && !canExpand;
   // const arePluginsLoaded = useTypedSelector(state => state.plugins.loaded);
   const namespaces = useTypedSelector((state) => state.filter.namespaces);
 
-  const items = useMemo(() => {
+  const items: Omit<SidebarItemProps, 'sidebar'>[] | undefined = useMemo(() => {
     return menus
-      .filter((f: any) => f.group === groupID)
-      .map((m: any) => {
-        const murl = params ? generatePath(m.url, { ...params } as { [x: string]: string | null }) : m.url;
+      ?.filter((menu) => menu.group === groupID)
+      .map<Omit<SidebarItemProps, 'sidebar'>>((menu: SidebarMenuType) => {
+        const murl = params ? generatePath(menu.url, { ...params } as { [x: string]: string | null }) : menu.url;
+        const isSelected = menu.id == (has(selectedMenu, 'parent') ? selectedMenu.parent : selectedMenu?.id);
+
         return {
-          name: m.id,
-          label: m.label,
+          name: menu.id,
+          label: menu.label,
           url: murl,
-          icon: m.icon,
+          icon: menu.icon,
           hide: false,
-          subList: m.sub
-            .filter((s: any) => s.isOnlyTab === false)
-            .map((s: any) => {
+          isSelected,
+          subList: menu.sub
+            ?.filter((s: any) => s.isOnlyTab === false)
+            .map((s: SidebarMenuType) => {
               const surl = params
                 ? generatePath(s.url, { ...params } as {
                     [x: string]: string | null;
                   })
-                : m.url;
-              return { name: s.id, label: s.label, url: surl };
+                : menu.url;
+              const isSelected = s.id == selectedMenu?.id;
+              return { name: s.id, label: s.label, url: surl, isSelected };
             }),
         };
       });
-  }, [groupID, menus, params]);
+  }, [groupID, menus, params, selectedMenu]);
 
   const search = namespaces.size !== 0 ? `?namespace=${[...namespaces].join('+')}` : '';
-  if (sidebar.selected.sidebar === null || !sidebar?.isVisible) {
+  // if (sidebar.selected.sidebar === null || !sidebar?.isVisible) {
+  //   return null;
+  // }
+
+  if (selectedMenu == null) {
     return null;
   }
 
   return (
     <PureSidebar
-      items={items}
+      items={items!}
       open={isOpen}
       openUserSelected={isUserOpened}
       isNarrowOnly={isNarrowOnly}
       isTemporaryDrawer={isTemporaryDrawer}
-      selectedName={menu.id}
+      selectedName={selectedMenu.label}
       search={search}
-      onToggleOpen={() => {
-        setOpen(!isOpen);
-      }}
-      linkArea={<DefaultLinkArea sidebarName={sidebar.selected.sidebar || ''} isOpen={isOpen} />}
+      onToggleOpen={() => setIsOpen((prev) => !prev)}
+      linkArea={<DefaultLinkArea sidebarName={selectedMenu.label} isOpen={isOpen} />}
     />
   );
 }
@@ -186,7 +201,6 @@ export function PureSidebar({
   open,
   openUserSelected,
   items,
-  selectedName,
   isTemporaryDrawer = false,
   isNarrowOnly = false,
   onToggleOpen,
@@ -244,7 +258,7 @@ export function PureSidebar({
             {items.map((item) => (
               <SidebarItem
                 key={item.name}
-                selectedName={selectedName}
+                isSelected={item.isSelected}
                 fullWidth={largeSideBarOpen}
                 search={search}
                 {...item}
