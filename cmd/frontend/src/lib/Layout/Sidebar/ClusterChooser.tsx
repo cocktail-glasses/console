@@ -80,46 +80,68 @@ export default function ClusterChooser() {
       //   '&:hover': {},
       // })}
     >
-      <ListSubheader className="select-content-subheader">Production</ListSubheader>
-      <MenuItem value="">
+      <ListSubheader className="select-content-subheader" sx={{ fontSize: '12px' }}>
+        Production
+      </ListSubheader>
+      <MenuItem value="" sx={{ borderRadius: '8px' }}>
         <ListItemAvatar>
           <Avatar alt="Sitemark web">
             <DevicesRoundedIcon sx={{ fontSize: '1rem' }} />
           </Avatar>
         </ListItemAvatar>
-        <ListItemText primary="Sitemark-web" secondary="Web app" />
+        <ListItemText
+          primary="Sitemark-web"
+          secondary="Web app"
+          slotProps={{ primary: { fontWeight: 'bold', fontSize: '14px' }, secondary: { fontSize: '12px' } }}
+        />
       </MenuItem>
-      <MenuItem value={10}>
+      <MenuItem value={10} sx={{ borderRadius: '8px' }}>
         <ListItemAvatar>
           <Avatar alt="Sitemark App">
             <SmartphoneRoundedIcon sx={{ fontSize: '1rem' }} />
           </Avatar>
         </ListItemAvatar>
-        <ListItemText primary="Sitemark-app" secondary="Mobile application" />
+        <ListItemText
+          primary="Sitemark-app"
+          secondary="Mobile application"
+          slotProps={{ primary: { fontWeight: 'bold', fontSize: '14px' }, secondary: { fontSize: '12px' } }}
+        />
       </MenuItem>
-      <MenuItem value={20}>
+      <MenuItem value={20} sx={{ borderRadius: '8px' }}>
         <ListItemAvatar>
           <Avatar alt="Sitemark Store">
             <DevicesRoundedIcon sx={{ fontSize: '1rem' }} />
           </Avatar>
         </ListItemAvatar>
-        <ListItemText primary="Sitemark-Store" secondary="Web app" />
+        <ListItemText
+          primary="Sitemark-Store"
+          secondary="Web app"
+          slotProps={{ primary: { fontWeight: 'bold', fontSize: '14px' }, secondary: { fontSize: '12px' } }}
+        />
       </MenuItem>
-      <ListSubheader>Development</ListSubheader>
-      <MenuItem value={30}>
+      <ListSubheader sx={{ fontSize: '12px' }}>Development</ListSubheader>
+      <MenuItem value={30} sx={{ borderRadius: '8px' }}>
         <ListItemAvatar>
           <Avatar alt="Sitemark Store">
             <ConstructionRoundedIcon sx={{ fontSize: '1rem' }} />
           </Avatar>
         </ListItemAvatar>
-        <ListItemText primary="Sitemark-Admin" secondary="Web app" />
+        <ListItemText
+          primary="Sitemark-Admin"
+          secondary="Web app"
+          slotProps={{ primary: { fontWeight: 'bold', fontSize: '14px' }, secondary: { fontSize: '12px' } }}
+        />
       </MenuItem>
       <Divider sx={{ mx: -1 }} />
-      <MenuItem value={40}>
+      <MenuItem value={40} sx={{ borderRadius: '8px' }}>
         <ListItemIcon>
           <AddRoundedIcon />
         </ListItemIcon>
-        <ListItemText primary="Add product" secondary="Web app" />
+        <ListItemText
+          primary="Add product"
+          secondary="Web app"
+          slotProps={{ primary: { fontWeight: 'bold', fontSize: '14px' }, secondary: { fontSize: '12px' } }}
+        />
       </MenuItem>
     </Select>
   );
