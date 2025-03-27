@@ -393,15 +393,6 @@ export const Menus: MenuType[] = [
     route: 'tenantClusters',
     group: 'kaas',
   },
-
-  {
-    id: 'crds',
-    label: 'Custom Resources',
-    icon: 'mdi:hexagon-multiple-outline',
-    route: 'crds',
-    group: 'k8s',
-  },
-
   {
     id: 'crds',
     label: 'Custom Resources',

@@ -11,8 +11,7 @@ import { Auth } from './auth';
  * The given path does not start with a /, it will be added.
  */
 export function getClusterPrefixedPath(path?: string | null) {
-  // const baseClusterPath = "/clusters/:cluster";
-  const baseClusterPath = '/clusters';
+  const baseClusterPath = '/clusters/:cluster';
   if (!path) {
     return baseClusterPath;
   }

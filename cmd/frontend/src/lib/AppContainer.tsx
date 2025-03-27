@@ -10,11 +10,13 @@ import {
 import { useAtomValue, useSetAtom } from 'jotai';
 import { loadable } from 'jotai/utils';
 
+import { getCluster } from './cluster';
+
 import { Loader } from '@components/common';
 import BasicLayout from '@lib/Layout/BasicLayout';
 import { asyncAuthAtom } from '@lib/auth';
 import { MenuType, Menus, Groups } from '@lib/menu';
-import { Routes } from '@lib/routes';
+import { Routes, createRouteIndexURL, getRoutePathPattern } from '@lib/routes';
 import { sidebarGroupId, sidebarGroups, sidebarMenus, sidebarMenuSelected, sidebarSub } from '@lib/stores';
 import Login from '@pages/Auth/Login';
 import ErrorComponent from '@pages/Common/ErrorPage';
@@ -26,10 +28,6 @@ import { SnackbarProvider } from 'notistack';
 // Don't use `Function` as a type. The `Function` type accepts any function-like value.
 //function make(t: Function) {
 function make(t: (...args: any[]) => any) {
-  const menuUrl: { [key: string]: any } = {};
-  Routes.forEach((e) => {
-    menuUrl[e.id] = e.routes.find((r) => r.index)?.path;
-  });
   const menus: { [key: string]: any } = {};
   const routeIdMenu: { [key: string]: any } = {};
 
@@ -37,18 +35,19 @@ function make(t: (...args: any[]) => any) {
     if (!m.parent) {
       const sub = Menus.filter((e) => e.group === m.group && m.id === e.parent).map((e) => ({
         ...e,
-        url: menuUrl[e.route],
+        url: createRouteIndexURL(e.route),
         label: t(e.label),
         isOnlyTab: false,
       }));
       if (!sub.find((s) => s.route === m.route) && sub.length > 0) {
-        sub.unshift({ ...m, url: menuUrl[m.route], isOnlyTab: true });
+        sub.unshift({ ...m, url: createRouteIndexURL(m.route), isOnlyTab: true });
       }
-      menus[m.id] = { ...m, label: t(m.label), sub, url: menuUrl[m.route] };
+      menus[m.id] = { ...m, label: t(m.label), sub, url: createRouteIndexURL(m.route) };
     }
     routeIdMenu[m.route] = m;
   });
 
+  const clusterName = getCluster();
   const routes: RouteObject[] = [];
   Routes.forEach((e) => {
     const menu = routeIdMenu[e.id];
@@ -57,7 +56,7 @@ function make(t: (...args: any[]) => any) {
       // const Element = lazy(() => import(`../pages/${r.page}`))
       const Element = r.element;
       const route: RouteObject = {
-        path: r.path,
+        path: getRoutePathPattern(r, e, clusterName),
         element: (
           <AuthRoute menu={menu} sub={p.sub}>
             <Element {...r.props} />

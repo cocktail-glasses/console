@@ -89,7 +89,7 @@
 // import { UsersList, UsersDetail } from 'pages/Users'
 import { generatePath } from 'react-router';
 
-import { getCluster } from '@lib/util';
+import { getCluster, getClusterPrefixedPath } from '@lib/util';
 
 // import store from 'redux/stores/store';
 
@@ -858,32 +858,27 @@ export interface RouteURLProps {
   cluster?: string;
   [prop: string]: any;
 }
-export function createRouteURL(routeName: string, params: any = {}) {
-  const cluster = getCluster() || 0;
+// TODO headlamp route 구조에 맞게 작성된 함수이므로, 우리 route 구조에 맞게 재작성해서 routes.tsx에 추가해야 함
+export function createRouteURL(routeName: string, params: RouteURLProps = {}) {
+  const cluster = getCluster();
   const fullParams = {
     cluster,
     ...params,
   };
-  // const path = ['', 'clusters', ':cluster']
-  const path = ['', 'clusters'];
-  if (fullParams) {
-    path.push();
-  }
-  if (routeName !== '') {
-    path.push(routeName.toLocaleLowerCase());
-  }
-  Object.entries(params).forEach(([k, v]) => {
-    if (k !== 'cluster' && v !== undefined) {
-      path.push(`:${k}`);
+
+  const pathPattern = [];
+  cluster ? pathPattern.push(getClusterPrefixedPath(routeName)) : pathPattern.push(routeName);
+
+  // Route 참조 없이 수작업으로 URL을 만드는 방식이므로 파라메터가 pathVariable로 붙는 순서를 하드코딩해줌
+  const pathVariableOrder = ['crd', 'namespace', 'managementNamespace', 'crName', 'name'];
+  pathVariableOrder.forEach((pathVariable) => {
+    if (params[pathVariable]) {
+      pathPattern.push(`:${pathVariable}`);
     }
   });
-  // Object.keys(params).forEach(k => {
-  //   if (k !== 'cluster') {
-  //     path.push(`:${k}`)
-  //   }
-  // })
-  // console.log("path", path, fullParams);
-  return generatePath(path.join('/'), fullParams);
+
+  const absolutePath = '/';
+  return generatePath(absolutePath + pathPattern.join('/'), fullParams);
 }
 // export function createRouteURL(routeName: string, params: RouteURLProps = {}) {
 //   const storeRoutes = store.getState().routes.routes;

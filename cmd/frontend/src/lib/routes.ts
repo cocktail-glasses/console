@@ -1,4 +1,10 @@
 import { lazy } from 'react';
+import { generatePath } from 'react-router';
+
+import { isUndefined } from 'lodash';
+
+import { getCluster, getClusterPrefixedPath } from './cluster';
+import { RouteURLProps } from './router';
 
 import DaemonSet from '@lib/k8s/daemonSet';
 import Deployment from '@lib/k8s/deployment';
@@ -54,7 +60,6 @@ import k8sPodDisruptionBudgetList from '@pages/K8s/podDisruptionBudget/List';
 import k8sPriorityClassDetails from '@pages/K8s/priorityClass/Details';
 import k8sPriorityClassList from '@pages/K8s/priorityClass/List';
 import k8sReplicasetList from '@pages/K8s/replicaset/List';
-// import k8sResourceMap from '@pages/K8s/resourceMap/GraphView';
 import k8sResourceQuotaDetails from '@pages/K8s/resourceQuota/Details';
 import k8sResourceQuotaList from '@pages/K8s/resourceQuota/List';
 import k8sRoleBindingDetails from '@pages/K8s/role/BindingDetails';
@@ -96,6 +101,8 @@ const k8sResourceMap = lazy(() => import('@pages/K8s/resourceMap/GraphView').the
 export interface RoutesType {
   id: string;
   routes: Route[];
+  // URL에 cluster prefix 여부
+  useClusterURL?: boolean;
 }
 
 export interface Route {
@@ -114,6 +121,7 @@ export const Routes: RoutesType[] = [
       { path: '/home', page: 'Home', element: Home, index: true },
       { path: '/', page: 'Home', element: Home, index: true },
     ],
+    useClusterURL: false,
   },
   {
     id: 'users',
@@ -122,10 +130,12 @@ export const Routes: RoutesType[] = [
       { path: '/users/create', page: 'Users/Detail', element: UsersDetail },
       { path: '/users/:name', page: 'Users/Detail', element: UsersDetail },
     ],
+    useClusterURL: false,
   },
   {
     id: 'settings',
     routes: [{ path: '/settings', page: 'Settings', element: Settings, index: true }],
+    useClusterURL: false,
   },
   //k8s
   {
@@ -138,12 +148,13 @@ export const Routes: RoutesType[] = [
         index: true,
       },
     ],
+    useClusterURL: false,
   },
   {
     id: 'cluster',
     routes: [
       {
-        path: '/clusters/cluster',
+        path: '/cluster',
         page: 'K8s/cluster/Overview',
         element: k8sClusterOverview,
         index: true,
@@ -154,13 +165,13 @@ export const Routes: RoutesType[] = [
     id: 'namespaces',
     routes: [
       {
-        path: '/clusters/namespaces',
+        path: '/namespaces',
         page: 'K8s/namespace/List',
         element: k8sNamespaceList,
         index: true,
       },
       {
-        path: '/clusters/namespace/:name',
+        path: '/namespace/:name',
         page: 'K8s/namespace/Details',
         element: k8sNamespaceDetails,
       },
@@ -170,13 +181,13 @@ export const Routes: RoutesType[] = [
     id: 'nodes',
     routes: [
       {
-        path: '/clusters/nodes',
+        path: '/nodes',
         page: 'K8s/node/List',
         element: k8sNodeList,
         index: true,
       },
       {
-        path: '/clusters/node/:name',
+        path: '/node/:name',
         page: 'K8s/node/Details',
         element: k8sNodeDetails,
       },
@@ -186,7 +197,7 @@ export const Routes: RoutesType[] = [
     id: 'workloads',
     routes: [
       {
-        path: '/clusters/workloads',
+        path: '/workloads',
         page: 'K8s/workload/Overview',
         element: k8sWorkloadOverview,
         index: true,
@@ -197,13 +208,13 @@ export const Routes: RoutesType[] = [
     id: 'pods',
     routes: [
       {
-        path: '/clusters/pods',
+        path: '/pods',
         page: 'K8s/pod/List',
         element: k8sPodList,
         index: true,
       },
       {
-        path: '/clusters/pod/:namespace/:name',
+        path: '/pod/:namespace/:name',
         page: 'K8s/pod/Details',
         element: k8sPodDetails,
       },
@@ -213,13 +224,13 @@ export const Routes: RoutesType[] = [
     id: 'deployments',
     routes: [
       {
-        path: '/clusters/deployments',
+        path: '/deployments',
         page: 'K8s/deployments/List',
         element: k8sDeploymentsList,
         index: true,
       },
       {
-        path: '/clusters/deployment/:namespace/:name',
+        path: '/deployment/:namespace/:name',
         page: 'K8s/workload/Details',
         element: k8sWorkloadDetails,
         props: { workloadKind: Deployment },
@@ -230,13 +241,13 @@ export const Routes: RoutesType[] = [
     id: 'statefulSets',
     routes: [
       {
-        path: '/clusters/statefulsets',
+        path: '/statefulsets',
         page: 'K8s/statefulset/List',
         element: k8sStatefulsetList,
         index: true,
       },
       {
-        path: '/clusters/statefulset/:namespace/:name',
+        path: '/statefulset/:namespace/:name',
         page: 'K8s/statefulset/Details',
         element: k8sStatefulsetDetails,
         props: { workloadKind: StatefulSet },
@@ -247,13 +258,13 @@ export const Routes: RoutesType[] = [
     id: 'daemonSets',
     routes: [
       {
-        path: '/clusters/daemonsets',
+        path: '/daemonsets',
         page: 'K8s/daemonset/List',
         element: k8sDaemonsetList,
         index: true,
       },
       {
-        path: '/clusters/daemonset/:namespace/:name',
+        path: '/daemonset/:namespace/:name',
         page: 'K8s/daemonset/Details',
         element: k8sDaemonsetDetails,
         props: { workloadKind: DaemonSet },
@@ -264,13 +275,13 @@ export const Routes: RoutesType[] = [
     id: 'replicaSets',
     routes: [
       {
-        path: '/clusters/replicasets',
+        path: '/replicasets',
         page: 'K8s/replicaset/List',
         element: k8sReplicasetList,
         index: true,
       },
       {
-        path: '/clusters/replicaset/:namespace/:name',
+        path: '/replicaset/:namespace/:name',
         page: 'K8s/workload/Details',
         element: k8sWorkloadDetails,
         props: { workloadKind: ReplicaSet },
@@ -281,13 +292,13 @@ export const Routes: RoutesType[] = [
     id: 'jobs',
     routes: [
       {
-        path: '/clusters/jobs',
+        path: '/jobs',
         page: 'K8s/job/List',
         element: k8sJobList,
         index: true,
       },
       {
-        path: '/clusters/job/:namespace/:name',
+        path: '/job/:namespace/:name',
         page: 'K8s/workload/Details',
         element: k8sWorkloadDetails,
         props: { workloadKind: Job },
@@ -298,13 +309,13 @@ export const Routes: RoutesType[] = [
     id: 'cronJobs',
     routes: [
       {
-        path: '/clusters/cronjobs',
+        path: '/cronjobs',
         page: 'K8s/cronjob/List',
         element: k8sCronjobList,
         index: true,
       },
       {
-        path: '/clusters/cronjob/:namespace/:name',
+        path: '/cronjob/:namespace/:name',
         page: 'K8s/cronjob/Details',
         element: k8sCronjobDetails,
       },
@@ -315,13 +326,13 @@ export const Routes: RoutesType[] = [
     id: 'persistentVolumeClaims',
     routes: [
       {
-        path: '/clusters/storage/persistentvolumeclaims',
+        path: '/storage/persistentvolumeclaims',
         page: 'K8s/storage/ClaimList',
         element: k8sStorageClaimList,
         index: true,
       },
       {
-        path: '/clusters/persistentvolumeclaim/:namespace/:name',
+        path: '/persistentvolumeclaim/:namespace/:name',
         page: 'K8s/storage/ClaimDetails',
         element: k8sStorageClaimDetails,
       },
@@ -331,13 +342,13 @@ export const Routes: RoutesType[] = [
     id: 'persistentVolumes',
     routes: [
       {
-        path: '/clusters/storage/persistentvolumes',
+        path: '/storage/persistentvolumes',
         page: 'K8s/storage/VolumeList',
         element: k8sStorageVolumeList,
         index: true,
       },
       {
-        path: '/clusters/persistentvolume/:name',
+        path: '/persistentvolume/:name',
         page: 'K8s/storage/VolumeDetails',
         element: k8sStorageVolumeDetails,
       },
@@ -347,13 +358,13 @@ export const Routes: RoutesType[] = [
     id: 'storageClasses',
     routes: [
       {
-        path: '/clusters/storage/classes',
+        path: '/storage/classes',
         page: 'K8s/storage/ClassList',
         element: k8sStorageClassList,
         index: true,
       },
       {
-        path: '/clusters/storageclass/:name',
+        path: '/storageclass/:name',
         page: 'K8s/storage/ClassDetails',
         element: k8sStorageClassDetails,
       },
@@ -364,13 +375,13 @@ export const Routes: RoutesType[] = [
     id: 'services',
     routes: [
       {
-        path: '/clusters/services',
+        path: '/services',
         page: 'K8s/service/List',
         element: k8sServiceList,
         index: true,
       },
       {
-        path: '/clusters/service/:namespace/:name',
+        path: '/service/:namespace/:name',
         page: 'K8s/service/Details',
         element: k8sServiceDetails,
       },
@@ -380,13 +391,13 @@ export const Routes: RoutesType[] = [
     id: 'endpoints',
     routes: [
       {
-        path: '/clusters/endpoints',
+        path: '/endpoints',
         page: 'K8s/endpoints/List',
         element: k8sEndpointsList,
         index: true,
       },
       {
-        path: '/clusters/endpoint/:namespace/:name',
+        path: '/endpoint/:namespace/:name',
         page: 'K8s/endpoints/Details',
         element: k8sEndpointsDetails,
       },
@@ -396,13 +407,13 @@ export const Routes: RoutesType[] = [
     id: 'ingresses',
     routes: [
       {
-        path: '/clusters/ingresses',
+        path: '/ingresses',
         page: 'K8s/ingress/List',
         element: k8sIngressList,
         index: true,
       },
       {
-        path: '/clusters/ingress/:namespace/:name',
+        path: '/ingress/:namespace/:name',
         page: 'K8s/ingress/Details',
         element: k8sIngressDetails,
       },
@@ -412,13 +423,13 @@ export const Routes: RoutesType[] = [
     id: 'ingressclasses',
     routes: [
       {
-        path: '/clusters/ingressclasses',
+        path: '/ingressclasses',
         page: 'K8s/ingress/ClassList',
         element: k8sIngressClassList,
         index: true,
       },
       {
-        path: '/clusters/ingressclass/:name',
+        path: '/ingressclass/:name',
         page: 'K8s/ingress/ClassDetails',
         element: k8sIngressClassDetails,
       },
@@ -428,13 +439,13 @@ export const Routes: RoutesType[] = [
     id: 'networkPolicies',
     routes: [
       {
-        path: '/clusters/networkPolicies',
+        path: '/networkPolicies',
         page: 'K8s/networkpolicy/List',
         element: k8sNetworkpolicyList,
         index: true,
       },
       {
-        path: '/clusters/networkPolicy/:namespace/:name',
+        path: '/networkPolicy/:namespace/:name',
         page: 'K8s/networkpolicy/Details',
         element: k8sNetworkpolicyDetails,
       },
@@ -445,13 +456,13 @@ export const Routes: RoutesType[] = [
     id: 'gateways',
     routes: [
       {
-        path: '/clusters/gateways',
+        path: '/gateways',
         page: 'K8s/gateway/GatewayList',
         element: k8sGatewayList,
         index: true,
       },
       {
-        path: '/clusters/gateway:namespace/:name',
+        path: '/gateway:namespace/:name',
         page: 'K8s/gateway/GatewayDetails',
         element: k8sGatewayDetails,
       },
@@ -462,13 +473,13 @@ export const Routes: RoutesType[] = [
     id: 'gatewayclasses',
     routes: [
       {
-        path: '/clusters/gatewayclasses',
+        path: '/gatewayclasses',
         page: 'K8s/gateway/GatewayClassList',
         element: k8sGatewayClassList,
         index: true,
       },
       {
-        path: '/clusters/gatewayclass/:name',
+        path: '/gatewayclass/:name',
         page: 'K8s/gateway/GatewayClassDetails',
         element: k8sGatewayClassDetails,
       },
@@ -479,13 +490,13 @@ export const Routes: RoutesType[] = [
     id: 'httproutes',
     routes: [
       {
-        path: '/clusters/httproutes',
+        path: '/httproutes',
         page: 'K8s/gateway/HttpRouteList',
         element: k8sHttpRouteList,
         index: true,
       },
       {
-        path: '/clusters/httproute/:namespace/:name',
+        path: '/httproute/:namespace/:name',
         page: 'K8s/gateway/HttpRouteDetails',
         element: k8sHttpRouteDetails,
       },
@@ -496,13 +507,13 @@ export const Routes: RoutesType[] = [
     id: 'grpcroutes',
     routes: [
       {
-        path: '/clusters/grpcroutes',
+        path: '/grpcroutes',
         page: 'K8s/gateway/GrpcRouteList',
         element: k8sGrpcRouteList,
         index: true,
       },
       {
-        path: '/clusters/grpcroute/:namespace/:name',
+        path: '/grpcroute/:namespace/:name',
         page: 'K8s/gateway/GrpcRouteDetails',
         element: k8sGrpcRouteDetails,
       },
@@ -513,13 +524,13 @@ export const Routes: RoutesType[] = [
     id: 'serviceAccounts',
     routes: [
       {
-        path: '/clusters/serviceaccounts',
+        path: '/serviceaccounts',
         page: 'K8s/serviceaccount/List',
         index: true,
         element: k8sServiceaccountList,
       },
       {
-        path: '/clusters/serviceaccount/:namespace/:name',
+        path: '/serviceaccount/:namespace/:name',
         page: 'K8s/serviceaccount/Details',
         element: k8sServiceaccountDetails,
       },
@@ -529,18 +540,18 @@ export const Routes: RoutesType[] = [
     id: 'roles',
     routes: [
       {
-        path: '/clusters/roles',
+        path: '/roles',
         page: 'K8s/role/List',
         element: k8sRoleList,
         index: true,
       },
       {
-        path: '/clusters/role/:namespace/:name',
+        path: '/role/:namespace/:name',
         page: 'K8s/role/Details',
         element: k8sRoleDetails,
       },
       {
-        path: '/clusters/clusterrole/:name',
+        path: '/clusterrole/:name',
         page: 'K8s/role/Details',
         element: k8sRoleDetails,
       },
@@ -550,18 +561,18 @@ export const Routes: RoutesType[] = [
     id: 'roleBindings',
     routes: [
       {
-        path: '/clusters/roleBindings',
+        path: '/roleBindings',
         page: 'K8s/role/BindingList',
         element: k8sRoleBindingList,
         index: true,
       },
       {
-        path: '/clusters/roleBindings/:namespace/:name',
+        path: '/roleBinding/:namespace/:name',
         page: 'K8s/role/BindingDetails',
         element: k8sRoleBindingDetails,
       },
       {
-        path: '/clusters/clusterrolebinding/:name',
+        path: '/clusterrolebinding/:name',
         page: 'K8s/role/BindingDetails',
         element: k8sRoleBindingDetails,
       },
@@ -572,13 +583,13 @@ export const Routes: RoutesType[] = [
     id: 'configMaps',
     routes: [
       {
-        path: '/clusters/configmaps',
+        path: '/configmaps',
         page: 'K8s/configmap/List',
         element: k8sConfigmapList,
         index: true,
       },
       {
-        path: '/clusters/configmap/:namespace/:name',
+        path: '/configmap/:namespace/:name',
         page: 'K8s/configmap/Details',
         element: k8sConfigmapDetails,
       },
@@ -588,13 +599,13 @@ export const Routes: RoutesType[] = [
     id: 'secrets',
     routes: [
       {
-        path: '/clusters/secrets',
+        path: '/secrets',
         page: 'K8s/secret/List',
         element: k8sSecretList,
         index: true,
       },
       {
-        path: '/clusters/secret/:namespace/:name',
+        path: '/secret/:namespace/:name',
         page: 'K8s/secret/Details',
         element: k8sSecretDetails,
       },
@@ -604,13 +615,13 @@ export const Routes: RoutesType[] = [
     id: 'horizontalPodAutoscalers',
     routes: [
       {
-        path: '/clusters/horizontalpodautoscalers',
+        path: '/horizontalpodautoscalers',
         page: 'K8s/horizontalPodAutoscaler/List',
         element: k8sHorizontalPodAutoscalerList,
         index: true,
       },
       {
-        path: '/clusters/horizontalpodautoscaler/:namespace/:name',
+        path: '/horizontalpodautoscaler/:namespace/:name',
         page: 'K8s/horizontalPodAutoscaler/Details',
         element: k8sHorizontalPodAutoscalerDetails,
       },
@@ -620,13 +631,13 @@ export const Routes: RoutesType[] = [
     id: 'verticalPodAutoscalers',
     routes: [
       {
-        path: '/clusters/verticalpodautoscalers',
+        path: '/verticalpodautoscalers',
         page: 'K8s/verticalPodAutoscaler/List',
         element: k8sVerticalPodAutoscalerList,
         index: true,
       },
       {
-        path: '/clusters/verticalpodautoscaler/:namespace/:name',
+        path: '/verticalpodautoscaler/:namespace/:name',
         page: 'K8s/verticalPodAutoscaler/Details',
         element: k8sVerticalPodAutoscalerDetails,
       },
@@ -636,13 +647,13 @@ export const Routes: RoutesType[] = [
     id: 'podDisruptionBudgets',
     routes: [
       {
-        path: '/clusters/poddisruptionbudgets',
+        path: '/poddisruptionbudgets',
         page: 'K8s/podDisruptionBudget/List',
         element: k8sPodDisruptionBudgetList,
         index: true,
       },
       {
-        path: '/clusters/poddisruptionbudget/:namespace/:name',
+        path: '/poddisruptionbudget/:namespace/:name',
         page: 'K8s/podDisruptionBudget/Details',
         element: k8sPodDisruptionBudgetDetails,
       },
@@ -652,13 +663,13 @@ export const Routes: RoutesType[] = [
     id: 'resourceQuotas',
     routes: [
       {
-        path: '/clusters/resourcequotas',
+        path: '/resourcequotas',
         page: 'K8s/resourceQuota/List',
         element: k8sResourceQuotaList,
         index: true,
       },
       {
-        path: '/clusters/resourcequota/:namespace/:name',
+        path: '/resourcequota/:namespace/:name',
         page: 'K8s/resourceQuota/Details',
         element: k8sResourceQuotaDetails,
       },
@@ -668,13 +679,13 @@ export const Routes: RoutesType[] = [
     id: 'limitRanges',
     routes: [
       {
-        path: '/clusters/limitranges',
+        path: '/limitranges',
         page: 'K8s/limitRange/List',
         element: k8sLimitRangeList,
         index: true,
       },
       {
-        path: '/clusters/limitrange/:namespace/:name',
+        path: '/limitrange/:namespace/:name',
         page: 'K8s/limitRange/Details',
         element: k8sLimitRangeDetails,
       },
@@ -684,13 +695,13 @@ export const Routes: RoutesType[] = [
     id: 'priorityClasses',
     routes: [
       {
-        path: '/clusters/priorityclasses',
+        path: '/priorityclasses',
         page: 'K8s/priorityClass/List',
         element: k8sPriorityClassList,
         index: true,
       },
       {
-        path: '/clusters/priorityclass/:name',
+        path: '/priorityclass/:name',
         page: 'K8s/priorityClass/Details',
         element: k8sPriorityClassDetails,
       },
@@ -700,13 +711,13 @@ export const Routes: RoutesType[] = [
     id: 'runtimeClasses',
     routes: [
       {
-        path: '/clusters/runtimeclasses',
+        path: '/runtimeclasses',
         page: 'K8s/runtimeClass/List',
         element: k8sRuntimeClassList,
         index: true,
       },
       {
-        path: '/clusters/runtimeclass/:name',
+        path: '/runtimeclass/:name',
         page: 'K8s/runtimeClass/Details',
         element: k8sRuntimeClassDetails,
       },
@@ -716,13 +727,13 @@ export const Routes: RoutesType[] = [
     id: 'leases',
     routes: [
       {
-        path: '/clusters/leases',
+        path: '/leases',
         page: 'K8s/lease/List',
         element: k8sLeaseList,
         index: true,
       },
       {
-        path: '/clusters/lease/:namespace/:name',
+        path: '/lease/:namespace/:name',
         page: 'K8s/lease/Details',
         element: k8sLeaseDetails,
       },
@@ -732,13 +743,13 @@ export const Routes: RoutesType[] = [
     id: 'mutatingWebhookConfigurations',
     routes: [
       {
-        path: '/clusters/mutatingwebhookconfigurations',
+        path: '/mutatingwebhookconfigurations',
         page: 'K8s/webhookconfiguration/MutatingWebhookConfigList',
         element: k8sWebhookconfigurationMutatingWebhookConfigList,
         index: true,
       },
       {
-        path: '/clusters/mutatingwebhookconfiguration/:name',
+        path: '/mutatingwebhookconfiguration/:name',
         page: 'K8s/webhookconfiguration/MutatingWebhookConfigDetails',
         element: k8sWebhookconfigurationMutatingWebhookConfigDetails,
       },
@@ -748,15 +759,64 @@ export const Routes: RoutesType[] = [
     id: 'validatingWebhookConfigurations',
     routes: [
       {
-        path: '/clusters/validatingwebhookconfigurations',
+        path: '/validatingwebhookconfigurations',
         page: 'K8s/webhookconfiguration/ValidatingWebhookConfigList',
         element: k8sWebhookconfigurationValidatingWebhookConfigList,
         index: true,
       },
       {
-        path: '/clusters/validatingwebhookconfiguration/:name',
+        path: '/validatingwebhookconfiguration/:name',
         page: 'K8s/webhookconfiguration/ValidatingWebhookConfigDetails',
         element: k8sWebhookconfigurationValidatingWebhookConfigDetails,
+      },
+    ],
+  },
+  {
+    id: 'crds',
+    routes: [
+      {
+        path: '/crds',
+        page: 'K8s/crd/List',
+        element: k8sCustomResourceDefinitionList,
+        index: true,
+      },
+      {
+        path: '/crds/:name',
+        page: 'K8s/crd/Details',
+        element: k8sCustomResourceDefinitionDetails,
+      },
+      {
+        path: '/customresources/:crd/:namespace/:crName',
+        page: 'K8s/crd/CustomResourceDetails',
+        element: k8sCustomResourceDetails,
+      },
+      {
+        path: '/customresources/:crd',
+        page: 'K8s/crd/CustomResourceList',
+        element: k8sCustomResourceList,
+      },
+    ],
+  },
+  {
+    id: 'crs',
+    routes: [
+      {
+        path: '/crs',
+        page: 'K8s/crd/CustomResourceInstancesList',
+        element: k8sCrsInstanceList,
+        index: true,
+      },
+    ],
+  },
+  {
+    id: 'maps',
+    routes: [
+      {
+        path: '/maps',
+        page: 'K8s/resourceMap/GraphView',
+        element: k8sResourceMap,
+        props: { height: 'calc(100vh - 64px)' },
+        index: true,
       },
     ],
   },
@@ -780,55 +840,46 @@ export const Routes: RoutesType[] = [
         element: KaaSCreate,
       },
     ],
-  },
-  {
-    id: 'crds',
-    routes: [
-      {
-        path: '/clusters/crds',
-        page: 'K8s/crd/List',
-        element: k8sCustomResourceDefinitionList,
-        index: true,
-      },
-      {
-        path: '/clusters/crds/:name',
-        page: 'K8s/crd/Details',
-        element: k8sCustomResourceDefinitionDetails,
-      },
-      {
-        path: '/clusters/customresources/:crd/:namespace/:crName',
-        page: 'K8s/crd/CustomResourceDetails',
-        element: k8sCustomResourceDetails,
-      },
-      {
-        path: '/clusters/customresources/:crd',
-        page: 'K8s/crd/CustomResourceList',
-        element: k8sCustomResourceList,
-      },
-    ],
-  },
-  {
-    id: 'crs',
-    routes: [
-      {
-        path: '/clusters/crs',
-        page: 'K8s/crd/CustomResourceInstancesList',
-        element: k8sCrsInstanceList,
-        index: true,
-      },
-    ],
-  },
-
-  {
-    id: 'maps',
-    routes: [
-      {
-        path: '/clusters/maps',
-        page: 'K8s/resourceMap/GraphView',
-        element: k8sResourceMap,
-        props: { height: 'calc(100vh - 64px)' },
-        index: true,
-      },
-    ],
+    useClusterURL: false,
   },
 ];
+
+export const routeTable = Routes.reduce((ret: object, route: RoutesType) => ({ ...ret, [route.id]: route }), {});
+
+// isUseClusterURL route가 cluster URL을 사용하는지 여부를 반환합니다.
+export function isUseClusterURL(route: RoutesType): boolean {
+  if (isUndefined(route?.useClusterURL)) {
+    // 기본값은 true
+    return true;
+  }
+  return route.useClusterURL;
+}
+
+// getRouteIndexPath 인덱스 URL 패턴을 반환합니다. clusterURL을 허용하는 route인 경우 cluster 명을 지정해주면 cluster prefix를 추가합니다.
+export function getRouteIndexPathPattern(route: RoutesType, cluster?: string | null) {
+  const indexRoute = route.routes.find((route) => route.index);
+
+  return indexRoute ? getRoutePathPattern(indexRoute, route, cluster) : '';
+}
+
+// getRoutePathPattern URL 패턴을 반환합니다. clusterURL을 허용하는 route인 경우 cluster 명을 지정해주면 cluster prefix를 추가합니다.
+export function getRoutePathPattern(route: Route, parentRoute: RoutesType, cluster?: string | null) {
+  if (!!cluster == false || !isUseClusterURL(parentRoute)) {
+    return route.path;
+  }
+
+  return getClusterPrefixedPath(route.path);
+}
+
+// TODO index url만 지원 가능.. headlamp에서 사용하는 router.tsx/createRouteURL을 제거하고 통합된 url 생성 로직 필요
+// createRouteIndexURL 인덱스 URL을 반환합니다.
+export function createRouteIndexURL(routeId: string, params: RouteURLProps = {}) {
+  const cluster = getCluster();
+  const fullParams = {
+    cluster,
+    ...params,
+  };
+
+  const route = routeTable[routeId];
+  return generatePath(getRouteIndexPathPattern(route, cluster), fullParams);
+}

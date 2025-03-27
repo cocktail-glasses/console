@@ -10,6 +10,7 @@ import ListItemLink from './ListItemLink';
 import { SidebarItemProps } from './SidebarInterface';
 import style from './SidebarItem.module.scss';
 
+import { createRouteURL } from '@lib/router';
 // import { createRouteURL, getRoute } from '@lib/router';
 import { getCluster, getClusterPrefixedPath } from '@lib/util';
 import clsx from 'clsx';
@@ -41,13 +42,14 @@ export default function SidebarItem(props: SidebarItemProps) {
     });
   }
 
-  // if (!fullURL) {
-  //   let routeName = name;
-  //   if (!getRoute(name)) {
-  //     routeName = subList.length > 0 ? subList[0].name : '';
-  //   }
-  //   fullURL = createRouteURL(routeName);
-  // }
+  if (!fullURL) {
+    const routeName = name;
+    // if (!getRoute(name)) {
+    //   routeName = subList.length > 0 ? subList[0].name : '';
+    // }
+    fullURL = createRouteURL(routeName);
+  }
+
   // const isSelected = useMemo(() => {
   //   if (name === selectedName) {
   //     return true;
