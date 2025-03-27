@@ -35,6 +35,16 @@
       border: none;
       // outline: 3px solid hsla(210, 90%, 42%, 0.5);
     }
+
+    &.collapse {
+      border: none;
+      box-shadow: none;
+      padding: 8px 7px;
+
+      & .MuiListItemText-root {
+        visibility: hidden;
+      }
+    }
   }
 
   & .MuiPaper-root {

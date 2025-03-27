@@ -325,7 +325,7 @@ export function PureSidebar({
           p: 1.5,
         }}
       >
-        <ClusterChooser />
+        <ClusterChooser fullWidth={largeSideBarOpen} />
       </Box>
       <Divider />
     </>

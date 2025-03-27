@@ -18,6 +18,8 @@ import { styled } from '@mui/material/styles';
 
 import './sidebar.scss';
 
+import clsx from 'clsx';
+
 const Avatar = styled(MuiAvatar)(({ theme }) => ({
   width: 28,
   height: 28,
@@ -31,7 +33,11 @@ const ListItemAvatar = styled(MuiListItemAvatar)({
   marginRight: 12,
 });
 
-export default function ClusterChooser() {
+interface ClusterChooserProps {
+  fullWidth: boolean;
+}
+
+export default function ClusterChooser({ fullWidth }: ClusterChooserProps) {
   const [company, setCompany] = React.useState('');
 
   const handleChange = (event: SelectChangeEvent) => {
@@ -41,7 +47,7 @@ export default function ClusterChooser() {
     <Select
       labelId="select-content-label"
       id="select-content"
-      className="selectContent"
+      className={clsx('selectContent', { collapse: !fullWidth })}
       value={company}
       onChange={handleChange}
       displayEmpty
