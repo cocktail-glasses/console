@@ -1,19 +1,19 @@
 // import VersionDialog from '@lib/App/VersionDialog';
-import { Outlet } from "react-router-dom";
+import { Outlet } from 'react-router-dom';
 
-import Box from "@mui/material/Box";
-import Container from "@mui/material/Container";
-import CssBaseline from "@mui/material/CssBaseline";
-import { useTheme } from "@mui/material/styles";
-import { styled } from "@mui/material/styles";
+import Box from '@mui/material/Box';
+import Container from '@mui/material/Container';
+import CssBaseline from '@mui/material/CssBaseline';
+import { useTheme } from '@mui/material/styles';
+import { styled } from '@mui/material/styles';
 
 // import ActionsNotifier from '@components/common/ActionsNotifier';
 // import AlertNotification from '@components/common/AlertNotification';
-import Sidebar, { NavigationTabs } from "@lib/Layout/Sidebar";
-import TopBar from "@lib/Layout/TopBar";
+import Sidebar, { NavigationTabs } from '@lib/Layout/Sidebar';
+import TopBar from '@lib/Layout/TopBar';
 
-const Div = styled("div")``;
-const Main = styled("main")``;
+const Div = styled('div')``;
+const Main = styled('main')``;
 
 export default function Layout() {
   const theme = useTheme();
@@ -22,10 +22,10 @@ export default function Layout() {
     <Box
       id="layout"
       sx={{
-        display: "flex",
-        [theme.breakpoints.down("sm")]: { display: "block" },
-        height: "100vh",
-        width: "100vw",
+        display: 'flex',
+        [theme.breakpoints.down('sm')]: { display: 'block' },
+        height: '100vh',
+        width: '100vw',
       }}
       className={theme.palette.mode}
     >
@@ -37,9 +37,10 @@ export default function Layout() {
         id="main"
         sx={{
           flexGrow: 1,
-          marginLeft: "initial",
-          overflowX: "hidden",
-          overflowY: "auto",
+          marginLeft: 'initial',
+          overflowX: 'hidden',
+          overflowY: 'auto',
+          paddingBottom: '100px',
         }}
       >
         {/* <AlertNotification /> */}
