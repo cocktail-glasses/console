@@ -183,9 +183,9 @@ const commonRules = {
     MuiTooltip: {
       styleOverrides: {
         tooltip: {
-          fontSize: '1.3em',
+          fontSize: '0.8em',
           color: '#fff',
-          backgroundColor: '#000',
+          backgroundColor: 'hsla(220, 20%, 25%, 0.92)',
         },
       },
     },
@@ -329,14 +329,6 @@ const darkTheme = createTheme({
   },
   components: {
     ...commonRules.components,
-    MuiTooltip: {
-      styleOverrides: {
-        tooltip: {
-          ...commonRules.components.MuiTooltip.styleOverrides.tooltip,
-          backgroundColor: '#000',
-        },
-      },
-    },
     MuiAppBar: {
       styleOverrides: {
         root: {
