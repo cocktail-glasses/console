@@ -1,7 +1,7 @@
 import { memo, ReactNode, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { Box, Paper, Table as MuiTable, TableCellProps, TableHead } from '@mui/material';
+import { Box, Paper, Table as MuiTable, TableCellProps, TableHead, TableRow } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { alpha, styled } from '@mui/system';
 
@@ -123,12 +123,12 @@ const StyledHeadRow = styled('tr')(({ theme }) => ({
   display: 'contents',
   background: theme.palette.tables.head.background,
 }));
-const StyledRow = styled('tr')(({ theme }) => ({
-  display: 'contents',
-  '&[data-selected=true]': {
-    background: alpha(theme.palette.primary.main, 0.2),
-  },
-}));
+// const StyledRow = styled('tr')(({ theme }) => ({
+//   display: 'contents',
+//   '&[data-selected=true]': {
+//     background: alpha(theme.palette.primary.main, 0.2),
+//   },
+// }));
 const StyledBody = styled('tbody')({ display: 'contents' });
 
 /**
@@ -206,7 +206,7 @@ export default function Table<RowItem extends Record<string, any>>({
     enablePagination: tableData.length > rowsPerPageOptions[0],
     enableDensityToggle: tableProps.enableDensityToggle ?? false,
     enableFullScreenToggle: tableProps.enableFullScreenToggle ?? false,
-    enableColumnActions: false,
+    // enableColumnActions: false,
     localization: tableLocalizationMap[i18n.language],
     autoResetAll: false,
     onPaginationChange: (updater: any) => {
@@ -278,22 +278,50 @@ export default function Table<RowItem extends Record<string, any>>({
         boxShadow: undefined,
       },
     },
-    muiTableHeadCellProps: {
+    muiTableHeadCellProps: ({ column }) => ({
       sx: {
         width: 'unset',
         minWidth: 'unset',
         paddingTop: '0.5rem',
-        '.MuiTableSortLabel-icon': {
-          margin: 0,
-          width: '14px',
-          height: '14px',
-          marginTop: '-2px',
+        '& .Mui-TableHeadCell-Content': {
+          justifyContent: 'space-between',
         },
-        ',MuiTableSortLabel-root': {
-          width: 'auto',
+
+        '& .Mui-TableHeadCell-Content-Labels': {
+          flexGrow: 1,
+          justifyContent: 'space-between',
         },
+
+        // '& .MuiTableSortLabel-root, & .Mui-TableHeadCell-Content-Actions': {
+        //   // display: 'none',
+        //   visibility: 'hidden',
+        //   alignContent: 'flex-end',
+        // },
+
+        // '&:hover .MuiTableSortLabel-root, &:hover .Mui-TableHeadCell-Content-Actions': {
+        //   // display: 'block',
+        //   visibility: 'visible',
+        // },
+
+        // '&:focus .Mui-TableHeadCell-Content-Actions': {
+        //   backgroundColor: 'red',
+        //   display: 'block',
+        // },
+
+        // ...(column.getIsSorted() && {
+        //   '& .MuiTableSortLabel-root': {
+        //     // display: 'block',
+        //     visibility: 'visible',
+        //   },
+        // }),
       },
-    },
+    }),
+    // ({ closeMenu, column, , table }) => ReactNode[]
+    // renderColumnActionsMenuItems: ({ closeMenu }) => {
+    //   closeMenu(true);
+
+    //   return internalColumnMenuItems;
+    // },
     muiSelectCheckboxProps: {
       size: 'small',
       sx: { padding: 0 },
@@ -386,7 +414,7 @@ export default function Table<RowItem extends Record<string, any>>({
         </TableHead>
         <StyledBody>
           {rows.map((row) => (
-            <Row key={row.id} cells={row.getVisibleCells()} table={table} isSelected={row.getIsSelected()} />
+            <Row key={row.id} cells={row.getVisibleCells()} table={table} hover isSelected={row.getIsSelected()} />
           ))}
         </StyledBody>
       </MuiTable>
@@ -422,16 +450,32 @@ const Row = memo(
     cells,
     table,
     isSelected,
+    hover,
   }: {
     table: MRT_TableInstance<any>;
     cells: MRT_Cell<any, unknown>[];
     isSelected: boolean;
+    hover: boolean;
   }) => (
-    <StyledRow data-selected={isSelected}>
+    <TableRow
+      data-selected={isSelected}
+      hover={hover}
+      sx={(theme) => ({
+        display: 'contents',
+        '&[data-selected=true]': {
+          background: alpha(theme.palette.primary.main, 0.2),
+        },
+      })}
+    >
       {cells.map((cell) => (
         <MemoCell cell={cell} table={table} key={cell.id} isRowSelected={cell.row.getIsSelected()} />
       ))}
-    </StyledRow>
+    </TableRow>
+    // <StyledRow data-selected={isSelected}>
+    //   {cells.map((cell) => (
+    //     <MemoCell cell={cell} table={table} key={cell.id} isRowSelected={cell.row.getIsSelected()} />
+    //   ))}
+    // </StyledRow>
   )
 );
 
