@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
+import { Fragment } from 'react/jsx-runtime';
 
 import { Link } from '@components/common';
 import { DetailsGrid } from '@components/common/Resource';
@@ -15,21 +16,21 @@ export default function ServiceAccountDetails() {
       name={name}
       namespace={namespace}
       withEvents
-      extraInfo={(item: ServiceAccount) =>
+      extraInfo={(item) =>
         item && [
           {
             name: t('Secrets'),
             value: (
-              <React.Fragment>
+              <Fragment>
                 {item.secrets?.map(({ name }, index) => (
-                  <React.Fragment key={`${name}__${index}`}>
+                  <Fragment key={`${name}__${index}`}>
                     <Link routeName={'secret'} params={{ namespace, name }}>
                       {name}
                     </Link>
                     {index !== item.secrets.length - 1 && ','}
-                  </React.Fragment>
+                  </Fragment>
                 ))}
-              </React.Fragment>
+              </Fragment>
             ),
           },
         ]
