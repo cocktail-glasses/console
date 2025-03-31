@@ -1,6 +1,5 @@
 # Console Frontend
 
-
 ---
 
 ## Development
@@ -27,20 +26,22 @@ npm run build-prod # 상용 빌드 (경로에 static 추가됨)
 
 vite.config.ts 설정
 
+Cocktail Console을 포트포워딩하여 접속합니다.
+
 ```js
 proxy: {
   '/k8s': {
-    target: 'http://localhost:8001', // k8s api 화면용
+    target: 'http://localhost:8099', // k8s api 리소스 url
     changeOrigin: true,
     ws: true,
     rewrite: (path) => path.replace(/^\/k8s/, ''),
   },
   '/api': {
-    target: 'https://blue-dragon.acloud.run', // cocktail api
+    target: 'http://localhost:8099', // cocktail api 리소스 url
     changeOrigin: true,
   },
-  '/sso': {
-    target: 'https://blue-dragon.acloud.run', // cocktail dashboard 로그인
+  '/auth': {
+    target: 'http://localhost:8099', // cocktail console 인증 url
     changeOrigin: true,
   },
 },

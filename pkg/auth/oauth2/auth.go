@@ -95,8 +95,7 @@ type loginMethod interface {
 type AuthSource int
 
 const (
-	AuthSourceOIDC         AuthSource = 0
-	AuthSourceCocktaiCloud AuthSource = 1
+	AuthSourceOIDC AuthSource = 0
 )
 
 type Config struct {
@@ -206,21 +205,6 @@ func NewOAuth2Authenticator(ctx context.Context, config *Config) (*OAuth2Authent
 
 	var tokenHandler loginMethod
 	switch c.AuthSource {
-	case AuthSourceCocktaiCloud:
-		// TODO: once https://github.com/kubernetes/kubernetes/issues/11948 is fixed,
-		// copy the transport config from c.k8sConfig with rest.CopyConfig,
-		// add the c.K8SCA to it and use the roundtripper created from that config
-		//
-		// Use the k8s CA for OAuth metadata discovery.
-		k8sClient, errK8Client := newHTTPClient(c.K8sCA, true)
-		if errK8Client != nil {
-			return nil, errK8Client
-		}
-
-		tokenHandler, err = newOpenShiftAuth(ctx, k8sClient, authConfig)
-		if err != nil {
-			return nil, err
-		}
 	case AuthSourceOIDC:
 		sessionStore := sessions.NewSessionStore(
 			c.CookieAuthenticationKey,
@@ -286,6 +270,7 @@ func (a *OAuth2Authenticator) LoginFunc(w http.ResponseWriter, r *http.Request) 
 		Value:    state,
 		HttpOnly: true,
 		Secure:   a.secureCookies,
+		Path:     "/auth",
 	}
 	http.SetCookie(w, &cookie)
 	http.Redirect(w, r, a.oauth2Config().AuthCodeURL(state), http.StatusSeeOther)
@@ -345,15 +330,16 @@ func (a *OAuth2Authenticator) CallbackFunc(fn func(loginInfo sessions.LoginJSON,
 			return
 		}
 
-		ls, err := a.login(w, r, token)
+		_, err = a.login(w, r, token)
 		if err != nil {
 			klog.Errorf("error constructing login state: %v", err)
 			a.redirectAuthError(w, errorInternal)
 			return
 		}
 
+		// TODO 인증 정보를 이용해서 cocktail api-server에서 사용자 정보 조회 필요
 		klog.Infof("oauth success, redirecting to: %q", a.successURL)
-		fn(ls.ToLoginJSON(), a.successURL, w)
+		http.Redirect(w, r, a.successURL, http.StatusSeeOther)
 	}
 }
 

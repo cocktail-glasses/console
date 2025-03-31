@@ -76,53 +76,6 @@ func TestNewAuthenticator(t *testing.T) {
 	}
 }
 
-func TestNewOpenShiftAuthenticator(t *testing.T) {
-	errURL := "http://example.com/error"
-	sucURL := "http://example.com/success"
-
-	p := &mockOpenShiftProvider{}
-
-	s := httptest.NewServer(http.HandlerFunc(p.handleDiscovery))
-	defer s.Close()
-	p.issuer = s.URL
-
-	ccfg := &Config{
-		AuthSource:    AuthSourceCocktaiCloud,
-		ClientID:      "fake-client-id",
-		ClientSecret:  "fake-secret",
-		Scope:         []string{"foo", "bar"},
-		RedirectURL:   "http://example.com/callback",
-		IssuerURL:     p.issuer,
-		ErrorURL:      errURL,
-		SuccessURL:    sucURL,
-		CookiePath:    "/",
-		SecureCookies: true,
-	}
-
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	a, err := NewOAuth2Authenticator(ctx, ccfg)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	rr := httptest.NewRecorder()
-	req := httptest.NewRequest("GET", "http://example.com/", nil)
-
-	a.LoginFunc(rr, req)
-
-	u, err := url.Parse(rr.HeaderMap.Get("Location"))
-	if err != nil {
-		t.Fatalf("failed to parse location header: %v", err)
-	}
-
-	got := (&url.URL{Scheme: u.Scheme, Host: u.Host, Path: u.Path}).String()
-	if got != p.issuer+"/auth" {
-		t.Errorf("redirect didn't go to %s/auth, got %s", p.issuer+"/auth", u)
-	}
-}
-
 func TestRedirectAuthError(t *testing.T) {
 	errURL := "http://example.com/error"
 	sucURL := "http://example.com/success"

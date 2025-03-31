@@ -10,6 +10,7 @@ import {
 import { useAtomValue, useSetAtom } from 'jotai';
 import { loadable } from 'jotai/utils';
 
+import { authCheck } from './api/common';
 import { getCluster } from './cluster';
 
 import { Loader } from '@components/common';
@@ -84,12 +85,6 @@ function AuthRoute(props: { children: React.ReactNode | JSX.Element; [otherProps
   return <Suspense fallback={<Loader title="Loading..." />}>{children}</Suspense>;
 }
 
-function AuthenticatedComponent(props: { isAuth: boolean }) {
-  // return props.isAuth ? <BasicLayout /> : <Navigate to="/login" />;
-  console.log(props);
-  return <BasicLayout />;
-}
-
 const loadableAtom = loadable(asyncAuthAtom);
 export default function AppContainer() {
   const load = useAtomValue(loadableAtom);
@@ -107,7 +102,17 @@ export default function AppContainer() {
     routes = [
       {
         path: '/',
-        element: <AuthenticatedComponent isAuth={!!load.data} />,
+        element: <BasicLayout />,
+        loader: () => {
+          authCheck().then((isAuthenticated: boolean) => {
+            if (!isAuthenticated) location.href = '/auth/login';
+          });
+          return true;
+        },
+        shouldRevalidate: ({ currentUrl, nextUrl }) => {
+          // url이 변경되면 loader를 호출합니다.
+          return currentUrl.pathname !== nextUrl.pathname;
+        },
         children: r,
       },
       {

@@ -25,7 +25,7 @@ type session struct {
 
 func SessionCookieName() string {
 	podName, _ := os.LookupEnv("POD_NAME")
-	return OpenshiftAccessTokenCookieName + "-" + podName
+	return CocktailSessionTokenCookieName + "-" + podName
 }
 
 func NewSessionStore(authnKey, encryptKey []byte, secureCookies bool, cookiePath string) *CombinedSessionStore {
@@ -61,7 +61,7 @@ func (cs *CombinedSessionStore) AddSession(w http.ResponseWriter, r *http.Reques
 
 func (cs *CombinedSessionStore) getCookieSession(r *http.Request) *session {
 	clientSession, _ := cs.clientStore.Get(r, SessionCookieName())
-	refreshSession, _ := cs.clientStore.Get(r, openshiftRefreshTokenCookieName)
+	refreshSession, _ := cs.clientStore.Get(r, cocktailRefreshTokenCookieName)
 	return &session{
 		sessionToken: clientSession,
 		refreshToken: refreshSession,
@@ -103,7 +103,7 @@ func (cs *CombinedSessionStore) GetSession(w http.ResponseWriter, r *http.Reques
 
 func (cs *CombinedSessionStore) GetCookieRefreshToken(r *http.Request) string {
 	// Get always returns a session, even if empty.
-	clientSession, _ := cs.clientStore.Get(r, openshiftRefreshTokenCookieName)
+	clientSession, _ := cs.clientStore.Get(r, cocktailRefreshTokenCookieName)
 	if refreshToken, ok := clientSession.Values["refresh-token"].(string); ok {
 		return refreshToken
 	}
@@ -112,7 +112,7 @@ func (cs *CombinedSessionStore) GetCookieRefreshToken(r *http.Request) string {
 
 func (cs *CombinedSessionStore) UpdateCookieRefreshToken(w http.ResponseWriter, r *http.Request, refreshToken string) error {
 	// no need to lock here since there shouldn't be any races around the client session
-	clientSession, _ := cs.clientStore.Get(r, openshiftRefreshTokenCookieName)
+	clientSession, _ := cs.clientStore.Get(r, cocktailRefreshTokenCookieName)
 	clientSession.Values["refresh-token"] = refreshToken
 	return clientSession.Save(r, w)
 }
@@ -161,7 +161,7 @@ func (cs *CombinedSessionStore) DeleteSession(w http.ResponseWriter, r *http.Req
 
 	for _, cookie := range r.Cookies() {
 		cookie := cookie
-		if strings.HasPrefix(cookie.Name, OpenshiftAccessTokenCookieName) {
+		if strings.HasPrefix(cookie.Name, CocktailSessionTokenCookieName) {
 			cookie.MaxAge = -1
 			http.SetCookie(w, cookie)
 		}
@@ -176,7 +176,7 @@ func (cs *CombinedSessionStore) DeleteSession(w http.ResponseWriter, r *http.Req
 		cs.serverStore.DeleteBySessionToken(sessionToken.(string))
 	}
 
-	refreshTokenCookie, _ := cs.clientStore.Get(r, openshiftRefreshTokenCookieName)
+	refreshTokenCookie, _ := cs.clientStore.Get(r, cocktailRefreshTokenCookieName)
 	if !refreshTokenCookie.IsNew {
 		// Get always returns a session, only timeout current sessions
 		refreshTokenCookie.Options.MaxAge = -1

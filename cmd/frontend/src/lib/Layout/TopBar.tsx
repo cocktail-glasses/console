@@ -1,43 +1,42 @@
 // import { has } from 'lodash';
-import { useState } from "react";
-import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 
-import { useAtom, useSetAtom } from "jotai";
+import { useAtom, useSetAtom } from 'jotai';
 
-import AppBar from "@mui/material/AppBar";
-import Box from "@mui/material/Box";
-import IconButton from "@mui/material/IconButton";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import ListItemText from "@mui/material/ListItemText";
-import Menu from "@mui/material/Menu";
-import MenuItem from "@mui/material/MenuItem";
-import Toolbar from "@mui/material/Toolbar";
-import { useTheme } from "@mui/material/styles";
-import useMediaQuery from "@mui/material/useMediaQuery";
+import AppBar from '@mui/material/AppBar';
+import Box from '@mui/material/Box';
+import IconButton from '@mui/material/IconButton';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import Toolbar from '@mui/material/Toolbar';
+import { useTheme } from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
 
 // import { setWhetherSidebarOpen } from 'redux/sidebarSlice';
 // import { SettingsButton } from '../../pages/Settings';
-
-import { Icon } from "@iconify/react";
-import { AppLogo } from "@lib/App/AppLogo";
+import { Icon } from '@iconify/react';
+import { AppLogo } from '@lib/App/AppLogo';
 // import { ClusterTitle } from '@components/cluster/Chooser';
 // import ErrorBoundary from '@components/common/ErrorBoundary';
-import { drawerWidth } from "@lib/Layout/Sidebar";
-import MinButton from "@lib/Layout/Sidebar/MinButton";
-import { authAtom, getToken } from "@lib/auth";
-import { useCluster, useClustersConf } from "@lib/k8s";
-import { createRouteURL } from "@lib/router";
-import { sidebarIsOpen } from "@lib/stores";
-import { SettingsButton } from "@pages/Settings";
-import NotificationButton from "@pages/Settings/NotificationButton";
+import { drawerWidth } from '@lib/Layout/Sidebar';
+import MinButton from '@lib/Layout/Sidebar/MinButton';
+import { authAtom, getToken } from '@lib/auth';
+import { useCluster, useClustersConf } from '@lib/k8s';
+import { createRouteURL } from '@lib/router';
+import { sidebarIsOpen } from '@lib/stores';
+import { SettingsButton } from '@pages/Settings';
+import NotificationButton from '@pages/Settings/NotificationButton';
 // import {
 //   AppBarAction,
 //   AppBarActionsProcessor,
 //   DefaultAppBarAction,
 //   HeaderActionType,
 // } from 'redux/actionButtonsSlice';
-import { useTypedSelector } from "redux/reducers/reducers";
+import { useTypedSelector } from 'redux/reducers/reducers';
 
 export interface TopBarProps {}
 
@@ -65,7 +64,7 @@ export default function TopBar() {
   // const dispatch = useDispatch();
   const [isSidebarOpen, setOpen] = useAtom(sidebarIsOpen);
   const setAuthAtom = useSetAtom(authAtom);
-  const isMedium = useMediaQuery("(max-width:960px)");
+  const isMedium = useMediaQuery('(max-width:960px)');
   const isSidebarOpenUserSelected = isSidebarOpen;
   // const isSidebarOpenUserSelected = useTypedSelector(
   //   state => state.sidebar.isSidebarOpenUserSelected
@@ -74,7 +73,6 @@ export default function TopBar() {
 
   const clustersConfig = useClustersConf();
   const cluster = useCluster();
-  const navigate = useNavigate();
   // const { appBarActions, appBarActionsProcessors } = useAppBarActionsProcessed();
 
   function hasToken() {
@@ -82,8 +80,8 @@ export default function TopBar() {
   }
 
   function logout() {
-    setAuthAtom("");
-    navigate("/");
+    setAuthAtom('');
+    fetch('auth/logout', { method: 'POST' });
   }
 
   if (hideAppBar) {
@@ -103,10 +101,7 @@ export default function TopBar() {
         // If they have not made a selection then the window size stays the default for
         //   the size.
 
-        const openSideBar =
-          isMedium && isSidebarOpenUserSelected === undefined
-            ? false
-            : isSidebarOpen;
+        const openSideBar = isMedium && isSidebarOpenUserSelected === undefined ? false : isSidebarOpen;
         setOpen(!openSideBar);
       }}
       cluster={cluster || undefined}
@@ -203,17 +198,14 @@ function PureTopBar({
 }: PureTopBarProps) {
   const { t } = useTranslation();
   const theme = useTheme();
-  const isSmall = useMediaQuery(theme.breakpoints.down("sm"));
+  const isSmall = useMediaQuery(theme.breakpoints.down('sm'));
 
   const navigate = useNavigate();
 
-  const openSideBar = !!(isSidebarOpenUserSelected === undefined
-    ? false
-    : isSidebarOpen);
+  const openSideBar = !!(isSidebarOpenUserSelected === undefined ? false : isSidebarOpen);
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [mobileMoreAnchorEl, setMobileMoreAnchorEl] =
-    useState<null | HTMLElement>(null);
+  const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState<null | HTMLElement>(null);
   // const isClusterContext = !!cluster;
 
   const isMenuOpen = Boolean(anchorEl);
@@ -235,10 +227,10 @@ function PureTopBar({
   const handleMobileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setMobileMoreAnchorEl(event.currentTarget);
   };
-  const userMenuId = "primary-user-menu";
+  const userMenuId = 'primary-user-menu';
   const userMenu = (
     <IconButton
-      aria-label={t("Account of current user")}
+      aria-label={t('Account of current user')}
       aria-controls={userMenuId}
       aria-haspopup="true"
       color="inherit"
@@ -252,16 +244,14 @@ function PureTopBar({
     </IconButton>
   );
   const settingMunu = <SettingsButton onClickExtra={handleMenuClose} />;
-  const notificationMenu = (
-    <NotificationButton onClickExtra={handleMenuClose} />
-  );
+  const notificationMenu = <NotificationButton onClickExtra={handleMenuClose} />;
   const renderUserMenu = (
     <Menu
       anchorEl={anchorEl}
-      anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
       id={userMenuId}
       keepMounted
-      transformOrigin={{ vertical: "top", horizontal: "right" }}
+      transformOrigin={{ vertical: 'top', horizontal: 'right' }}
       open={isMenuOpen}
       onClose={() => {
         handleMenuClose();
@@ -269,7 +259,7 @@ function PureTopBar({
       }}
       style={{ zIndex: 1400 }}
       sx={{
-        "& .MuiMenu-list": {
+        '& .MuiMenu-list': {
           paddingBottom: 0,
         },
       }}
@@ -284,19 +274,19 @@ function PureTopBar({
         <ListItemIcon>
           <Icon icon="mdi:logout" />
         </ListItemIcon>
-        <ListItemText primary={t("Log out")} />
+        <ListItemText primary={t('Log out')} />
       </MenuItem>
       <MenuItem
         component="a"
         onClick={() => {
-          navigate(createRouteURL("settings"));
+          navigate(createRouteURL('settings'));
           handleMenuClose();
         }}
       >
         <ListItemIcon>
           <Icon icon="mdi:cog-box" />
         </ListItemIcon>
-        <ListItemText>{t("translation|General Settings")}</ListItemText>
+        <ListItemText>{t('translation|General Settings')}</ListItemText>
       </MenuItem>
       <MenuItem
         component="a"
@@ -307,12 +297,12 @@ function PureTopBar({
         <ListItemIcon>
           <Icon icon="mdi:information-outline" />
         </ListItemIcon>
-        <ListItemText>{""}</ListItemText>
+        <ListItemText>{''}</ListItemText>
       </MenuItem>
     </Menu>
   );
 
-  const mobileMenuId = "primary-menu-mobile";
+  const mobileMenuId = 'primary-menu-mobile';
   // const allAppBarActionsMobile: AppBarAction[] = [
   //   {
   //     id: DefaultAppBarAction.CLUSTER,
@@ -357,10 +347,10 @@ function PureTopBar({
   const renderMobileMenu = (
     <Menu
       anchorEl={mobileMoreAnchorEl}
-      anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
       id={mobileMenuId}
       keepMounted
-      transformOrigin={{ vertical: "top", horizontal: "right" }}
+      transformOrigin={{ vertical: 'top', horizontal: 'right' }}
       open={isMobileMenuOpen}
       onClose={handleMobileMenuClose}
     >
@@ -419,20 +409,20 @@ function PureTopBar({
         sx={(theme) => ({
           marginLeft: drawerWidth,
           zIndex: theme.zIndex.drawer + 1,
-          "& > *": {
+          '& > *': {
             color: theme.palette.text.primary,
           },
           backgroundColor: theme.palette.background.paper,
         })}
         elevation={1}
         component="nav"
-        aria-label={t("Appbar Tools")}
+        aria-label={t('Appbar Tools')}
         enableColorOnDark
       >
         <Toolbar
           variant="dense"
           sx={{
-            [theme.breakpoints.down("sm")]: {
+            [theme.breakpoints.down('sm')]: {
               paddingLeft: 0,
               paddingRight: 0,
             },
@@ -443,7 +433,7 @@ function PureTopBar({
               <MinButton open={openSideBar} onToggleOpen={onToggleOpen} />
               <Box sx={{ flexGrow: 1 }} />
               <IconButton
-                aria-label={t("show more")}
+                aria-label={t('show more')}
                 aria-controls={mobileMenuId}
                 aria-haspopup="true"
                 onClick={handleMobileMenuOpen}

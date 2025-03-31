@@ -59,8 +59,9 @@ const (
 	alertManagerProxyEndpoint             = "/api/alertmanager"
 	alertManagerTenancyProxyEndpoint      = "/api/alertmanager-tenancy"
 	alertmanagerUserWorkloadProxyEndpoint = "/api/alertmanager-user-workload"
-	authLoginEndpoint                     = "/sso/login"
-	authLogoutEndpoint                    = "/sso/logout"
+	authLoginEndpoint                     = "/auth/login"
+	authLogoutEndpoint                    = "/auth/logout"
+	authCheckEndpoint                     = "/auth/check"
 	catalogdEndpoint                      = "/api/catalogd/"
 	customLogoEndpoint                    = "/custom-logo"
 	devfileEndpoint                       = "/api/devfile/"
@@ -264,6 +265,7 @@ func (s *Server) HTTPHandler() (http.Handler, error) {
 	}
 	handleFunc(authLoginEndpoint, s.Authenticator.LoginFunc)
 	handleFunc(authLogoutEndpoint, allowMethod(http.MethodPost, s.handleLogout))
+	handleFunc(authCheckEndpoint, authHandler(okHandler))
 	handleFunc(AuthLoginCallbackEndpoint, s.Authenticator.CallbackFunc(fn))
 	handle(copyLoginEndpoint, authHandler(s.handleCopyLogin))
 
@@ -600,6 +602,10 @@ func (s *Server) versionHandler(w http.ResponseWriter, r *http.Request) {
 	}{
 		Version: version.Version,
 	})
+}
+
+func okHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
 }
 
 func notFoundHandler(w http.ResponseWriter, r *http.Request) {

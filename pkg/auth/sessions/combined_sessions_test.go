@@ -161,11 +161,11 @@ func TestCombinedSessionStore_AddSession(t *testing.T) {
 					if gotSession["session-token"] != got.sessionToken {
 						t.Errorf("wanted session cookie to be %q, got %q", got.sessionToken, c.Value)
 					}
-				} else if c.Name == openshiftRefreshTokenCookieName {
+				} else if c.Name == cocktailRefreshTokenCookieName {
 					// got refresh token cookie
 					refreshFound = true
 					gotRefresh := make(map[interface{}]interface{})
-					require.NoError(t, securecookie.DecodeMulti(openshiftRefreshTokenCookieName, c.Value, &gotRefresh, cookieCodecs...))
+					require.NoError(t, securecookie.DecodeMulti(cocktailRefreshTokenCookieName, c.Value, &gotRefresh, cookieCodecs...))
 					if gotRefresh["refresh-token"] != tt.wantRefreshToken {
 						t.Errorf("wanted refresh cookie to be %q, got %q", tt.wantRefreshToken, c.Value)
 					}
@@ -458,7 +458,7 @@ func TestCombinedSessionStore_DeleteSession(t *testing.T) {
 			cookieStore: (&testCookieFactory{}).
 				WithCustomCookie("random-cookie", map[interface{}]interface{}{"random-value": "50"}).
 				WithRefreshToken("some-refresh-token"),
-			wantCookieTimeouts:          []string{openshiftRefreshTokenCookieName},
+			wantCookieTimeouts:          []string{cocktailRefreshTokenCookieName},
 			expectedRefreshTokenIndices: 1,
 			expectedSessionTokenIndices: 5,
 		},
@@ -468,23 +468,23 @@ func TestCombinedSessionStore_DeleteSession(t *testing.T) {
 				WithCustomCookie("random-cookie", map[interface{}]interface{}{"random-value": "50"}).
 				WithRefreshToken("some-refresh-token").
 				WithSessionToken("some-session-token"),
-			wantCookieTimeouts:          []string{SessionCookieName(), openshiftRefreshTokenCookieName},
+			wantCookieTimeouts:          []string{SessionCookieName(), cocktailRefreshTokenCookieName},
 			expectedRefreshTokenIndices: 1,
 			expectedSessionTokenIndices: 5,
 		},
 		{
 			name: "session tokens for multiple instances",
 			cookieStore: (&testCookieFactory{}).
-				WithCustomCookie(OpenshiftAccessTokenCookieName+"-pod1", map[interface{}]interface{}{"session-token": "50"}).
-				WithCustomCookie(OpenshiftAccessTokenCookieName+"-pod2", map[interface{}]interface{}{"session-token": "60"}).
-				WithCustomCookie(OpenshiftAccessTokenCookieName+"-pod3", map[interface{}]interface{}{"session-token": "200"}).
+				WithCustomCookie(CocktailSessionTokenCookieName+"-pod1", map[interface{}]interface{}{"session-token": "50"}).
+				WithCustomCookie(CocktailSessionTokenCookieName+"-pod2", map[interface{}]interface{}{"session-token": "60"}).
+				WithCustomCookie(CocktailSessionTokenCookieName+"-pod3", map[interface{}]interface{}{"session-token": "200"}).
 				WithCustomCookie("just-a-cookie", map[interface{}]interface{}{"session-token": "why not"}).
 				WithRefreshToken("some-refresh-token"),
 			wantCookieTimeouts: []string{
-				OpenshiftAccessTokenCookieName + "-pod1",
-				OpenshiftAccessTokenCookieName + "-pod2",
-				OpenshiftAccessTokenCookieName + "-pod3",
-				openshiftRefreshTokenCookieName,
+				CocktailSessionTokenCookieName + "-pod1",
+				CocktailSessionTokenCookieName + "-pod2",
+				CocktailSessionTokenCookieName + "-pod3",
+				cocktailRefreshTokenCookieName,
 			},
 			expectedRefreshTokenIndices: 1,
 			expectedSessionTokenIndices: 5,
@@ -516,7 +516,7 @@ func TestCombinedSessionStore_DeleteSession(t *testing.T) {
 			name:                          "our server session - refresh token set in cookie",
 			serverStore:                   NewServerSessionStore(10),
 			cookieStore:                   (&testCookieFactory{}).WithRefreshToken("refresh-old"),
-			wantCookieTimeouts:            []string{openshiftRefreshTokenCookieName},
+			wantCookieTimeouts:            []string{cocktailRefreshTokenCookieName},
 			wantServerSesionTokenRemoved:  []string{"4"},
 			wantServerRefreshTokenRemoved: "refresh-old",
 			expectedRefreshTokenIndices:   0,
@@ -528,7 +528,7 @@ func TestCombinedSessionStore_DeleteSession(t *testing.T) {
 			cookieStore: (&testCookieFactory{}).
 				WithRefreshToken("refresh-old").
 				WithSessionToken("4"),
-			wantCookieTimeouts:            []string{openshiftRefreshTokenCookieName, SessionCookieName()},
+			wantCookieTimeouts:            []string{cocktailRefreshTokenCookieName, SessionCookieName()},
 			wantServerSesionTokenRemoved:  []string{"4"},
 			wantServerRefreshTokenRemoved: "refresh-old",
 			expectedRefreshTokenIndices:   0,
@@ -540,7 +540,7 @@ func TestCombinedSessionStore_DeleteSession(t *testing.T) {
 			cookieStore: (&testCookieFactory{}).
 				WithRefreshToken("refresh-old").
 				WithSessionToken("2"),
-			wantCookieTimeouts:            []string{openshiftRefreshTokenCookieName, SessionCookieName()},
+			wantCookieTimeouts:            []string{cocktailRefreshTokenCookieName, SessionCookieName()},
 			wantServerSesionTokenRemoved:  []string{"4", "2"},
 			wantServerRefreshTokenRemoved: "refresh-old",
 			expectedRefreshTokenIndices:   0,
@@ -652,7 +652,7 @@ func (f *testCookieFactory) Complete(t *testing.T, req *http.Request) *http.Requ
 			f.cookieCodecs)
 	}
 	if f.refreshToken != nil {
-		attachCookieOrDie(t, req, openshiftRefreshTokenCookieName,
+		attachCookieOrDie(t, req, cocktailRefreshTokenCookieName,
 			map[interface{}]interface{}{
 				"refresh-token": f.refreshToken,
 			},

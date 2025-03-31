@@ -14,8 +14,8 @@ import (
 )
 
 const (
-	OpenshiftAccessTokenCookieName  = "openshift-session-token"
-	openshiftRefreshTokenCookieName = "openshift-refresh-token"
+	CocktailSessionTokenCookieName = "cocktail-session-token"
+	cocktailRefreshTokenCookieName = "cocktail-refresh-token"
 )
 
 var sessionPruningPeriod = 5 * time.Minute

@@ -3,7 +3,7 @@ import { ApiReq } from './api';
 
 export const cocktailApi = {
   auth: {
-    login: <ApiReq>{ path: '/sso/login', method: 'POST' },
+    login: <ApiReq>{ path: '/auth/callback', method: 'POST' },
   },
   cluster: {
     conditions: <ApiReq>{ path: '/api/cluster/v2/conditions', method: 'GET' },
