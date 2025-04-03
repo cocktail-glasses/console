@@ -296,7 +296,22 @@ func (s *Server) HTTPHandler() (http.Handler, error) {
 
 	handle(k8sProxyEndpoint, http.StripPrefix(
 		proxy.SingleJoiningSlash(s.BaseURL.Path, k8sProxyEndpoint),
-		authHandler(k8sProxy.ServeHTTP),
+		authHandlerWithUser(func(user *auth.User, w http.ResponseWriter, r *http.Request) {
+			// TODO 현재 전달할 프록시 서버가 없으므로, User 정보는 인증용으로 사용하고, 토큰 파일을 읽어서 사용한다.
+			filePath := "token"
+			if s.K8sMode == "in-cluster" {
+				filePath = s.InternalProxiedK8SClientConfig.BearerTokenFile
+			}
+			tokenByte, err := os.ReadFile(filePath)
+			if err != nil {
+				// 토큰이 없는 경우 인증 실패
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
+
+			r.Header.Set("Authorization", fmt.Sprintf("bearer %s", tokenByte))
+			k8sProxy.ServeHTTP(w, r)
+		}),
 	))
 
 	/*terminalProxy := terminal.NewProxy(
