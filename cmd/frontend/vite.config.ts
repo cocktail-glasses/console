@@ -11,6 +11,8 @@ import { nodePolyfills } from 'vite-plugin-node-polyfills';
 import svgr from 'vite-plugin-svgr';
 import tsconfigPaths from 'vite-tsconfig-paths';
 
+const backendUrl = 'http://127.0.0.1:8099';
+
 export default defineConfig({
   define: {
     global: 'globalThis',
@@ -23,17 +25,16 @@ export default defineConfig({
     open: true,
     proxy: {
       '/k8s': {
-        target: 'http://127.0.0.1:8001',
+        target: backendUrl,
         changeOrigin: true,
         ws: true,
-        rewrite: (path) => path.replace(/^\/k8s/, ''),
       },
       '/api': {
-        target: 'https://blue-dragon.acloud.run',
+        target: backendUrl,
         changeOrigin: true,
       },
-      '/sso': {
-        target: 'https://blue-dragon.acloud.run',
+      '/auth': {
+        target: backendUrl,
         changeOrigin: true,
       },
     },

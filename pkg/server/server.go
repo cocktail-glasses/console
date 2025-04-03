@@ -45,6 +45,7 @@ const (
 const (
 	ssoEndpoint                           = "/sso"
 	apiServerEndpoint                     = "/api/"
+	cocktailUserInfoEndpoint              = "/api/auth/login"
 	builderAPIEndpoint                    = "/builder/"
 	monitoringEndpoint                    = "/monitoring-api/"
 	clusterAPIEndpoint                    = "/cluster-api/"
@@ -263,7 +264,11 @@ func (s *Server) HTTPHandler() (http.Handler, error) {
 	authHandlerWithUser := func(h HandlerWithUser) http.HandlerFunc {
 		return authMiddlewareWithUser(authenticator, s.CSRFVerifier, h)
 	}
-	handleFunc(authLoginEndpoint, s.Authenticator.LoginFunc)
+	handleFunc(authLoginEndpoint, func(w http.ResponseWriter, r *http.Request) {
+		// 프론트 HMR을 사용하면 인덱스 핸들러를 타지 않기 때문에, 공통으로 사용할 수 있는 로그인 API에 CSRF 쿠키 설정 추가
+		s.CSRFVerifier.SetCSRFCookie(s.BaseURL.Path, w)
+		s.Authenticator.LoginFunc(w, r)
+	})
 	handleFunc(authLogoutEndpoint, allowMethod(http.MethodPost, s.handleLogout))
 	handleFunc(authCheckEndpoint, authHandler(okHandler))
 	handleFunc(AuthLoginCallbackEndpoint, s.Authenticator.CallbackFunc(fn))
@@ -344,8 +349,9 @@ func (s *Server) HTTPHandler() (http.Handler, error) {
 	apiServerProxy := proxy.NewProxy(s.APIServerProxyConfig)
 	handle(apiServerEndpoint, http.StripPrefix(
 		s.BaseURL.Path,
-		authHandler(apiServerProxy.ServeHTTP)),
-	)
+		authHandlerWithUser(cocktailLoginMiddleware(apiServerProxy.ServeHTTP)),
+		//authHandler(apiServerProxy.ServeHTTP)),
+	))
 	handle("/terminal/", http.StripPrefix(
 		s.BaseURL.Path,
 		authHandler(apiServerProxy.ServeHTTP)),

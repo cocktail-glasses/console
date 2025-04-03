@@ -168,7 +168,7 @@ func (a *CocktailAuthenticator) CallbackFunc(fn func(loginInfo sessions.LoginJSO
 			content["result"].(map[string]interface{})["loginPage"] = loginPage
 
 			// Encrypt the response body if necessary
-			rs, err := EncryptAES256CBC(toJSON(content["result"]), "cocktail-glasses_encryption_data", "cocktail-glasses")
+			rs, err := EncryptAES256CBC(ToJSON(content["result"]), "cocktail-glasses_encryption_data", "cocktail-glasses")
 			if err != nil {
 				return
 			}

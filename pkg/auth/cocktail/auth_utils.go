@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-func toJSON(data interface{}) string {
+func ToJSON(data interface{}) string {
 	bytes, _ := json.Marshal(data)
 	return string(bytes)
 }

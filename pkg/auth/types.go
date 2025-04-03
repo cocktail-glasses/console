@@ -3,6 +3,7 @@ package auth
 import (
 	"github.com/cocktailcloud/console/pkg/auth/sessions"
 	"net/http"
+	"strings"
 )
 
 type Authenticator interface {
@@ -35,4 +36,14 @@ type User struct {
 	UserSeq       string `json:"userSeq"`
 	AccountSeq    string `json:"accountSeq"`
 	AccountCode   string `json:"accountCode"`
+}
+
+const delimiter = ";"
+
+func JoinUserRole(groups []string) string {
+	return strings.Join(groups, delimiter)
+}
+
+func (u *User) SplitUserRole() []string {
+	return strings.Split(u.UserRole, delimiter)
 }

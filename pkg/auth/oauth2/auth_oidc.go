@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 
@@ -81,7 +82,9 @@ func (o *oidcAuth) refreshSession(ctx context.Context, w http.ResponseWriter, r 
 
 	tokenRefreshHandling := auth.TokenRefreshUnknown
 	defer func() {
-		o.metrics.TokenRefreshRequest(tokenRefreshHandling)
+		if o.metrics != nil {
+			o.metrics.TokenRefreshRequest(tokenRefreshHandling)
+		}
 	}()
 
 	session, err := o.sessions.GetSession(w, r)
@@ -150,11 +153,21 @@ func (o *oidcAuth) Authenticate(w http.ResponseWriter, r *http.Request) (*auth.U
 		return nil, err
 	}
 
+	accountCode := o.parseAccountCode(o.issuerURL)
+
 	return &auth.User{
-		ID:       ls.UserID(),
-		Username: ls.Username(),
-		Token:    ls.AccessToken(),
+		ID:          ls.UserID(),
+		Username:    ls.PreferredUsername(),
+		Token:       ls.AccessToken(),
+		AccountCode: accountCode,
+		UserRole:    auth.JoinUserRole(ls.Groups()),
 	}, nil
+}
+
+func (o *oidcAuth) parseAccountCode(issuerUrl string) string {
+	tokens := strings.Split(issuerUrl, "/")
+
+	return tokens[len(tokens)-1]
 }
 
 func (o *oidcAuth) GetSpecialURLs() auth.SpecialAuthURLs {

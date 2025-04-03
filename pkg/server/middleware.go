@@ -1,7 +1,9 @@
 package server
 
 import (
+	"bytes"
 	"compress/gzip"
+	"encoding/json"
 	"fmt"
 	"io"
 	"k8s.io/klog/v2"
@@ -53,6 +55,52 @@ func authMiddlewareWithUser(authenticator auth.Authenticator, csrfVerifier *csrf
 			}
 		}),
 	)
+}
+
+type CocktailLoginBody struct {
+	UserName  string `json:"username"`
+	AccountId string `json:"accountId"`
+	Role      string `json:"role"`
+}
+
+func cocktailLoginMiddleware(h http.HandlerFunc) HandlerWithUser {
+	return func(user *auth.User, w http.ResponseWriter, r *http.Request) {
+		if r.RequestURI != cocktailUserInfoEndpoint {
+			h(w, r)
+		}
+
+		availableRoles := []string{"SYSTEM", "SYSUSER", "SYSDEMO", "DEVOPS"}
+
+		userRole := ""
+		roles := user.SplitUserRole()
+		for _, availableRole := range availableRoles {
+			for _, role := range roles {
+				if role == fmt.Sprintf("%s-%s", "cocktail-console", strings.ToLower(availableRole)) {
+					userRole = availableRole
+					break
+				}
+			}
+		}
+
+		// cocktail api-server로 전달할 Body 데이터 생성
+		body := &CocktailLoginBody{
+			UserName:  user.Username,
+			AccountId: user.AccountCode,
+			Role:      userRole,
+		}
+
+		// Send the login request
+		bodyJson, err := json.Marshal(body)
+		if err != nil {
+			http.Error(w, fmt.Sprintf("failed to JSON-marshal the response: %v", err), http.StatusInternalServerError)
+			return
+		}
+
+		r.Body = io.NopCloser(bytes.NewReader(bodyJson))
+		r.ContentLength = int64(len(bodyJson))
+
+		h(w, r)
+	}
 }
 
 func allowMethods(methods []string, h http.HandlerFunc) http.HandlerFunc {

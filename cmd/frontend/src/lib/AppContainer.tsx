@@ -1,4 +1,4 @@
-import { Suspense } from 'react';
+import { Suspense, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   createBrowserRouter,
@@ -10,18 +10,20 @@ import {
 import { useAtomValue, useSetAtom } from 'jotai';
 import { loadable } from 'jotai/utils';
 
+import { apiRequest } from './api/api';
 import { authCheck } from './api/common';
 import { getCluster } from './cluster';
+import { decryptAESCBC256 } from './util';
 
 import { Loader } from '@components/common';
 import BasicLayout from '@lib/Layout/BasicLayout';
-import { asyncAuthAtom } from '@lib/auth';
+import { asyncAuthAtom, authAtom } from '@lib/auth';
 import { MenuType, Menus, Groups } from '@lib/menu';
 import { Routes, createRouteIndexURL, getRoutePathPattern } from '@lib/routes';
 import { sidebarGroupId, sidebarGroups, sidebarMenus, sidebarMenuSelected, sidebarSub } from '@lib/stores';
 import Login from '@pages/Auth/Login';
 import ErrorComponent from '@pages/Common/ErrorPage';
-import { SnackbarProvider } from 'notistack';
+import { enqueueSnackbar, SnackbarProvider } from 'notistack';
 
 // import { UriPrefix } from './api/constants';
 
@@ -97,6 +99,27 @@ export default function AppContainer() {
       element: <Loader title="Loading..." />,
     },
   ];
+
+  const setAuthAtom = useSetAtom(authAtom);
+  useEffect(() => {
+    if (load.state != 'hasData') return;
+
+    if (!load.data) {
+      apiRequest({ method: 'post', host: '', path: 'api/auth/login' })
+        .then((res) => {
+          setAuthAtom(res);
+          // decryptAESCBC256(res, 'cocktail-glasses_encryption_data', 'cocktail-glasses').then((e) => {
+          // const user = JSON.parse(e);
+          // setAuthAtom(user);
+          // });
+        })
+        .catch((e) => {
+          enqueueSnackbar(e, { variant: 'error' });
+          console.log('login catch', e);
+        });
+    }
+  }, [load.state]);
+
   if (load.state == 'hasData') {
     const { r, g, m } = make(t);
     routes = [

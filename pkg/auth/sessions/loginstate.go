@@ -21,15 +21,17 @@ type IDTokenVerifier func(context.Context, string) (*oidc.IDToken, error)
 // and should be safe to send as a non-http-only cookie.
 type LoginState struct {
 	// IMPORTANT: if adding any ref type, change the DeepCopy() implementation
-	userID       string
-	name         string
-	email        string
-	exp          time.Time
-	rotateAt     time.Time // 80% of token's lifetime
-	now          nowFunc
-	sessionToken string
-	rawToken     string
-	refreshToken string
+	userID            string
+	name              string
+	email             string
+	preferredUsername string
+	groups            []string
+	exp               time.Time
+	rotateAt          time.Time // 80% of token's lifetime
+	now               nowFunc
+	sessionToken      string
+	rawToken          string
+	refreshToken      string
 }
 
 type LoginJSON struct {
@@ -40,10 +42,12 @@ type LoginJSON struct {
 }
 
 type interestingClaims struct {
-	Subject string   `json:"sub"`
-	Expiry  jsonTime `json:"exp"`
-	Email   string   `json:"email"`
-	Name    string   `json:"name"`
+	Subject           string   `json:"sub"`
+	Expiry            jsonTime `json:"exp"`
+	Email             string   `json:"email"`
+	Name              string   `json:"name"`
+	PreferredUsername string   `json:"preferred_username"`
+	Groups            []string `json:"groups"`
 }
 
 // NewRawLoginState creates a new login state in cases where the access token
@@ -71,13 +75,15 @@ func newLoginState(tokenVerifier IDTokenVerifier, token *oauth2.Token) (*LoginSt
 	}
 
 	ls := &LoginState{
-		now:          time.Now,
-		sessionToken: RandomString(256),
-		rawToken:     rawIDToken,
-		refreshToken: token.RefreshToken,
-		userID:       tokenClaims.Subject,
-		email:        tokenClaims.Email,
-		name:         tokenClaims.Name,
+		now:               time.Now,
+		sessionToken:      RandomString(256),
+		rawToken:          rawIDToken,
+		refreshToken:      token.RefreshToken,
+		userID:            tokenClaims.Subject,
+		email:             tokenClaims.Email,
+		name:              tokenClaims.Name,
+		preferredUsername: tokenClaims.PreferredUsername,
+		groups:            tokenClaims.Groups,
 	}
 	ls.updateExpiry(tokenClaims.Expiry)
 
@@ -90,6 +96,14 @@ func (ls *LoginState) UserID() string {
 
 func (ls *LoginState) Username() string {
 	return ls.name
+}
+
+func (ls *LoginState) PreferredUsername() string {
+	return ls.preferredUsername
+}
+
+func (ls *LoginState) Groups() []string {
+	return ls.groups
 }
 
 func (ls *LoginState) UpdateTokens(verifier IDTokenVerifier, tokenResponse *oauth2.Token) error {
