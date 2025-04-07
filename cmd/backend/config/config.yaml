@@ -1,0 +1,14 @@
+apiVersion: console.openshift.io/v1
+kind: ConsoleConfig
+servingInfo:
+  bindAddress: 'http://0.0.0.0:8080'
+clusterInfo:
+  consoleBaseAddress: 'http://192.168.88.48:30926'
+auth:
+  authType: 'oidc'
+  oidcIssuer: 'https://keycloak-auth.cocktailcloud.io/realms/acorn'
+  clientID: 'cocktail-console'
+  clientSecretFile: '/data/user-auth-oidc-client-secret'
+session:
+  cookieAuthenticationKeyFile: '/data/auth-key'
+  cookieEncryptionKeyFile: '/data/enc-key'
