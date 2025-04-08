@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/cocktailcloud/console/pkg/auth"
-	"github.com/cocktailcloud/console/pkg/auth/oauth2"
 	"github.com/cocktailcloud/console/pkg/auth/sessions"
 	"github.com/cocktailcloud/console/pkg/serverutils"
 	"io/ioutil"
@@ -39,22 +38,8 @@ type CocktailAuthenticator struct {
 }
 
 type Config struct {
-	AuthSource oauth2.AuthSource
+	IssuerURL string
 
-	IssuerURL              string
-	LogoutRedirectOverride string // overrides the OIDC provider's front-channel logout URL
-	IssuerCA               string
-	RedirectURL            string
-	ClientID               string
-	ClientSecret           string
-	Scope                  []string
-
-	// K8sCA is required for OpenShift OAuth metadata discovery. This is the CA
-	// used to talk to the master, which might be different than the issuer CA.
-	K8sCA string
-
-	SuccessURL string
-	ErrorURL   string
 	// cookiePath is an abstraction leak. (unfortunately, a necessary one.)
 	CookiePath              string
 	SecureCookies           bool

@@ -69,6 +69,15 @@ func cocktailLoginMiddleware(h http.HandlerFunc) HandlerWithUser {
 			h(w, r)
 		}
 
+		// 인증은 됐지만 사용자 정보가 없는 경우 하드코딩 for authMode: disabled
+		if user.AccountCode == "" {
+			user = &auth.User{
+				Username:    "yunwansu",
+				AccountCode: "ACORN",
+				UserRole:    auth.JoinUserRole([]string{"cocktail-console-system"}),
+			}
+		}
+
 		availableRoles := []string{"SYSTEM", "SYSUSER", "SYSDEMO", "DEVOPS"}
 
 		userRole := ""

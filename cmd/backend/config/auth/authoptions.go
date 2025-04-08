@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"github.com/cocktailcloud/console/pkg/auth/cocktail"
 	"github.com/cocktailcloud/console/pkg/auth/oauth2"
 	"net/url"
 	"os"
@@ -258,7 +259,13 @@ func (c *completedOptions) getAuthenticator(
 	}
 
 	if c.AuthType == flagvalues.AuthTypeCocktail {
-
+		return cocktail.NewCocktailAuthenticator(&cocktail.Config{
+			IssuerURL:               c.IssuerURL.String(),
+			CookiePath:              "/",
+			SecureCookies:           useSecureCookies,
+			CookieEncryptionKey:     sessionConfig.CookieEncryptionKey,
+			CookieAuthenticationKey: sessionConfig.CookieAuthenticationKey,
+		})
 	}
 
 	flags.FatalIfFailed(flags.ValidateFlagNotEmpty("base-address", baseURL.String()))

@@ -50,7 +50,7 @@ func main() {
 	// Define commandline / env / config options
 	fs.String("config", "", "The YAML config file.")
 
-	fListen := fs.String("listen", "http://0.0.0.0:80", "")
+	fListen := fs.String("listen", "http://0.0.0.0:8099", "")
 
 	fBaseAddress := fs.String("base-address", "", "Format: <http | https>://domainOrIPAddress[:port]. Example: https://cocktailcloud.example.com.")
 	fBasePath := fs.String("base-path", "/", "")

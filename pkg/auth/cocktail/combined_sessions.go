@@ -60,7 +60,7 @@ func (cs *CombinedSessionStore) AddSession(w http.ResponseWriter, r *http.Reques
 	}*/
 	gob.Register(user)
 	clientSession.sessionToken.Values["user"] = user
-	paths := []string{"/api", "/builder", "/monitoring-api", "/cluster-api", "/alarm-api", "/metric-api", "/backup-api", "/ws", "/terminal", "/apis/package", "/apm", "/sm,", "/v1alpha1", "/k8s"}
+	paths := []string{"/", "/api", "/builder", "/monitoring-api", "/cluster-api", "/alarm-api", "/metric-api", "/backup-api", "/ws", "/terminal", "/apis/package", "/apm", "/sm,", "/v1alpha1", "/k8s"}
 	var errs []error
 	for _, path := range paths {
 		clientSession.sessionToken.Options.Path = path
@@ -110,10 +110,11 @@ func (cs *CombinedSessionStore) GetSession(w http.ResponseWriter, r *http.Reques
 	clientSession := cs.getCookieSession(r)
 
 	val := clientSession.sessionToken.Values["user"]
-	if val == nil {
-		fmt.Fprintln(w, "No user information in session")
-		//return
-	}
+	// 인증 실패시 401을 반환해야하므로 w에 값 넣기 제거
+	//if val == nil {
+	//fmt.Fprintln(w, "No user information in session")
+	//return
+	//}
 
 	user, ok := val.(*auth.User)
 	if !ok {
