@@ -105,7 +105,7 @@ export default function AppContainer() {
     if (load.state != 'hasData') return;
 
     if (!load.data) {
-      apiRequest({ method: 'post', host: '', path: 'api/auth/login' })
+      apiRequest({ method: 'post', host: '', path: '/api/auth/login' })
         .then((res) => {
           setAuthAtom(res);
           // decryptAESCBC256(res, 'cocktail-glasses_encryption_data', 'cocktail-glasses').then((e) => {
