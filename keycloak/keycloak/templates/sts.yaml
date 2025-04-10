@@ -1,0 +1,166 @@
+{{- $acornConfig := lookup "v1" "ConfigMap" "cocktail-auth" "acornstack" }}
+{{- $host := index $acornConfig.data "root-host" }}
+
+{{- $existingPassword := lookup "v1" "Secret" "acorn-keycloak" (printf "%s-credentials" .Release.Name) }}
+{{- $password := randAlphaNum 16 -}}
+{{- if $existingPassword }}
+  {{- $password = index $existingPassword.data "password" | b64dec }}
+{{- end }}
+
+{{- $imageRegistry := index $acornConfig.data "image-registry" }}
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ .Release.Name }}-credentials
+stringData:
+  username: admin
+  password: {{ $password }}
+
+---
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: keycloak
+  labels:
+    app: keycloak-ha
+spec:
+  selector:
+    matchLabels:
+      app: keycloak-ha
+  replicas: 2
+  serviceName: keycloak-headless
+  podManagementPolicy: Parallel
+  updateStrategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: keycloak-ha
+    spec:
+      restartPolicy: Always
+      securityContext:
+        fsGroup: 1000
+      initContainers:
+        - args:
+            - -c
+            - cp -rf /temp/* /opt/keycloak/providers;
+          command:
+            - sh
+          image: "{{ $imageRegistry }}/{{ .Values.themeImage }}"
+          imagePullPolicy: Always
+          name: copy
+          resources:
+            limits:
+              cpu: 20m
+              memory: 50Mi
+            requests:
+              cpu: 20m
+              memory: 50Mi
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+            - mountPath: /opt/keycloak/providers
+              name: keycloak-providers
+              subPath: data
+      containers:
+        - name: keycloak
+          image: "{{ $imageRegistry }}/{{ .Values.image }}"
+          imagePullPolicy: Always
+         {{- if or .Values.resources.requests .Values.resources.limits }}
+          resources:
+            {{- if .Values.resources.limits }}
+            limits:
+              {{- toYaml .Values.resources.limits | nindent 14 }}
+            {{- end }}
+            {{- if .Values.resources.requests }}
+            requests:
+              {{- toYaml .Values.resources.requests | nindent 14 }}
+            {{- end }}
+          {{- end }}
+          volumeMounts:
+            - mountPath: /opt/keycloak/providers
+              name: keycloak-providers
+              subPath: data
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            capabilities:
+              drop:
+                - ALL
+                - CAP_NET_RAW
+            readOnlyRootFilesystem: false
+            allowPrivilegeEscalation: false
+          args:
+            - start
+          env:
+            - name: KC_METRICS_ENABLED
+              value: "true"
+            - name: KC_LOG_LEVEL
+              value: "info"
+            - name: KC_CACHE
+              value: "ispn"
+            - name: KC_CACHE_STACK
+              value: "kubernetes"
+            - name: KC_PROXY_HEADERS
+              value: "xforwarded"
+            - name: KC_HTTP_ENABLED
+              value: "true"
+            - name: KEYCLOAK_ADMIN
+              value: admin
+            - name: KEYCLOAK_ADMIN_PASSWORD
+              value: {{ $password }}
+            - name: KC_DB
+              value: "postgres"
+            - name: KC_DB_URL_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-db-app
+                  key: "host"
+            - name: KC_DB_URL_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-db-app
+                  key: "port"
+            - name: KC_DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-db-app
+                  key: "username"
+            - name: KC_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-db-app
+                  key: "password"
+            - name: KC_DB_URL_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-db-app
+                  key: "dbname"
+            - name: KC_FEATURES
+              value: "docker"
+            - name: KC_HOSTNAME
+              value: https://keycloak-{{ .Values.ingress.prefix }}.{{ $host }}
+            - name: JAVA_OPTS_APPEND
+              value: "-Djgroups.dns.query=keycloak-headless.cocktail-auth.svc.cluster.local"
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 120
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /realms/master
+              port: http
+            initialDelaySeconds: 60
+            timeoutSeconds: 1
+      terminationGracePeriodSeconds: 60
+      volumes:
+        - emptyDir: {}
+          name: keycloak-providers

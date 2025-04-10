@@ -1,0 +1,20 @@
+{{- $acornConfig := lookup "v1" "ConfigMap" "cocktail-auth" "acornstack" }}
+{{- $imageRegistry := index $acornConfig.data "image-registry" }}
+
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: keycloak-db
+spec:
+  instances: {{ .Values.db.instances }}
+  imageName: "{{ $imageRegistry }}/{{ .Values.db.imageName }}"
+  storage:
+    size: {{ .Values.db.storage.size }}
+    storageClass: {{ .Values.db.storage.storageClass }}
+
+  monitoring:
+    enablePodMonitor: true
+
+  inheritedMetadata:
+    labels:
+      policy.acornstack.io/allow-to-apiserver: "true"
