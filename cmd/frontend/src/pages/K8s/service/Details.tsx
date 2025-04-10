@@ -16,8 +16,9 @@ import { InlineIcon } from '@iconify/react';
 import Endpoints from '@lib/k8s/endpoints';
 import Service from '@lib/k8s/service';
 
-export default function ServiceDetails() {
-  const { namespace, name } = useParams<{ namespace: string; name: string }>();
+export default function ServiceDetails(props: { name?: string; namespace?: string }) {
+  const params = useParams<{ namespace: string; name: string }>();
+  const { name = params.name, namespace = params.namespace } = props;
   const { t } = useTranslation(['glossary', 'translation']);
 
   const [endpoints, endpointsError] = Endpoints.useList({ namespace });
@@ -73,12 +74,12 @@ export default function ServiceDetails() {
                     {
                       label: t('Ports'),
                       getter: ({ port, targetPort }) => (
-                        <React.Fragment>
+                        <>
                           <ValueLabel>{port}</ValueLabel>
                           <InlineIcon icon="mdi:chevron-right" />
                           <ValueLabel>{targetPort}</ValueLabel>
                           <PortForward containerPort={targetPort} resource={item} />
-                        </React.Fragment>
+                        </>
                       ),
                     },
                   ]}

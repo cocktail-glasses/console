@@ -49,7 +49,8 @@ export interface SimpleTableProps {
         [dataProp: string]: any;
         [dataProp: number]: any;
       }[]
-    | null;
+    | null
+    | undefined;
   filterFunction?: ((...args: any[]) => boolean) | null;
   rowsPerPage?: number[];
   emptyMessage?: string;
@@ -276,7 +277,7 @@ export default function SimpleTable(props: SimpleTableProps) {
   }
 
   if (displayData === null) {
-    if (!!errorMessage) {
+    if (errorMessage) {
       return <Empty color="error">{errorMessage}</Empty>;
     }
 
