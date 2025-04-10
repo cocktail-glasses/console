@@ -204,6 +204,14 @@ export const useEndpoints = (
   const { data: endpoint, error } = useQuery<KubeObjectEndpoint, ApiError>({
     enabled: endpoints.length > 1,
     queryKey: ['endpoints', endpoints],
+    retry: (failureCount, error) => {
+      // 404면 재시도 안 함
+      if (error instanceof ApiError && error.status == 404) {
+        return false;
+      }
+
+      return failureCount < 3;
+    },
     queryFn: () => getWorkingEndpoint(endpoints, cluster!, namespace),
   });
   if (endpoints.length === 1) return { endpoint: endpoints[0], error: null };

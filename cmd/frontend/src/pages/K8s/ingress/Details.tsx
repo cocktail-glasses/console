@@ -17,7 +17,7 @@ import Ingress, { IngressBackend, IngressRule } from '@lib/k8s/ingress';
 /**
  * Is https used in the ingress item
  */
-function isHttpsUsed(item: Ingress, url: String) {
+function isHttpsUsed(item: Ingress, url: string) {
   const hostList: string[] = item.jsonData.spec?.tls?.map(({ ...hosts }) => `${hosts.hosts}`);
   const isHttps = hostList.includes(`${url}`);
 
@@ -125,10 +125,10 @@ export function BackendFormat({ backend }: BackendFormatProps) {
   for (const backendItem of backend) {
     let currentBackend: string = '';
 
-    if (!!backendItem.resource) {
+    if (backendItem.resource) {
       currentBackend = backendItem.resource.kind + ':' + backendItem.resource.name;
     }
-    if (!!backendItem.service) {
+    if (backendItem.service) {
       currentBackend =
         backendItem.service.name +
         ':' +
@@ -154,25 +154,26 @@ export function BackendFormat({ backend }: BackendFormatProps) {
   );
 }
 
-export default function IngressDetails() {
-  const { namespace, name } = useParams<{ namespace: string; name: string }>();
+export default function IngressDetails(props: { name?: string; namespace?: string }) {
+  const params = useParams<{ namespace: string; name: string }>();
+  const { name = params.name, namespace = params.namespace } = props;
   const { t } = useTranslation(['glossary', 'translation']);
   const storeRowsPerPageOptions = useSettings('tableRowsPerPageOptions');
 
   function getPorts(item: Ingress) {
     const ports: string[] = [];
     item.getRules().forEach((rule) => {
-      rule.http.paths.forEach((path) => {
-        if (!!path.backend.service) {
+      rule.http?.paths.forEach((path) => {
+        if (path.backend.service) {
           const portNumber = path.backend.service.port.number ?? path.backend.service.port.name ?? '';
           ports.push(portNumber.toString());
-        } else if (!!path.backend.resource) {
+        } else if (path.backend.resource) {
           ports.push(path.backend.resource.kind + ':' + path.backend.resource.name);
         }
       });
     });
 
-    if (!!item.spec?.tls) {
+    if (item.spec?.tls) {
       ports.push('443');
     }
 

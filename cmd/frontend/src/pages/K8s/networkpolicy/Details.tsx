@@ -13,9 +13,10 @@ import NetworkPolicy, {
   NetworkPolicyPort,
 } from '@lib/k8s/networkpolicy';
 
-export default function NetworkPolicyDetails() {
+export default function NetworkPolicyDetails(props: { name?: string; namespace?: string }) {
+  const params = useParams<{ namespace: string; name: string }>();
+  const { name = params.name, namespace = params.namespace } = props;
   const { t } = useTranslation(['glossary', 'translation']);
-  const { name, namespace } = useParams<{ name: string; namespace: string }>();
 
   function prepareMatchLabelsAndExpressions(
     matchLabels: LabelSelector['matchLabels'],
