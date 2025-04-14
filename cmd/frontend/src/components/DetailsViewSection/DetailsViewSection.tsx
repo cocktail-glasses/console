@@ -1,4 +1,4 @@
-import { isValidElement, useEffect, useMemo } from 'react';
+import { isValidElement, ReactElement, ReactNode, useEffect, useMemo } from 'react';
 
 import ErrorBoundary from '@components/common/ErrorBoundary';
 import { KubeObject } from '@lib/k8s/cluster';
@@ -8,11 +8,7 @@ import { useTypedSelector } from 'redux/reducers/reducers';
 export interface DetailsViewSectionProps {
   resource: KubeObject;
 }
-export type DetailsViewSectionType =
-  | ((...args: any[]) => JSX.Element | null | React.ReactNode)
-  | null
-  | React.ReactElement
-  | React.ReactNode;
+export type DetailsViewSectionType = ((...args: any[]) => ReactNode) | null | ReactElement | ReactNode;
 
 /**
  * View components registered by plugins in the different Details views.

@@ -1,76 +1,94 @@
 import { Suspense, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  createBrowserRouter,
-  RouterProvider,
-  /*Navigate,*/
-  RouteObject,
-} from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, RouteObject } from 'react-router-dom';
 
 import { useAtomValue, useSetAtom } from 'jotai';
 import { loadable } from 'jotai/utils';
 
+import { groupBy, has, map, size } from 'lodash';
+
 import { apiRequest } from './api/api';
 import { authCheck } from './api/common';
 import { getCluster } from './cluster';
-import { decryptAESCBC256 } from './util';
 
 import { Loader } from '@components/common';
 import BasicLayout from '@lib/Layout/BasicLayout';
 import { asyncAuthAtom, authAtom } from '@lib/auth';
 import { MenuType, Menus, Groups } from '@lib/menu';
-import { Routes, createRouteIndexURL, getRoutePathPattern } from '@lib/routes';
+import { Route, getRoutes, RoutesGroup, createRouteURL, getRoute, getRoutePathPattern } from '@lib/router';
 import { sidebarGroupId, sidebarGroups, sidebarMenus, sidebarMenuSelected, sidebarSub } from '@lib/stores';
 import Login from '@pages/Auth/Login';
 import ErrorComponent from '@pages/Common/ErrorPage';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
 
-// import { UriPrefix } from './api/constants';
+type Translator = (...args: any[]) => any;
 
-// TODO: ccambo, ESLint 오류로 변경
-// Don't use `Function` as a type. The `Function` type accepts any function-like value.
-//function make(t: Function) {
-function make(t: (...args: any[]) => any) {
-  const menus: { [key: string]: any } = {};
-  const routeIdMenu: { [key: string]: any } = {};
+// makeMenuList menu 데이터간의 root, sub 계층 구조를 만들고 root 메뉴 목록으로 반환함
+const makeMenuList = (t: Translator) => {
+  const menusByGroup = groupBy(Menus, (menu: MenuType) => `${menu.group}_${menu.parent ?? menu.id}`);
 
-  Menus.forEach((m: MenuType) => {
-    if (!m.parent) {
-      const sub = Menus.filter((e) => e.group === m.group && m.id === e.parent).map((e) => ({
-        ...e,
-        url: createRouteIndexURL(e.route),
-        label: t(e.label),
-        isOnlyTab: false,
-      }));
-      if (!sub.find((s) => s.route === m.route) && sub.length > 0) {
-        sub.unshift({ ...m, url: createRouteIndexURL(m.route), isOnlyTab: true });
-      }
-      menus[m.id] = { ...m, label: t(m.label), sub, url: createRouteIndexURL(m.route) };
-    }
-    routeIdMenu[m.route] = m;
+  const makeSubMenu = (subMenu: MenuType) => ({
+    ...subMenu,
+    url: createRouteURL(subMenu.route),
+    label: t(subMenu.label),
+    isOnlyTab: false,
   });
 
-  const clusterName = getCluster();
-  const routes: RouteObject[] = [];
-  Routes.forEach((e) => {
-    const menu = routeIdMenu[e.id];
-    const p = menus[menu.parent || menu.id];
-    e.routes.forEach((r) => {
-      // const Element = lazy(() => import(`../pages/${r.page}`))
-      const Element = r.element;
-      const route: RouteObject = {
-        path: getRoutePathPattern(r, e, clusterName),
-        element: (
-          <AuthRoute menu={menu} sub={p.sub}>
-            <Element {...r.props} />
-          </AuthRoute>
-        ),
-      };
-      routes.push(route);
+  const makeRootMenu = (rootMenu: MenuType, sub: Array<ReturnType<typeof makeSubMenu>>) => {
+    const isNotExistRootRouteInSub = sub.length > 0 && !sub.find((s) => s.route === rootMenu.route);
+
+    return {
+      ...rootMenu,
+      url: createRouteURL(rootMenu.route),
+      label: t(rootMenu.label),
+      sub: isNotExistRootRouteInSub ? [{ ...makeSubMenu(rootMenu), isOnlyTab: true }].concat(sub) : sub,
+    };
+  };
+
+  return Object.values(menusByGroup)
+    .filter((menus: MenuType[]) => {
+      const { false: rootMenu } = groupBy(menus, (menu: MenuType) => has(menu, 'parent'));
+
+      return size(rootMenu) != 0;
+    })
+    .map((menus: MenuType[]) => {
+      const { true: subMenus, false: rootMenu } = groupBy(menus, (menu: MenuType) => has(menu, 'parent'));
+
+      const sub = map(subMenus, makeSubMenu);
+      return makeRootMenu(rootMenu[0], sub);
     });
-  });
-  return { r: routes, g: Groups, m: Object.values(menus) };
-}
+};
+
+type Menu = {
+  id: string;
+  group: string;
+  sub: Array<object>;
+};
+// makeRouteList 라우터 배열을 생성합니다.
+const makeRouteList = (menuList: Menu[]) => {
+  const clusterName = getCluster();
+
+  return getRoutes()
+    .map((routeGroup: RoutesGroup) => {
+      const menu = Menus.find((menu: { id: string }) => menu.id === routeGroup.indexId);
+      const sub = menuList.find((m: Menu) => m.id === menu?.id || m.id === menu?.parent);
+      return routeGroup.routes.map((route: Route) => {
+        return {
+          id: route.id,
+          path: getRoutePathPattern(getRoute(route.id), clusterName),
+          index: routeGroup.indexId === route.id,
+          useClusterURL: routeGroup.useClusterURL,
+          element: (
+            <AuthRoute menu={menu} sub={sub}>
+              {route.element()}
+              {/* <route.element /> */}
+            </AuthRoute>
+          ),
+        };
+      });
+    })
+    .flat();
+};
 
 function AuthRoute(props: { children: React.ReactNode | JSX.Element; [otherProps: string]: any }) {
   const { children, menu, sub } = props;
@@ -108,10 +126,6 @@ export default function AppContainer() {
       apiRequest({ method: 'post', host: '', path: '/api/auth/login' })
         .then((res) => {
           setAuthAtom(res);
-          // decryptAESCBC256(res, 'cocktail-glasses_encryption_data', 'cocktail-glasses').then((e) => {
-          // const user = JSON.parse(e);
-          // setAuthAtom(user);
-          // });
         })
         .catch((e) => {
           enqueueSnackbar(e, { variant: 'error' });
@@ -121,7 +135,9 @@ export default function AppContainer() {
   }, [load.state]);
 
   if (load.state == 'hasData') {
-    const { r, g, m } = make(t);
+    const menuList = makeMenuList(t);
+    const routeList = makeRouteList(menuList);
+
     routes = [
       {
         path: '/',
@@ -136,7 +152,7 @@ export default function AppContainer() {
           // url이 변경되면 loader를 호출합니다.
           return currentUrl.pathname !== nextUrl.pathname;
         },
-        children: r,
+        children: routeList,
       },
       {
         path: '/login',
@@ -148,8 +164,8 @@ export default function AppContainer() {
       },
     ];
 
-    setSidebarGroups(g);
-    setSidebarList(m);
+    setSidebarGroups(Groups);
+    setSidebarList(menuList);
   }
 
   const router = createBrowserRouter(routes);

@@ -14,6 +14,7 @@ import { DotStatus } from '@components/atoms/KaaS/DotStatus';
 import DeleteIconButton from '@components/molecules/KaaS/Button/DeleteIconButton/DeleteIconButton';
 import Table from '@components/molecules/KaaS/Table/Table';
 import { IoClastixKamajiV1alpha1TenantControlPlane } from '@lib/kamaji';
+import { createRouteURL } from '@lib/router';
 import { CellContext, createColumnHelper } from '@tanstack/react-table';
 
 interface TenantControlPlaneTableProps {
@@ -37,7 +38,7 @@ const TenantControlPlaneTable = ({
   const navigate = useNavigate();
   const handleRowClick = (row: IoClastixKamajiV1alpha1TenantControlPlane) => {
     const metadata = row.metadata;
-    navigate(`/kaas/clusters/${metadata?.namespace}/${metadata?.name}`);
+    navigate(createRouteURL('tenantCluster', { managementNamespace: metadata?.namespace, name: metadata?.name }));
   };
 
   // tanstack-table example

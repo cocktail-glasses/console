@@ -7,11 +7,9 @@ import SimpleTable from '@components/common/SimpleTable';
 import ClusterRole from '@lib/k8s/clusterRole';
 import Role from '@lib/k8s/role';
 
-export default function RoleDetails() {
-  const { namespace = undefined, name } = useParams<{
-    namespace: string | undefined;
-    name: string;
-  }>();
+export default function RoleDetails(props: { name?: string; namespace?: string }) {
+  const params = useParams<{ namespace?: string; name: string }>();
+  const { name = params.name, namespace = params.namespace } = props;
   const { t } = useTranslation('glossary');
 
   return (

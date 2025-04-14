@@ -1,3 +1,5 @@
+import { ReactNode } from 'react';
+
 import { get, set } from 'lodash';
 
 import { DetailsViewSectionType } from '@components/DetailsViewSection/DetailsViewSection';
@@ -6,10 +8,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 export type DetailsViewSection = {
   id: string;
-  section?:
-    | DetailsViewSectionType
-    | ((item: KubeObject) => React.ReactNode | DetailsViewSection[])
-    | DetailsViewSection;
+  section?: DetailsViewSectionType;
 };
 
 export enum DefaultDetailsViewSection {
@@ -22,7 +21,10 @@ export enum DefaultDetailsViewSection {
   CHILDREN = 'CHILDREN',
 }
 
-type HeaderActionFuncType = (resource: KubeObject | null, sections: DetailsViewSection[]) => DetailsViewSection[];
+type HeaderActionFuncType = (
+  resource: KubeObject | null,
+  sections: (DetailsViewSection | ReactNode)[]
+) => DetailsViewSection[];
 
 export type DetailsViewsSectionProcessor = {
   id: string;

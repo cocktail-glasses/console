@@ -14,14 +14,14 @@ import ActionButton from '@components/common/ActionButton';
 import helpers from '@helpers';
 import { InlineIcon } from '@iconify/react';
 import { listPortForward, startPortForward, stopOrDeletePortForward } from '@lib/k8s/apiProxy';
-import { KubeContainer, KubeObject } from '@lib/k8s/cluster';
+import { KubeContainer, KubeObjectInterface } from '@lib/k8s/cluster';
 import Pod from '@lib/k8s/pod';
 import Service from '@lib/k8s/service';
 import { getCluster } from '@lib/util';
 
 interface PortForwardProps {
   containerPort: number | string;
-  resource?: KubeObject;
+  resource?: KubeObjectInterface;
 }
 
 export interface PortForwardState {
@@ -162,7 +162,7 @@ export default function PortForward(props: PortForwardProps) {
     const serviceNamespace = namespace;
     const serviceName = !isPod ? resourceName : '';
     const podName = isPod ? resourceName : pods[0].metadata.name;
-    var port = portForward?.port;
+    let port = portForward?.port;
 
     let address = 'localhost';
     // In case of docker desktop only a range of ports are open

@@ -72,7 +72,7 @@ export type ResourceTableColumn<RowItem> = {
     }
 );
 
-type ColumnType = 'age' | 'name' | 'namespace' | 'type' | 'kind';
+export type ColumnType = 'age' | 'name' | 'namespace' | 'type' | 'kind';
 
 export interface ResourceTableProps<RowItem> {
   /** The columns to be rendered, like used in Table, or by name. */
