@@ -1,7 +1,7 @@
 // sort-imports-ignore
 // 이 파일에서는 preitter import 정렬을 무시합니다. kubeObject 클래스 때문에 @pages와 @lib의 임포트 순서가 중요합니다.
-import React, { ReactNode } from 'react';
-import { generatePath } from 'react-router';
+import React, { Children, ReactNode, useEffect } from 'react';
+import { generatePath, useLocation, useNavigate, useNavigationType } from 'react-router';
 
 import { isUndefined, toLower } from 'lodash';
 
@@ -96,6 +96,8 @@ import Job from '@lib/k8s/job';
 import ReplicaSet from '@lib/k8s/replicaSet';
 import StatefulSet from '@lib/k8s/statefulSet';
 import { getCluster, getClusterPrefixedPath } from '@lib/util';
+import { useAtomValue, useSetAtom } from 'jotai';
+import { routeLavel } from './stores';
 
 const K8sResourceMap = React.lazy(() =>
   import('@pages/K8s/resourceMap/GraphView').then((it) => ({ default: it.default }))
@@ -927,7 +929,6 @@ export function isUseClusterURL(route: Route): boolean {
 // getRoutePathPattern URL 패턴을 반환합니다. clusterURL을 허용하는 route인 경우 cluster 명을 지정해주면 cluster prefix를 추가합니다.
 export function getRoutePathPattern(route: Route, cluster?: string | null) {
   if (!!cluster == false || !isUseClusterURL(route)) {
-    console.log(route);
     return route.path;
   }
 
@@ -951,11 +952,33 @@ export function createRouteURL(routeId: string, params: RouteURLProps = {}) {
     cluster,
     ...params,
   };
-  console.log('route id : ', routeId);
+
   const route = getRoute(routeId);
   return generatePath(getRoutePathPattern(route, cluster), fullParams);
 }
 
 export function getRoutes() {
   return Routes;
+}
+
+export function PreviousRouteProvider({ children }: React.PropsWithChildren<{}>) {
+  const location = useLocation();
+  const action = useNavigationType();
+
+  const setLocationInfo = useSetAtom(routeLavel);
+
+  useEffect(() => {
+    if (action === 'PUSH') {
+      setLocationInfo((levels) => levels + 1);
+    } else if (action === 'POP') {
+      setLocationInfo((levels) => levels - 1);
+    }
+  }, [location, action]);
+
+  return Children.toArray(children);
+}
+
+export function useHasPreviousRoute() {
+  const routeLevels = useAtomValue(routeLavel);
+  return routeLevels >= 1;
 }

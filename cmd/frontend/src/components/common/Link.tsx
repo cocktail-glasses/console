@@ -1,12 +1,16 @@
 // import { useDispatch } from 'react-redux';
 import { Link as RouterLink } from 'react-router-dom';
 
+import { useAtomValue, useSetAtom } from 'jotai';
+
 import MuiLink from '@mui/material/Link';
 
 import { LightTooltip } from '@components/common/Tooltip';
 import { kubeObjectQueryKey, useEndpoints } from '@lib/k8s/api/v2/hooks';
 import { KubeObject } from '@lib/k8s/cluster';
 import { createRouteURL, RouteURLProps } from '@lib/router';
+import { detailDrawerEnabled, selectedResource } from '@lib/stores';
+import { canRenderDetails } from '@pages/K8s/resourceMap/details/KubeNodeDetails';
 import { useQueryClient } from '@tanstack/react-query';
 
 // import { useTypedSelector } from 'redux/reducers/reducers';
@@ -78,8 +82,8 @@ function PureLink(props: React.PropsWithChildren<LinkProps | LinkObjectProps>) {
       to={{
         pathname: createRouteURL(routeName, params),
         search,
-        // state,
       }}
+      state={state}
       {...otherProps}
     >
       {props.children}
@@ -88,33 +92,44 @@ function PureLink(props: React.PropsWithChildren<LinkProps | LinkObjectProps>) {
 }
 
 export default function Link(props: React.PropsWithChildren<LinkProps | LinkObjectProps>) {
-  // const drawerEnabled = useTypedSelector((state) => state.drawerMode.isDetailDrawerEnabled);
-  // const dispatch = useDispatch();
+  const drawerEnabled = useAtomValue(detailDrawerEnabled);
+  const setSelectedResource = useSetAtom(selectedResource);
 
   const { tooltip, kubeObject, ...otherProps } = props as LinkObjectProps;
-  // const name = 'kubeObject' in props ? props.kubeObject?.getName() : props.params?.name;
-  // const namespace = 'kubeObject' in props ? props.kubeObject?.getNamespace() : props.params?.namespace;
-  // const kind = 'kubeObject' in props ? props.kubeObject?._class().kind : props?.routeName;
+  const name = 'kubeObject' in props ? props.kubeObject?.getName() : props.params?.name;
+  const namespace = 'kubeObject' in props ? props.kubeObject?.getNamespace() : props.params?.namespace;
+  const kind = 'kubeObject' in props ? props.kubeObject?._class().kind : props?.routeName;
 
-  // let content: React.ReactNode;
+  let content: React.ReactNode;
 
-  // if (!drawerEnabled || !canRenderDe(kind)) {
-  const content = <PureLink {...otherProps} kubeObject={kubeObject} />;
-  // } else {
-  //   content = (
-  //     <MuiLink
-  //       sx={{ cursor: 'pointer' }}
-  //       onClick={() => {
-  //         if (drawerEnabled) {
-  //           dispatch(setSelected({ kind, metadata: { name, namespace } }));
+  if (!drawerEnabled || !canRenderDetails(kind)) {
+    content = <PureLink {...otherProps} kubeObject={kubeObject} />;
+  } else {
+    content = (
+      <MuiLink
+        sx={{ cursor: 'pointer' }}
+        onClick={() => {
+          if (drawerEnabled) {
+            setSelectedResource({ kind, metadata: { name, namespace } });
+            /**
+             * NOTE: we are using window.history.pushState to update the URL without causing a page reload.
+             * currently there is no way to update the URL without navigation to the details page which would make the drawer redundant.
+             *
+             * also note that this currently only works in the browser, not in electron.
+             */
 
-  //         }
-  //       }}
-  //     >
-  //       {props.children || kubeObject?.getName()}
-  //     </MuiLink>
-  //   );
-  // }
+            window.history.pushState(
+              { path: createRouteURL(kind, { name, namespace }) },
+              '',
+              createRouteURL(kind, { name, namespace })
+            );
+          }
+        }}
+      >
+        {props.children || kubeObject?.getName()}
+      </MuiLink>
+    );
+  }
 
   if (tooltip) {
     let tooltipText = '';

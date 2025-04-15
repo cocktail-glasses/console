@@ -15,7 +15,15 @@ import { Loader } from '@components/common';
 import BasicLayout from '@lib/Layout/BasicLayout';
 import { asyncAuthAtom, authAtom } from '@lib/auth';
 import { MenuType, Menus, Groups } from '@lib/menu';
-import { Route, getRoutes, RoutesGroup, createRouteURL, getRoute, getRoutePathPattern } from '@lib/router';
+import {
+  Route,
+  getRoutes,
+  RoutesGroup,
+  createRouteURL,
+  getRoute,
+  getRoutePathPattern,
+  PreviousRouteProvider,
+} from '@lib/router';
 import { sidebarGroupId, sidebarGroups, sidebarMenus, sidebarMenuSelected, sidebarSub } from '@lib/stores';
 import Login from '@pages/Auth/Login';
 import ErrorComponent from '@pages/Common/ErrorPage';
@@ -81,7 +89,6 @@ const makeRouteList = (menuList: Menu[]) => {
           element: (
             <AuthRoute menu={menu} sub={sub}>
               {route.element()}
-              {/* <route.element /> */}
             </AuthRoute>
           ),
         };
@@ -141,7 +148,11 @@ export default function AppContainer() {
     routes = [
       {
         path: '/',
-        element: <BasicLayout />,
+        element: (
+          <PreviousRouteProvider>
+            <BasicLayout />
+          </PreviousRouteProvider>
+        ),
         loader: () => {
           authCheck().then((isAuthenticated: boolean) => {
             if (!isAuthenticated) location.href = '/auth/login';
@@ -178,11 +189,6 @@ export default function AppContainer() {
       }}
     >
       <RouterProvider router={router} />
-      {/* <BrowserRouter>
-        <PreviousRouteProvider>
-          <Layout />
-        </PreviousRouteProvider>
-      </BrowserRouter> */}
     </SnackbarProvider>
   );
 }
