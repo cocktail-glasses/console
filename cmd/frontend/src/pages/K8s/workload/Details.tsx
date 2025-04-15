@@ -1,15 +1,16 @@
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 
+import { WorkloadClass } from '@lib/k8s/Workload';
+import { Workload } from '@lib/k8s/Workload';
+
 import {
   ConditionsSection,
   ContainersSection,
-  DetailsGrid,
+  DetailsGrid, // LogsButton,
   MetadataDictGrid,
   OwnedPodsSection,
 } from '@components/common/Resource';
-import { WorkloadClass } from '@lib/k8s/Workload';
-import { Workload } from '@lib/k8s/cluster';
 
 interface WorkloadDetailsProps<T extends WorkloadClass> {
   workloadKind: T;
@@ -18,7 +19,8 @@ interface WorkloadDetailsProps<T extends WorkloadClass> {
 }
 
 export default function WorkloadDetails<T extends WorkloadClass>(props: WorkloadDetailsProps<T>) {
-  const { namespace, name } = useParams<{ namespace: string; name: string }>();
+  const params = useParams<{ namespace: string; name: string }>();
+  const { name = params.name, namespace = params.namespace } = props;
   const { workloadKind } = props;
   const { t } = useTranslation(['glossary', 'translation']);
 
@@ -82,6 +84,18 @@ export default function WorkloadDetails<T extends WorkloadClass>(props: Workload
       name={name}
       withEvents
       namespace={namespace}
+      actions={(item) => {
+        if (!item) return [];
+        const isLoggable = ['Deployment', 'ReplicaSet', 'DaemonSet'].includes(workloadKind.kind);
+        if (!isLoggable) return [];
+
+        return [
+          {
+            id: 'logs',
+            action: <LogsButton key="logs" item={item} />,
+          },
+        ];
+      }}
       extraInfo={(item) =>
         item && [
           {

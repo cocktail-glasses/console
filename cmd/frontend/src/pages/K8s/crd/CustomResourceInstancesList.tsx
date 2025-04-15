@@ -15,6 +15,7 @@ function CrInstancesView({ crds }: { crds: CRD[]; key: string }) {
 
   const dataClassCrds = crds.map((crd) => {
     const crdClass = crd.makeCRClass();
+    /* eslint-disable react-hooks/rules-of-hooks */
     const data = crdClass.useList({ cluster: crd.cluster, namespace: useNamespaces() });
     return { data, crdClass, crd };
   });
@@ -92,7 +93,7 @@ function CrInstancesView({ crds }: { crds: CRD[]; key: string }) {
             render: (cr) => {
               return (
                 <Link
-                  routeName="customresources"
+                  routeName="customresource"
                   params={{
                     crd: getCRDForCR(cr).metadata.name,
                     namespace: cr.metadata.namespace ?? '-',
@@ -112,7 +113,7 @@ function CrInstancesView({ crds }: { crds: CRD[]; key: string }) {
             render: (cr) => {
               return (
                 <Link
-                  routeName="crds"
+                  routeName="crd"
                   params={{
                     name: getCRDForCR(cr).metadata.name,
                   }}

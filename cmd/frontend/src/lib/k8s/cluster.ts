@@ -1,9 +1,9 @@
 import helpers from '../../helpers';
 import { getCluster } from '../util';
 import { KubeMetadata } from './KubeMetadata';
+
 export {
   KubeObject,
-  makeKubeObject,
   type KubeObjectClass,
   type KubeObjectInterface,
   type ApiListOptions,

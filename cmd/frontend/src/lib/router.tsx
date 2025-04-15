@@ -1,913 +1,949 @@
-// import AuthChooser from '@components/authchooser';
-// import KubeConfigLoader from '@components/cluster/KubeConfigLoader';
-// import { PageGrid } from '@components/common/Resource/Resource';
-// import { DefaultSidebars } from '@lib/Layout/Sidebar';
-// import LocaleSelect from 'i18n/LocaleSelect/LocaleSelect';
-// import Deployment from 'lib/k8s/deployment';
-// import Job from 'lib/k8s/job';
-// import ReplicaSet from 'lib/k8s/replicaSet';
-// import NotFoundComponent from 'pages/Common/404';
-// import Login from 'pages/Auth/Login';
-// import OIDCAuth from 'pages/Auth/oidcauth';
-// import Clusters from 'pages/Clusters/Clusters';
-// import Home from 'pages/Home';
-// import AuthToken from 'pages/K8s/account/Auth';
-// import ConfigDetails from 'pages/K8s/configmap/Details';
-// import ConfigMapList from 'pages/K8s/configmap/List';
-// import CustomResourceDetails from 'pages/K8s/crd/CustomResourceDetails';
-// import CustomResourceList from 'pages/K8s/crd/CustomResourceList';
-// import CustomResourceDefinitionDetails from 'pages/K8s/crd/Details';
-// import CustomResourceDefinitionList from 'pages/K8s/crd/List';
-// import CronJobDetails from 'pages/K8s/cronjob/Details';
-// import CronJobList from 'pages/K8s/cronjob/List';
-// import DaemonSetDetails from 'pages/K8s/daemonset/Details';
-// import DaemonSetList from 'pages/K8s/daemonset/List';
-// import DeploymentsList from 'pages/K8s/deployments/List';
-// import EndpointDetails from 'pages/K8s/endpoints/Details';
-// import EndpointList from 'pages/K8s/endpoints/List';
-// import HpaDetails from 'pages/K8s/horizontalPodAutoscaler/Details';
-// import HpaList from 'pages/K8s/horizontalPodAutoscaler/List';
-// import IngressClassDetails from 'pages/K8s/ingress/ClassDetails';
-// import IngressClassList from 'pages/K8s/ingress/ClassList';
-// import IngressDetails from 'pages/K8s/ingress/Details';
-// import IngressList from 'pages/K8s/ingress/List';
-// import JobsList from 'pages/K8s/job/List';
-// import { LeaseDetails } from 'pages/K8s/lease/Details';
-// import { LeaseList } from 'pages/K8s/lease/List';
-// import { LimitRangeDetails } from 'pages/K8s/limitRange/Details';
-// import { LimitRangeList } from 'pages/K8s/limitRange/List';
-// import NamespaceDetails from 'pages/K8s/namespace/Details';
-// import NamespacesList from 'pages/K8s/namespace/List';
-// import { NetworkPolicyDetails } from 'pages/K8s/networkpolicy/Details';
-// import { NetworkPolicyList } from 'pages/K8s/networkpolicy/List';
-// import NodeDetails from 'pages/K8s/node/Details';
-// import NodeList from 'pages/K8s/node/List';
-// import PodDetails from 'pages/K8s/pod/Details';
-// import PodList from 'pages/K8s/pod/List';
-// import PDBDetails from 'pages/K8s/podDisruptionBudget/Details';
-// import PDBList from 'pages/K8s/podDisruptionBudget/List';
-// import PortForwardingList from 'pages/K8s/portforward';
-// import PriorityClassDetails from 'pages/K8s/priorityClass/Details';
-// import PriorityClassList from 'pages/K8s/priorityClass/List';
-// import ReplicaSetList from 'pages/K8s/replicaset/List';
-// import ResourceQuotaDetails from 'pages/K8s/resourceQuota/Details';
-// import ResourceQuotaList from 'pages/K8s/resourceQuota/List';
-// import RoleBindingDetails from 'pages/K8s/role/BindingDetails';
-// import RoleBindingList from 'pages/K8s/role/BindingList';
-// import RoleDetails from 'pages/K8s/role/Details';
-// import RoleList from 'pages/K8s/role/List';
-// import { RuntimeClassDetails } from 'pages/K8s/runtimeClass/Details';
-// import { RuntimeClassList } from 'pages/K8s/runtimeClass/List';
-// import SecretDetails from 'pages/K8s/secret/Details';
-// import SecretList from 'pages/K8s/secret/List';
-// import ServiceDetails from 'pages/K8s/service/Details';
-// import ServiceList from 'pages/K8s/service/List';
-// import ServiceAccountDetails from 'pages/K8s/serviceaccount/Details';
-// import ServiceAccountList from 'pages/K8s/serviceaccount/List';
-// import StatefulSetDetails from 'pages/K8s/statefulset/Details';
-// import StatefulSetList from 'pages/K8s/statefulset/List';
-// import PersistentVolumeClaimDetails from 'pages/K8s/storage/ClaimDetails';
-// import PersistentVolumeClaimList from 'pages/K8s/storage/ClaimList';
-// import StorageClassDetails from 'pages/K8s/storage/ClassDetails';
-// import StorageClassList from 'pages/K8s/storage/ClassList';
-// import PersistentVolumeDetails from 'pages/K8s/storage/VolumeDetails';
-// import PersistentVolumeList from 'pages/K8s/storage/VolumeList';
-// import VpaDetails from 'pages/K8s/verticalPodAutoscaler/Details';
-// import VpaList from 'pages/K8s/verticalPodAutoscaler/List';
-// import MutatingWebhookConfigurationDetails from 'pages/K8s/webhookconfiguration/MutatingWebhookConfigDetails';
-// import MutatingWebhookConfigList from 'pages/K8s/webhookconfiguration/MutatingWebhookConfigList';
-// import ValidatingWebhookConfigurationDetails from 'pages/K8s/webhookconfiguration/ValidatingWebhookConfigDetails';
-// import ValidatingWebhookConfigurationList from 'pages/K8s/webhookconfiguration/ValidatingWebhookConfigList';
-// import WorkloadDetails from 'pages/K8s/workload/Details';
-// import WorkloadOverview from 'pages/K8s/workload/Overview';
-// import NotificationList from 'pages/Notifications/List';
-// import PluginSettings from 'pages/PluginSettings';
-// // import PluginSettingsDetails from 'pages/PluginSettings/PluginSettingsDetails';
-// import Settings from 'pages/Settings';
-// import SettingsCluster from 'pages/Settings/SettingsCluster';
-// import SettingsClusters from 'pages/Settings/SettingsClusters';
-// import { UsersList, UsersDetail } from 'pages/Users'
+// sort-imports-ignore
+// 이 파일에서는 preitter import 정렬을 무시합니다. kubeObject 클래스 때문에 @pages와 @lib의 임포트 순서가 중요합니다.
+import React, { ReactNode } from 'react';
 import { generatePath } from 'react-router';
 
+import { isUndefined, toLower } from 'lodash';
+
+import Clusters from '@pages/Clusters/Clusters';
+import Home from '@pages/Home';
+import K8sClusterOverview from '@pages/K8s/cluster/Overview';
+import K8sConfigmapDetails from '@pages/K8s/configmap/Details';
+import K8sConfigmapList from '@pages/K8s/configmap/List';
+import K8sCustomResourceDetails from '@pages/K8s/crd/CustomResourceDetails';
+import K8sCrsInstanceList from '@pages/K8s/crd/CustomResourceInstancesList';
+import K8sCustomResourceList from '@pages/K8s/crd/CustomResourceList';
+import K8sCustomResourceDefinitionDetails from '@pages/K8s/crd/Details';
+import K8sCustomResourceDefinitionList from '@pages/K8s/crd/List';
+import K8sCronjobDetails from '@pages/K8s/cronjob/Details';
+import K8sCronjobList from '@pages/K8s/cronjob/List';
+// import K8sDaemonsetDetails from '@pages/K8s/daemonset/Details';
+import K8sDaemonsetList from '@pages/K8s/daemonset/List';
+import K8sDeploymentsList from '@pages/K8s/deployments/List';
+import K8sEndpointsDetails from '@pages/K8s/endpoints/Details';
+import K8sEndpointsList from '@pages/K8s/endpoints/List';
+import K8sGatewayClassDetails from '@pages/K8s/gateway/ClassDetails';
+import K8sGatewayClassList from '@pages/K8s/gateway/ClassList';
+import K8sGrpcRouteDetails from '@pages/K8s/gateway/GRPCRouteDetails';
+import K8sGrpcRouteList from '@pages/K8s/gateway/GRPCRouteList';
+import K8sGatewayDetails from '@pages/K8s/gateway/GatewayDetails';
+import K8sGatewayList from '@pages/K8s/gateway/GatewayList';
+import K8sHttpRouteDetails from '@pages/K8s/gateway/HTTPRouteDetails';
+import K8sHttpRouteList from '@pages/K8s/gateway/HTTPRouteList';
+import K8sHorizontalPodAutoscalerDetails from '@pages/K8s/horizontalPodAutoscaler/Details';
+import K8sHorizontalPodAutoscalerList from '@pages/K8s/horizontalPodAutoscaler/List';
+import K8sIngressClassDetails from '@pages/K8s/ingress/ClassDetails';
+import K8sIngressClassList from '@pages/K8s/ingress/ClassList';
+import K8sIngressDetails from '@pages/K8s/ingress/Details';
+import K8sIngressList from '@pages/K8s/ingress/List';
+import K8sJobList from '@pages/K8s/job/List';
+import K8sLeaseDetails from '@pages/K8s/lease/Details';
+import K8sLeaseList from '@pages/K8s/lease/List';
+import K8sLimitRangeDetails from '@pages/K8s/limitRange/Details';
+import K8sLimitRangeList from '@pages/K8s/limitRange/List';
+import K8sNamespaceDetails from '@pages/K8s/namespace/Details';
+import K8sNamespaceList from '@pages/K8s/namespace/List';
+import K8sNetworkpolicyDetails from '@pages/K8s/networkpolicy/Details';
+import K8sNetworkpolicyList from '@pages/K8s/networkpolicy/List';
+import K8sNodeDetails from '@pages/K8s/node/Details';
+import K8sNodeList from '@pages/K8s/node/List';
+import K8sPodDetails from '@pages/K8s/pod/Details';
+import K8sPodList from '@pages/K8s/pod/List';
+import K8sPodDisruptionBudgetDetails from '@pages/K8s/podDisruptionBudget/Details';
+import K8sPodDisruptionBudgetList from '@pages/K8s/podDisruptionBudget/List';
+import K8sPriorityClassDetails from '@pages/K8s/priorityClass/Details';
+import K8sPriorityClassList from '@pages/K8s/priorityClass/List';
+import K8sReplicasetList from '@pages/K8s/replicaset/List';
+import K8sResourceQuotaDetails from '@pages/K8s/resourceQuota/Details';
+import K8sResourceQuotaList from '@pages/K8s/resourceQuota/List';
+import K8sRoleBindingDetails from '@pages/K8s/role/BindingDetails';
+import K8sRoleBindingList from '@pages/K8s/role/BindingList';
+import K8sRoleDetails from '@pages/K8s/role/Details';
+import K8sRoleList from '@pages/K8s/role/List';
+import K8sRuntimeClassDetails from '@pages/K8s/runtimeClass/Details';
+import K8sRuntimeClassList from '@pages/K8s/runtimeClass/List';
+import K8sSecretDetails from '@pages/K8s/secret/Details';
+import K8sSecretList from '@pages/K8s/secret/List';
+import K8sServiceDetails from '@pages/K8s/service/Details';
+import K8sServiceList from '@pages/K8s/service/List';
+import K8sServiceaccountDetails from '@pages/K8s/serviceaccount/Details';
+import K8sServiceaccountList from '@pages/K8s/serviceaccount/List';
+// import K8sStatefulsetDetails from '@pages/K8s/statefulset/Details';
+import K8sStatefulsetList from '@pages/K8s/statefulset/List';
+import K8sStorageClaimDetails from '@pages/K8s/storage/ClaimDetails';
+import K8sStorageClaimList from '@pages/K8s/storage/ClaimList';
+import K8sStorageClassDetails from '@pages/K8s/storage/ClassDetails';
+import K8sStorageClassList from '@pages/K8s/storage/ClassList';
+import K8sStorageVolumeDetails from '@pages/K8s/storage/VolumeDetails';
+import K8sStorageVolumeList from '@pages/K8s/storage/VolumeList';
+import K8sVerticalPodAutoscalerDetails from '@pages/K8s/verticalPodAutoscaler/Details';
+import K8sVerticalPodAutoscalerList from '@pages/K8s/verticalPodAutoscaler/List';
+import K8sWebhookconfigurationMutatingWebhookConfigDetails from '@pages/K8s/webhookconfiguration/MutatingWebhookConfigDetails';
+import K8sWebhookconfigurationMutatingWebhookConfigList from '@pages/K8s/webhookconfiguration/MutatingWebhookConfigList';
+import K8sWebhookconfigurationValidatingWebhookConfigDetails from '@pages/K8s/webhookconfiguration/ValidatingWebhookConfigDetails';
+import K8sWebhookconfigurationValidatingWebhookConfigList from '@pages/K8s/webhookconfiguration/ValidatingWebhookConfigList';
+import K8sWorkloadDetails from '@pages/K8s/workload/Details';
+import K8sWorkloadOverview from '@pages/K8s/workload/Overview';
+import KaaSCreate from '@pages/KaaS/clusters/Create';
+import KaaSDetail from '@pages/KaaS/clusters/Detail';
+import KaaSList from '@pages/KaaS/clusters/List';
+import Settings from '@pages/Settings';
+import { UsersDetail, UsersList } from '@pages/Users';
+
+import DaemonSet from '@lib/k8s/daemonSet';
+import Deployment from '@lib/k8s/deployment';
+import Job from '@lib/k8s/job';
+import ReplicaSet from '@lib/k8s/replicaSet';
+import StatefulSet from '@lib/k8s/statefulSet';
 import { getCluster, getClusterPrefixedPath } from '@lib/util';
 
-// import store from 'redux/stores/store';
+const K8sResourceMap = React.lazy(() =>
+  import('@pages/K8s/resourceMap/GraphView').then((it) => ({ default: it.default }))
+);
 
-// export interface Route {
-//   /** Any valid URL path or array of paths that path-to-regexp@^1.7.0 understands. */
-//   path: string;
-//   /** When true, will only match if the path matches the location.pathname exactly. */
-//   exact?: boolean;
-//   /** Human readable name. Capitalized and short. */
-//   name?: string;
-//   /**
-//    * In case this route does *not* need a cluster prefix and context.
-//    * @deprecated please use useClusterURL.
-//    */
-//   noCluster?: boolean;
-//   /**
-//    * Should URL have the cluster prefix? (default=true)
-//    */
-//   useClusterURL?: boolean;
-//   /** This route does not require Authentication. */
-//   noAuthRequired?: boolean;
-//   /** The sidebar entry this Route should enable, or null if it shouldn't enable any. If an object is passed with item and sidebar, it will try to enable the given sidebar and the given item. */
-//   sidebar: string | null | { item: string | null; sidebar: string | DefaultSidebars };
-//   /** Shown component for this route. */
-//   component: () => JSX.Element;
-//   /** Hide the appbar at the top. */
-//   hideAppBar?: boolean;
-//   /** Whether the route should be disabled (not registered). */
-//   disabled?: boolean;
-// }
+export interface RoutesGroup {
+  indexId: string;
+  routes: Route[];
+  // URL에 cluster prefix 여부
+  useClusterURL?: boolean;
+}
 
-// const defaultRoutes: {
-//   [routeName: string]: Route;
-// } = {
-//   userLogin: {
-//     path: '/user/login',
-//     exact: true,
-//     name: 'Login',
-//     sidebar: null,
-//     useClusterURL: false,
-//     noAuthRequired: true,
-//     component: () => <Login />,
-//     hideAppBar: true,
-//   },
-//   clusters: {
-//     path: '/clusters',
-//     exact: true,
-//     name: 'Clusters',
-//     sidebar: {
-//       item: 'clusters',
-//       sidebar: DefaultSidebars.HOME,
-//     },
-//     useClusterURL: false,
-//     component: () => <Clusters />,
-//   },
-//   users: {
-//     path: '/users',
-//     exact: true,
-//     name: 'Users',
-//     sidebar: {
-//       item: 'users',
-//       sidebar: DefaultSidebars.HOME
-//     },
-//     useClusterURL: false,
-//     component: () => <UsersList />,
-//   },
-//   userDetail: {
-//     path: '/users/:name',
-//     sidebar: null,
-//     // sidebar: {
-//     //   item: 'users',
-//     //   sidebar: DefaultSidebars.HOME
-//     // },
-//     useClusterURL: false,
-//     component: () => <UsersDetail />,
-//   },
-//   // cluster: {
-//   //   path: '/',
-//   //   exact: true,
-//   //   name: 'Cluster',
-//   //   sidebar: 'cluster',
-//   //   component: () => <Overview />,
-//   // },
-//   chooser: {
-//     path: '/',
-//     exact: true,
-//     name: 'Choose a cluster',
-//     sidebar: {
-//       item: 'home',
-//       sidebar: DefaultSidebars.HOME,
-//     },
-//     useClusterURL: false,
-//     noAuthRequired: true,
-//     component: () => <Home />,
-//   },
-//   namespaces: {
-//     path: '/namespaces',
-//     name: 'Namespaces',
-//     exact: true,
-//     sidebar: 'namespaces',
-//     component: () => <NamespacesList />,
-//   },
-//   namespace: {
-//     path: '/namespaces/:name',
-//     sidebar: 'namespaces',
-//     component: () => <NamespaceDetails />,
-//   },
-//   nodes: {
-//     path: '/nodes',
-//     name: 'Nodes',
-//     exact: true,
-//     sidebar: 'nodes',
-//     component: () => <NodeList />,
-//   },
-//   node: {
-//     path: '/nodes/:name',
-//     sidebar: 'nodes',
-//     component: () => <NodeDetails />,
-//   },
-//   storageClasses: {
-//     path: '/storage/classes',
-//     exact: true,
-//     sidebar: 'storageClasses',
-//     name: 'Storage Classes',
-//     component: () => <StorageClassList />,
-//   },
-//   storageClass: {
-//     path: '/storage/classes/:name',
-//     name: 'Storage Classes',
-//     sidebar: 'storageClasses',
-//     component: () => <StorageClassDetails />,
-//   },
-//   persistentVolumes: {
-//     path: '/storage/persistentvolumes',
-//     exact: true,
-//     sidebar: 'persistentVolumes',
-//     name: 'Persistent Volumes',
-//     component: () => <PersistentVolumeList />,
-//   },
-//   persistentVolume: {
-//     path: '/storage/persistentvolumes/:name',
-//     exact: true,
-//     sidebar: 'persistentVolumes',
-//     name: 'Persistent Volume',
-//     component: () => <PersistentVolumeDetails />,
-//   },
-//   persistentVolumeClaims: {
-//     path: '/storage/persistentvolumeclaims',
-//     exact: true,
-//     sidebar: 'persistentVolumeClaims',
-//     name: 'Persistent Volume Claims',
-//     component: () => <PersistentVolumeClaimList />,
-//   },
-//   persistentVolumeClaim: {
-//     path: '/storage/persistentvolumeclaims/:namespace/:name',
-//     sidebar: 'persistentVolumeClaims',
-//     exact: true,
-//     component: () => <PersistentVolumeClaimDetails />,
-//   },
-//   workloads: {
-//     path: '/workloads',
-//     exact: true,
-//     name: 'Workloads',
-//     sidebar: 'workloads',
-//     component: () => <WorkloadOverview />,
-//   },
-//   DaemonSet: {
-//     path: '/daemonsets/:namespace/:name',
-//     exact: true,
-//     sidebar: 'DaemonSets',
-//     component: () => <DaemonSetDetails />,
-//   },
-//   StatefulSet: {
-//     path: '/statefulsets/:namespace/:name',
-//     exact: true,
-//     sidebar: 'StatefulSets',
-//     component: () => <StatefulSetDetails />,
-//   },
-//   Deployment: {
-//     path: '/deployments/:namespace/:name',
-//     exact: true,
-//     sidebar: 'Deployments',
-//     component: () => <WorkloadDetails workloadKind={Deployment} />,
-//   },
-//   Job: {
-//     path: '/jobs/:namespace/:name',
-//     exact: true,
-//     sidebar: 'Jobs',
-//     component: () => <WorkloadDetails workloadKind={Job} />,
-//   },
-//   CronJob: {
-//     path: '/cronjobs/:namespace/:name',
-//     exact: true,
-//     sidebar: 'CronJobs',
-//     component: () => <CronJobDetails />,
-//   },
-//   Pods: {
-//     path: '/pods',
-//     exact: true,
-//     name: 'Pods',
-//     sidebar: 'Pods',
-//     component: () => <PodList />,
-//   },
-//   Pod: {
-//     path: '/pods/:namespace/:name',
-//     exact: true,
-//     sidebar: 'Pods',
-//     component: () => <PodDetails />,
-//   },
-//   services: {
-//     path: '/services',
-//     exact: true,
-//     name: 'Services',
-//     sidebar: 'services',
-//     component: () => <ServiceList />,
-//   },
-//   service: {
-//     path: '/services/:namespace/:name',
-//     exact: true,
-//     sidebar: 'services',
-//     component: () => <ServiceDetails />,
-//   },
-//   endpoints: {
-//     path: '/endpoints',
-//     exact: true,
-//     name: 'Endpoints',
-//     sidebar: 'endpoints',
-//     component: () => <EndpointList />,
-//   },
-//   endpoint: {
-//     path: '/endpoints/:namespace/:name',
-//     exact: true,
-//     sidebar: 'endpoints',
-//     component: () => <EndpointDetails />,
-//   },
-//   ingresses: {
-//     path: '/ingresses',
-//     exact: true,
-//     name: 'Ingresses',
-//     sidebar: 'ingresses',
-//     component: () => <IngressList />,
-//   },
-//   ingress: {
-//     path: '/ingresses/:namespace/:name',
-//     exact: true,
-//     sidebar: 'ingresses',
-//     component: () => <IngressDetails />,
-//   },
-//   ingressclasses: {
-//     path: '/ingressclasses',
-//     exact: true,
-//     name: 'IngressClasses',
-//     sidebar: 'ingressclasses',
-//     component: () => <IngressClassList />,
-//   },
-//   ingressclass: {
-//     path: '/ingressclasses/:name',
-//     exact: true,
-//     sidebar: 'ingressclasses',
-//     component: () => <IngressClassDetails />,
-//   },
-//   networkPolicies: {
-//     path: '/networkpolicies',
-//     exact: true,
-//     sidebar: 'NetworkPolicies',
-//     component: () => <NetworkPolicyList />,
-//   },
-//   networkPolicy: {
-//     path: '/networkpolicies/:namespace/:name',
-//     exact: true,
-//     sidebar: 'NetworkPolicies',
-//     component: () => <NetworkPolicyDetails />,
-//   },
-//   DaemonSets: {
-//     path: '/daemonsets',
-//     exact: true,
-//     sidebar: 'DaemonSets',
-//     name: 'DaemonSets',
-//     component: () => <DaemonSetList />,
-//   },
-//   Jobs: {
-//     path: '/jobs',
-//     exact: true,
-//     sidebar: 'Jobs',
-//     name: 'Jobs',
-//     component: () => <JobsList />,
-//   },
-//   CronJobs: {
-//     path: '/cronjobs',
-//     exact: true,
-//     sidebar: 'CronJobs',
-//     name: 'CronJobs',
-//     component: () => <CronJobList />,
-//   },
-//   Deployments: {
-//     path: '/deployments',
-//     exact: true,
-//     sidebar: 'Deployments',
-//     name: 'Deployments',
-//     component: () => <DeploymentsList />,
-//   },
-//   StatefulSets: {
-//     path: '/statefulsets',
-//     exact: true,
-//     sidebar: 'StatefulSets',
-//     name: 'StatefulSets',
-//     component: () => <StatefulSetList />,
-//   },
-//   ReplicaSets: {
-//     path: '/replicasets',
-//     exact: true,
-//     name: 'ReplicaSets',
-//     sidebar: 'ReplicaSets',
-//     component: () => <ReplicaSetList />,
-//   },
-//   ReplicaSet: {
-//     path: '/replicasets/:namespace/:name',
-//     exact: true,
-//     sidebar: 'ReplicaSets',
-//     component: () => <WorkloadDetails workloadKind={ReplicaSet} />,
-//   },
-//   configMaps: {
-//     path: '/configmaps',
-//     exact: true,
-//     name: 'Config Maps',
-//     sidebar: 'configMaps',
-//     component: () => <ConfigMapList />,
-//   },
-//   configMap: {
-//     path: '/configmaps/:namespace/:name',
-//     exact: true,
-//     sidebar: 'configMaps',
-//     component: () => <ConfigDetails />,
-//   },
-//   serviceAccounts: {
-//     path: '/serviceaccounts',
-//     exact: true,
-//     name: 'Service Accounts',
-//     sidebar: 'serviceAccounts',
-//     component: () => <ServiceAccountList />,
-//   },
-//   serviceAccount: {
-//     path: '/serviceaccounts/:namespace/:name',
-//     exact: true,
-//     sidebar: 'serviceAccounts',
-//     component: () => <ServiceAccountDetails />,
-//   },
-//   roles: {
-//     path: '/roles',
-//     exact: true,
-//     name: 'Roles',
-//     sidebar: 'roles',
-//     component: () => <RoleList />,
-//   },
-//   role: {
-//     path: '/roles/:namespace/:name',
-//     exact: true,
-//     sidebar: 'roles',
-//     component: () => <RoleDetails />,
-//   },
-//   clusterrole: {
-//     path: '/clusterroles/:name',
-//     exact: true,
-//     sidebar: 'roles',
-//     component: () => <RoleDetails />,
-//   },
-//   clusterRoles: {
-//     path: '/roles',
-//     exact: true,
-//     sidebar: 'roles',
-//     component: () => <RoleList />,
-//   },
-//   roleBindings: {
-//     path: '/rolebindings',
-//     exact: true,
-//     name: 'Role Bindings',
-//     sidebar: 'roleBindings',
-//     component: () => <RoleBindingList />,
-//   },
-//   roleBinding: {
-//     path: '/rolebinding/:namespace/:name',
-//     exact: true,
-//     name: 'Role Binding',
-//     sidebar: 'roleBindings',
-//     component: () => <RoleBindingDetails />,
-//   },
-//   clusterRoleBinding: {
-//     path: '/clusterrolebinding/:name',
-//     exact: true,
-//     name: 'Role Binding',
-//     sidebar: 'roleBindings',
-//     component: () => <RoleBindingDetails />,
-//   },
-//   clusterRoleBindings: {
-//     path: '/rolebindings',
-//     exact: true,
-//     sidebar: 'roleBindings',
-//     component: () => <RoleBindingDetails />,
-//   },
-//   secrets: {
-//     path: '/secrets',
-//     exact: true,
-//     name: 'Secrets',
-//     sidebar: 'secrets',
-//     component: () => <SecretList />,
-//   },
-//   secret: {
-//     path: '/secrets/:namespace/:name',
-//     exact: true,
-//     sidebar: 'secrets',
-//     component: () => <SecretDetails />,
-//   },
-//   horizontalPodAutoscalers: {
-//     path: '/horizontalpodautoscalers',
-//     exact: true,
-//     name: 'Horizontal Pod Autoscalers',
-//     sidebar: 'horizontalPodAutoscalers',
-//     component: () => <HpaList />,
-//   },
-//   horizontalPodAutoscaler: {
-//     path: '/horizontalpodautoscalers/:namespace/:name',
-//     exact: true,
-//     name: 'Horizontal Pod Autoscaler',
-//     sidebar: 'horizontalPodAutoscalers',
-//     component: () => <HpaDetails />,
-//   },
-//   podDisruptionBudgets: {
-//     path: '/poddisruptionbudgets',
-//     exact: true,
-//     name: 'Pod Disruption Budgets',
-//     sidebar: 'podDisruptionBudgets',
-//     component: () => <PDBList />,
-//   },
-//   podDisruptionBudget: {
-//     path: '/poddisruptionbudgets/:namespace/:name',
-//     exact: true,
-//     name: 'Pod Disruption Budget',
-//     sidebar: 'podDisruptionBudgets',
-//     component: () => <PDBDetails />,
-//   },
-//   priorityclasses: {
-//     path: '/priorityclasses',
-//     exact: true,
-//     name: 'Priority Classes',
-//     sidebar: 'priorityClasses',
-//     component: () => <PriorityClassList />,
-//   },
-//   priorityClass: {
-//     path: '/priorityclasses/:name',
-//     exact: true,
-//     name: 'PriorityClass',
-//     sidebar: 'priorityClasses',
-//     component: () => <PriorityClassDetails />,
-//   },
-//   resourceQuotas: {
-//     path: '/resourcequotas',
-//     exact: true,
-//     name: 'Resource Quotas',
-//     sidebar: 'resourceQuotas',
-//     component: () => <ResourceQuotaList />,
-//   },
-//   resourceQuota: {
-//     path: '/resourcequotas/:namespace/:name',
-//     exact: true,
-//     name: 'Resource Quota',
-//     sidebar: 'resourceQuotas',
-//     component: () => <ResourceQuotaDetails />,
-//   },
-//   leases: {
-//     path: '/leases',
-//     exact: true,
-//     name: 'Leases',
-//     sidebar: 'leases',
-//     component: () => <LeaseList />,
-//   },
-//   lease: {
-//     path: '/leases/:namespace/:name',
-//     exact: true,
-//     name: 'Lease',
-//     sidebar: 'leases',
-//     component: () => <LeaseDetails />,
-//   },
-//   runtimeClasses: {
-//     path: '/runtimeclasses',
-//     exact: true,
-//     name: 'Runtime Classes',
-//     sidebar: 'runtimeClasses',
-//     component: () => <RuntimeClassList />,
-//   },
-//   runtimeClass: {
-//     path: '/runtimeclasses/:name',
-//     exact: true,
-//     name: 'Runtime Class',
-//     sidebar: 'runtimeClasses',
-//     component: () => <RuntimeClassDetails />,
-//   },
-//   limitRanges: {
-//     path: '/limitranges',
-//     exact: true,
-//     name: 'Limit Ranges',
-//     sidebar: 'limitRanges',
-//     component: () => <LimitRangeList />,
-//   },
-//   limitRange: {
-//     path: '/limitranges/:namespace/:name',
-//     exact: true,
-//     name: 'Limit Range',
-//     sidebar: 'limitRanges',
-//     component: () => <LimitRangeDetails />,
-//   },
-//   mutatingWebhookConfigurations: {
-//     path: '/mutatingwebhookconfigurations',
-//     exact: true,
-//     name: 'Mutating Webhook Configurations',
-//     sidebar: 'mutatingWebhookConfigurations',
-//     component: () => <MutatingWebhookConfigList />,
-//   },
-//   mutatingWebhookConfiguration: {
-//     path: '/mutatingwebhookconfigurations/:name',
-//     exact: true,
-//     name: 'Mutating Webhook Configuration',
-//     sidebar: 'mutatingWebhookConfigurations',
-//     component: () => <MutatingWebhookConfigurationDetails />,
-//   },
-//   validatingWebhookConfigurations: {
-//     path: '/validatingwebhookconfigurations',
-//     exact: true,
-//     name: 'Validating Webhook Configurations',
-//     sidebar: 'validatingWebhookConfigurations',
-//     component: () => <ValidatingWebhookConfigurationList />,
-//   },
-//   validatingWebhookConfiguration: {
-//     path: '/validatingwebhookconfigurations/:name',
-//     exact: true,
-//     name: 'Validating Webhook Configuration',
-//     sidebar: 'validatingWebhookConfigurations',
-//     component: () => <ValidatingWebhookConfigurationDetails />,
-//   },
-//   verticalPodAutoscalers: {
-//     path: '/verticalpodautoscalers',
-//     exact: true,
-//     name: 'Vertical Pod Autoscalers',
-//     sidebar: 'verticalPodAutoscalers',
-//     component: () => <VpaList />,
-//   },
-//   verticalPodAutoscaler: {
-//     path: '/verticalpodautoscalers/:namespace/:name',
-//     exact: true,
-//     name: 'Vertical Pod Autoscaler',
-//     sidebar: 'verticalPodAutoscalers',
-//     component: () => <VpaDetails />,
-//   },
-//   token: {
-//     path: '/token',
-//     exact: true,
-//     name: 'Token',
-//     sidebar: null,
-//     noAuthRequired: true,
-//     component: () => <AuthToken />,
-//   },
-//   oidcAuth: {
-//     path: '/auth',
-//     name: 'OidcAuth',
-//     sidebar: null,
-//     noAuthRequired: true,
-//     component: () => <OIDCAuth />,
-//   },
-//   login: {
-//     path: '/login',
-//     exact: true,
-//     name: 'Login',
-//     sidebar: null,
-//     noAuthRequired: true,
-//     component: () => (
-//       <AuthChooser>
-//         <LocaleSelect />
-//       </AuthChooser>
-//     ),
-//   },
-//   crds: {
-//     path: '/crds',
-//     exact: true,
-//     name: 'CRDs',
-//     sidebar: 'crds',
-//     component: () => <CustomResourceDefinitionList />,
-//   },
-//   crd: {
-//     path: '/crds/:name',
-//     exact: true,
-//     name: 'CRD',
-//     sidebar: 'crds',
-//     component: () => <CustomResourceDefinitionDetails />,
-//   },
-//   customresource: {
-//     path: '/customresources/:crd/:namespace/:crName',
-//     exact: true,
-//     name: 'Custom Resource',
-//     sidebar: 'crds',
-//     component: () => <CustomResourceDetails />,
-//   },
-//   customresources: {
-//     path: '/customresources/:crd',
-//     exact: true,
-//     name: 'Custom Resources',
-//     sidebar: 'crds',
-//     component: () => <CustomResourceList />,
-//   },
-//   notifications: {
-//     path: '/notifications',
-//     exact: true,
-//     useClusterURL: false,
-//     name: 'Notifications',
-//     sidebar: {
-//       item: 'notifications',
-//       sidebar: DefaultSidebars.HOME,
-//     },
-//     noAuthRequired: true,
-//     component: () => (
-//       <PageGrid>
-//         <NotificationList />
-//       </PageGrid>
-//     ),
-//   },
-//   settings: {
-//     path: '/settings',
-//     exact: true,
-//     name: 'Settings',
-//     sidebar: {
-//       item: 'settings',
-//       sidebar: DefaultSidebars.HOME,
-//     },
-//     useClusterURL: false,
-//     noAuthRequired: true,
-//     component: () => (
-//       <PageGrid>
-//         <Settings />
-//       </PageGrid>
-//     ),
-//   },
+export interface Route {
+  id: string;
+  path: string;
+  element: () => ReactNode;
+  index?: boolean;
+  props?: any;
 
-//   settingsClusters: {
-//     path: '/settings/clusters',
-//     exact: true,
-//     name: 'Clusters',
-//     sidebar: 'settingsClusters',
-//     useClusterURL: false,
-//     noAuthRequired: true,
-//     component: () => (
-//       <PageGrid>
-//         <SettingsClusters />
-//       </PageGrid>
-//     ),
-//   },
-//   settingsCluster: {
-//     path: '/settings',
-//     exact: true,
-//     name: 'Cluster Settings',
-//     sidebar: 'settingsCluster',
-//     noAuthRequired: true,
-//     component: () => (
-//       <PageGrid>
-//         <SettingsCluster />
-//       </PageGrid>
-//     ),
-//   },
-//   // DISABLED UNTIL DATA HOOK UP
-//   plugins: {
-//     path: '/settings/plugins',
-//     exact: true,
-//     name: 'Plugins',
-//     sidebar: {
-//       item: 'plugins',
-//       sidebar: DefaultSidebars.HOME,
-//     },
-//     useClusterURL: false,
-//     noAuthRequired: true,
-//     component: () => <PluginSettings />,
-//   },
-//   // pluginDetails: {
-//   //   path: '/settings/plugins/:name',
-//   //   exact: true,
-//   //   name: 'Plugin Details',
-//   //   sidebar: {
-//   //     item: 'plugins',
-//   //     sidebar: DefaultSidebars.HOME,
-//   //   },
-//   //   useClusterURL: false,
-//   //   noAuthRequired: true,
-//   //   component: () => <PluginSettingsDetails />,
-//   // },
-//   portforwards: {
-//     path: '/portforwards',
-//     exact: true,
-//     name: 'PortForwards',
-//     sidebar: 'portforwards',
-//     component: () => <PortForwardingList />,
-//   },
-//   loadKubeConfig: {
-//     path: '/load-kube-config',
-//     exact: true,
-//     name: 'Load KubeConfig',
-//     sidebar: null,
-//     useClusterURL: false,
-//     noAuthRequired: true,
-//     component: () => <KubeConfigLoader />,
-//   },
-// };
+  // URL에 cluster prefix 여부
+  useClusterURL?: boolean;
+}
 
-// // The NotFound route  needs to be considered always in the last place when used
-// // with the router switch, as any routes added after this one will never be considered.
-// // So we do not include it in the default routes in order to always "manually" consider it.
-// export const NotFoundRoute = {
-//   path: '*',
-//   exact: true,
-//   name: 'Whoops! This page doesn\'t exist',
-//   component: () => <NotFoundComponent />,
-//   sidebar: null,
-//   noAuthRequired: true,
-// };
+const Routes: RoutesGroup[] = [
+  {
+    indexId: 'home',
+    routes: [
+      { id: 'home', path: '/home', element: () => <Home /> },
+      { id: 'main', path: '/', element: () => <Home /> },
+    ],
+    useClusterURL: false,
+  },
+  {
+    indexId: 'users',
+    routes: [
+      { id: 'users', path: '/users', element: () => <UsersList /> },
+      { id: 'userCreate', path: '/users/create', element: () => <UsersDetail /> },
+      { id: 'userDetail', path: '/users/:name', element: () => <UsersDetail /> },
+    ],
+    useClusterURL: false,
+  },
+  {
+    indexId: 'settings',
+    routes: [{ id: 'settings', path: '/settings', element: () => <Settings /> }],
+    useClusterURL: false,
+  },
+  // k8s
+  {
+    indexId: 'clusters',
+    routes: [
+      {
+        id: 'clusters',
+        path: '/clusters',
 
-// export function getRoute(routeName: string) {
-//   let routeKey = routeName;
-//   for (const key in defaultRoutes) {
-//     if (key.toLowerCase() === routeName.toLowerCase()) {
-//       // if (key !== routeName) {
-//       //   console.warn(`Route name ${routeName} and ${key} are not matching`);
-//       // }
-//       routeKey = key;
-//       break;
-//     }
-//   }
-//   return defaultRoutes[routeKey];
-// }
+        element: () => <Clusters />,
+      },
+    ],
+    useClusterURL: false,
+  },
+  {
+    indexId: 'cluster',
+    routes: [
+      {
+        id: 'cluster',
+        path: '/cluster',
 
-// /**
-//  * Should the route use a cluster URL?
-//  *
-//  * @param route
-//  * @returns true when a cluster URL contains cluster in the URL. eg. /c/minikube/my-url
-//  *   false, the URL does not contain the cluster. eg. /my-url
-//  */
-// export function getRouteUseClusterURL(route: Route): boolean {
-//   if (route.useClusterURL === undefined && route.noCluster !== undefined) {
-//     console.warn('Route.noCluster is deprecated. Please use route.useClusterURL instead.');
-//     return route.noCluster;
-//   }
-//   if (route.useClusterURL === undefined) {
-//     // default is true, so undefined === true.
-//     return true;
-//   }
-//   return route.useClusterURL;
-// }
+        element: () => <K8sClusterOverview />,
+      },
+    ],
+  },
+  {
+    indexId: 'namespaces',
+    routes: [
+      {
+        id: 'namespaces',
+        path: '/namespaces',
 
-// export function getRoutePath(route: Route) {
-//   if (route.path === NotFoundRoute.path) {
-//     return route.path;
-//   }
-//   if (!getRouteUseClusterURL(route)) {
-//     return route.path;
-//   }
+        element: () => <K8sNamespaceList />,
+      },
+      {
+        id: 'namespace',
+        path: '/namespace/:name',
 
-//   return getClusterPrefixedPath(route.path);
-// }
+        element: () => <K8sNamespaceDetails />,
+      },
+    ],
+  },
+  {
+    indexId: 'nodes',
+    routes: [
+      {
+        id: 'nodes',
+        path: '/nodes',
+
+        element: () => <K8sNodeList />,
+      },
+      {
+        id: 'node',
+        path: '/nodes/:name',
+
+        element: () => <K8sNodeDetails />,
+      },
+    ],
+  },
+  {
+    indexId: 'workloads',
+    routes: [
+      {
+        id: 'workloads',
+        path: '/workloads',
+
+        element: () => <K8sWorkloadOverview />,
+      },
+    ],
+  },
+  {
+    indexId: 'pods',
+    routes: [
+      {
+        id: 'pods',
+        path: '/pods',
+
+        element: () => <K8sPodList />,
+      },
+      {
+        id: 'pod',
+        path: '/pods/:namespace/:name',
+
+        element: () => <K8sPodDetails />,
+      },
+    ],
+  },
+  {
+    indexId: 'deployments',
+    routes: [
+      {
+        id: 'deployments',
+        path: '/deployments',
+
+        element: () => <K8sDeploymentsList />,
+      },
+      {
+        id: 'deployment',
+        path: '/deployments/:namespace/:name',
+
+        element: () => <K8sWorkloadDetails workloadKind={Deployment} />,
+      },
+    ],
+  },
+  {
+    indexId: 'statefulSets',
+    routes: [
+      {
+        id: 'statefulSets',
+        path: '/statefulsets',
+
+        element: () => <K8sStatefulsetList />,
+      },
+      {
+        id: 'statefulSet',
+        path: '/statefulsets/:namespace/:name',
+
+        element: () => <K8sWorkloadDetails workloadKind={StatefulSet} />,
+      },
+    ],
+  },
+  {
+    indexId: 'daemonSets',
+    routes: [
+      {
+        id: 'daemonSets',
+        path: '/daemonsets',
+
+        element: () => <K8sDaemonsetList />,
+      },
+      {
+        id: 'daemonSet',
+        path: '/daemonsets/:namespace/:name',
+
+        element: () => <K8sWorkloadDetails workloadKind={DaemonSet} />,
+      },
+    ],
+  },
+  {
+    indexId: 'replicaSets',
+    routes: [
+      {
+        id: 'replicaSets',
+        path: '/replicasets',
+
+        element: () => <K8sReplicasetList />,
+      },
+      {
+        id: 'replicaSet',
+        path: '/replicasets/:namespace/:name',
+
+        element: () => <K8sWorkloadDetails workloadKind={ReplicaSet} />,
+      },
+    ],
+  },
+  {
+    indexId: 'jobs',
+    routes: [
+      {
+        id: 'jobs',
+        path: '/jobs',
+
+        element: () => <K8sJobList />,
+      },
+      {
+        id: 'job',
+        path: '/jobs/:namespace/:name',
+
+        element: () => <K8sWorkloadDetails workloadKind={Job} />,
+      },
+    ],
+  },
+  {
+    indexId: 'cronJobs',
+    routes: [
+      {
+        id: 'cronJobs',
+        path: '/cronjobs',
+
+        element: () => <K8sCronjobList />,
+      },
+      {
+        id: 'cronJob',
+        path: '/cronjobs/:namespace/:name',
+
+        element: () => <K8sCronjobDetails />,
+      },
+    ],
+  },
+
+  {
+    indexId: 'persistentVolumeClaims',
+    routes: [
+      {
+        id: 'persistentVolumeClaims',
+        path: '/storage/persistentvolumeclaims',
+
+        element: () => <K8sStorageClaimList />,
+      },
+      {
+        id: 'persistentVolumeClaim',
+        path: '/storage/persistentvolumeclaims/:namespace/:name',
+
+        element: () => <K8sStorageClaimDetails />,
+      },
+    ],
+  },
+  {
+    indexId: 'persistentVolumes',
+    routes: [
+      {
+        id: 'persistentVolumes',
+        path: '/storage/persistentvolumes',
+
+        element: () => <K8sStorageVolumeList />,
+      },
+      {
+        id: 'persistentVolume',
+        path: '/storage/persistentvolumes/:name',
+
+        element: () => <K8sStorageVolumeDetails />,
+      },
+    ],
+  },
+  {
+    indexId: 'storageClasses',
+    routes: [
+      {
+        id: 'storageClasses',
+        path: '/storage/classes',
+
+        element: () => <K8sStorageClassList />,
+      },
+      {
+        id: 'storageClass',
+        path: '/storage/classes/:name',
+
+        element: () => <K8sStorageClassDetails />,
+      },
+    ],
+  },
+
+  {
+    indexId: 'services',
+    routes: [
+      {
+        id: 'services',
+        path: '/services',
+
+        element: () => <K8sServiceList />,
+      },
+      {
+        id: 'service',
+        path: '/services/:namespace/:name',
+
+        element: () => <K8sServiceDetails />,
+      },
+    ],
+  },
+  {
+    indexId: 'endpoints',
+    routes: [
+      {
+        id: 'endpoints',
+        path: '/endpoints',
+
+        element: () => <K8sEndpointsList />,
+      },
+      {
+        id: 'endpoint',
+        path: '/endpoints/:namespace/:name',
+
+        element: () => <K8sEndpointsDetails />,
+      },
+    ],
+  },
+  {
+    indexId: 'ingresses',
+    routes: [
+      {
+        id: 'ingresses',
+        path: '/ingresses',
+
+        element: () => <K8sIngressList />,
+      },
+      {
+        id: 'ingress',
+        path: '/ingresses/:namespace/:name',
+
+        element: () => <K8sIngressDetails />,
+      },
+    ],
+  },
+  {
+    indexId: 'ingressclasses',
+    routes: [
+      {
+        id: 'ingressclasses',
+        path: '/ingressclasses',
+
+        element: () => <K8sIngressClassList />,
+      },
+      {
+        id: 'ingressclass',
+        path: '/ingressclasses/:name',
+
+        element: () => <K8sIngressClassDetails />,
+      },
+    ],
+  },
+  {
+    indexId: 'networkPolicies',
+    routes: [
+      {
+        id: 'networkPolicies',
+        path: '/networkPolicies',
+
+        element: () => <K8sNetworkpolicyList />,
+      },
+      {
+        id: 'networkPolicy',
+        path: '/networkPolicies/:namespace/:name',
+
+        element: () => <K8sNetworkpolicyDetails />,
+      },
+    ],
+  },
+
+  {
+    indexId: 'gateways',
+    routes: [
+      {
+        id: 'gateways',
+        path: '/gateways',
+
+        element: () => <K8sGatewayList />,
+      },
+      {
+        id: 'gateway',
+        path: '/gateways/:namespace/:name',
+
+        element: () => <K8sGatewayDetails />,
+      },
+    ],
+  },
+
+  {
+    indexId: 'gatewayclasses',
+    routes: [
+      {
+        id: 'gatewayclasses',
+        path: '/gatewayclasses',
+
+        element: () => <K8sGatewayClassList />,
+      },
+      {
+        id: 'gatewayclass',
+        path: '/gatewayclasses/:name',
+
+        element: () => <K8sGatewayClassDetails />,
+      },
+    ],
+  },
+
+  {
+    indexId: 'httproutes',
+    routes: [
+      {
+        id: 'httproutes',
+        path: '/httproutes',
+
+        element: () => <K8sHttpRouteList />,
+      },
+      {
+        id: 'httprout',
+        path: '/httproutes/:namespace/:name',
+
+        element: () => <K8sHttpRouteDetails />,
+      },
+    ],
+  },
+
+  {
+    indexId: 'grpcroutes',
+    routes: [
+      {
+        id: 'grpcroutes',
+        path: '/grpcroutes',
+
+        element: () => <K8sGrpcRouteList />,
+      },
+      {
+        id: 'grpcrout',
+        path: '/grpcroutes/:namespace/:name',
+
+        element: () => <K8sGrpcRouteDetails />,
+      },
+    ],
+  },
+
+  {
+    indexId: 'serviceAccounts',
+    routes: [
+      {
+        id: 'serviceAccounts',
+        path: '/serviceaccounts',
+
+        element: () => <K8sServiceaccountList />,
+      },
+      {
+        id: 'serviceAccount',
+        path: '/serviceaccounts/:namespace/:name',
+
+        element: () => <K8sServiceaccountDetails />,
+      },
+    ],
+  },
+  {
+    indexId: 'roles',
+    routes: [
+      {
+        id: 'roles',
+        path: '/roles',
+
+        element: () => <K8sRoleList />,
+      },
+      {
+        id: 'role',
+        path: '/roles/:namespace/:name',
+
+        element: () => <K8sRoleDetails />,
+      },
+      {
+        id: 'clusterrole',
+        path: '/clusterroles/:name',
+
+        element: () => <K8sRoleDetails />,
+      },
+    ],
+  },
+  {
+    indexId: 'roleBindings',
+    routes: [
+      {
+        id: 'roleBindings',
+        path: '/roleBindings',
+
+        element: () => <K8sRoleBindingList />,
+      },
+      {
+        id: 'roleBinding',
+        path: '/roleBinding/:namespace/:name',
+
+        element: () => <K8sRoleBindingDetails />,
+      },
+      {
+        id: 'clusterRoleBinding',
+        path: '/clusterrolebinding/:name',
+
+        element: () => <K8sRoleBindingDetails />,
+      },
+    ],
+  },
+
+  {
+    indexId: 'configMaps',
+    routes: [
+      {
+        id: 'configMaps',
+        path: '/configmaps',
+
+        element: () => <K8sConfigmapList />,
+      },
+      {
+        id: 'configMap',
+        path: '/configmaps/:namespace/:name',
+
+        element: () => <K8sConfigmapDetails />,
+      },
+    ],
+  },
+  {
+    indexId: 'secrets',
+    routes: [
+      {
+        id: 'secrets',
+        path: '/secrets',
+
+        element: () => <K8sSecretList />,
+      },
+      {
+        id: 'secret',
+        path: '/secrets/:namespace/:name',
+
+        element: () => <K8sSecretDetails />,
+      },
+    ],
+  },
+  {
+    indexId: 'horizontalPodAutoscalers',
+    routes: [
+      {
+        id: 'horizontalPodAutoscalers',
+        path: '/horizontalpodautoscalers',
+
+        element: () => <K8sHorizontalPodAutoscalerList />,
+      },
+      {
+        id: 'horizontalPodAutoscaler',
+        path: '/horizontalpodautoscalers/:namespace/:name',
+
+        element: () => <K8sHorizontalPodAutoscalerDetails />,
+      },
+    ],
+  },
+  {
+    indexId: 'verticalPodAutoscalers',
+    routes: [
+      {
+        id: 'verticalPodAutoscalers',
+        path: '/verticalpodautoscalers',
+
+        element: () => <K8sVerticalPodAutoscalerList />,
+      },
+      {
+        id: 'verticalPodAutoscaler',
+        path: '/verticalpodautoscalers/:namespace/:name',
+
+        element: () => <K8sVerticalPodAutoscalerDetails />,
+      },
+    ],
+  },
+  {
+    indexId: 'podDisruptionBudgets',
+    routes: [
+      {
+        id: 'podDisruptionBudgets',
+        path: '/poddisruptionbudgets',
+
+        element: () => <K8sPodDisruptionBudgetList />,
+      },
+      {
+        id: 'podDisruptionBudget',
+        path: '/poddisruptionbudgets/:namespace/:name',
+
+        element: () => <K8sPodDisruptionBudgetDetails />,
+      },
+    ],
+  },
+  {
+    indexId: 'resourceQuotas',
+    routes: [
+      {
+        id: 'resourceQuotas',
+        path: '/resourcequotas',
+
+        element: () => <K8sResourceQuotaList />,
+      },
+      {
+        id: 'resourceQuota',
+        path: '/resourcequotas/:namespace/:name',
+
+        element: () => <K8sResourceQuotaDetails />,
+      },
+    ],
+  },
+  {
+    indexId: 'limitRanges',
+    routes: [
+      {
+        id: 'limitRanges',
+        path: '/limitranges',
+
+        element: () => <K8sLimitRangeList />,
+      },
+      {
+        id: 'limitRange',
+        path: '/limitranges/:namespace/:name',
+
+        element: () => <K8sLimitRangeDetails />,
+      },
+    ],
+  },
+  {
+    indexId: 'priorityClasses',
+    routes: [
+      {
+        id: 'priorityClasses',
+        path: '/priorityclasses',
+
+        element: () => <K8sPriorityClassList />,
+      },
+      {
+        id: 'priorityClass',
+        path: '/priorityclasses/:name',
+
+        element: () => <K8sPriorityClassDetails />,
+      },
+    ],
+  },
+  {
+    indexId: 'runtimeClasses',
+    routes: [
+      {
+        id: 'runtimeClasses',
+        path: '/runtimeclasses',
+
+        element: () => <K8sRuntimeClassList />,
+      },
+      {
+        id: 'runtimeClass',
+        path: '/runtimeclasses/:name',
+
+        element: () => <K8sRuntimeClassDetails />,
+      },
+    ],
+  },
+  {
+    indexId: 'leases',
+    routes: [
+      {
+        id: 'leases',
+        path: '/leases',
+
+        element: () => <K8sLeaseList />,
+      },
+      {
+        id: 'lease',
+        path: '/leases/:namespace/:name',
+
+        element: () => <K8sLeaseDetails />,
+      },
+    ],
+  },
+  {
+    indexId: 'mutatingWebhookConfigurations',
+    routes: [
+      {
+        id: 'mutatingWebhookConfigurations',
+        path: '/mutatingwebhookconfigurations',
+
+        element: () => <K8sWebhookconfigurationMutatingWebhookConfigList />,
+      },
+      {
+        id: 'mutatingWebhookConfiguration',
+        path: '/mutatingwebhookconfigurations/:name',
+
+        element: () => <K8sWebhookconfigurationMutatingWebhookConfigDetails />,
+      },
+    ],
+  },
+  {
+    indexId: 'validatingWebhookConfigurations',
+    routes: [
+      {
+        id: 'validatingWebhookConfigurations',
+        path: '/validatingwebhookconfigurations',
+
+        element: () => <K8sWebhookconfigurationValidatingWebhookConfigList />,
+      },
+      {
+        id: 'validatingWebhookConfiguration',
+        path: '/validatingwebhookconfigurations/:name',
+
+        element: () => <K8sWebhookconfigurationValidatingWebhookConfigDetails />,
+      },
+    ],
+  },
+  {
+    indexId: 'crds',
+    routes: [
+      {
+        id: 'crds',
+        path: '/crds',
+
+        element: () => <K8sCustomResourceDefinitionList />,
+      },
+      {
+        id: 'crd',
+        path: '/crds/:name',
+
+        element: () => <K8sCustomResourceDefinitionDetails />,
+      },
+      {
+        id: 'customresource',
+        path: '/customresources/:crd/:namespace/:crName',
+
+        element: () => <K8sCustomResourceDetails />,
+      },
+      {
+        id: 'customresources',
+        path: '/customresources/:crd',
+
+        element: () => <K8sCustomResourceList />,
+      },
+    ],
+  },
+  {
+    indexId: 'crs',
+    routes: [
+      {
+        id: 'crs',
+        path: '/crs',
+
+        element: () => <K8sCrsInstanceList />,
+      },
+    ],
+  },
+  {
+    indexId: 'maps',
+    routes: [
+      {
+        id: 'maps',
+        path: '/maps',
+
+        element: () => <K8sResourceMap height="calc(100vh - 64px)" />,
+      },
+    ],
+  },
+  {
+    indexId: 'tenantClusters',
+    routes: [
+      {
+        id: 'tenantClusters',
+        path: '/kaas/clusters',
+
+        element: () => <KaaSList />,
+      },
+      {
+        id: 'tenantCluster',
+        path: '/kaas/clusters/:managementNamespace/:name',
+
+        element: () => <KaaSDetail />,
+      },
+      {
+        id: 'tenantClusterCreate',
+        path: '/kaas/clusters/create',
+
+        element: () => <KaaSCreate />,
+      },
+    ],
+    useClusterURL: false,
+  },
+];
+
+export const routeTable: { [key: string]: Route } = Routes.reduce((ret: object, group: RoutesGroup) => {
+  const flatRoute = group.routes.reduce((subRet: object, route: Route) => {
+    const index = group.indexId === route.id;
+    return {
+      ...subRet,
+      [toLower(route.id)]: {
+        ...route,
+        index,
+        useClusterURL: route.useClusterURL,
+      },
+    };
+  }, {});
+
+  return {
+    ...ret,
+    ...flatRoute,
+  };
+}, {});
+
+// isUseClusterURL route가 cluster URL을 사용하는지 여부를 반환합니다.
+export function isUseClusterURL(route: Route): boolean {
+  if (isUndefined(route?.useClusterURL)) {
+    // 기본값은 true
+    return true;
+  }
+  return route.useClusterURL;
+}
+
+// getRoutePathPattern URL 패턴을 반환합니다. clusterURL을 허용하는 route인 경우 cluster 명을 지정해주면 cluster prefix를 추가합니다.
+export function getRoutePathPattern(route: Route, cluster?: string | null) {
+  if (!!cluster == false || !isUseClusterURL(route)) {
+    return route.path;
+  }
+
+  return getClusterPrefixedPath(route.path);
+}
+
+// getRoute 라우트 id로 라우트 객체를 조회합니다.
+export function getRoute(routeId: string): Route {
+  return routeTable[toLower(routeId)];
+}
 
 export interface RouteURLProps {
   cluster?: string;
   [prop: string]: any;
 }
-// TODO headlamp route 구조에 맞게 작성된 함수이므로, 우리 route 구조에 맞게 재작성해서 routes.tsx에 추가해야 함
-export function createRouteURL(routeName: string, params: RouteURLProps = {}) {
+
+// createRouteURL URL을 반환합니다.
+export function createRouteURL(routeId: string, params: RouteURLProps = {}) {
   const cluster = getCluster();
   const fullParams = {
     cluster,
     ...params,
   };
-
-  const pathPattern = [];
-  cluster ? pathPattern.push(getClusterPrefixedPath(routeName)) : pathPattern.push(routeName);
-
-  // Route 참조 없이 수작업으로 URL을 만드는 방식이므로 파라메터가 pathVariable로 붙는 순서를 하드코딩해줌
-  const pathVariableOrder = ['crd', 'namespace', 'managementNamespace', 'crName', 'name'];
-  pathVariableOrder.forEach((pathVariable) => {
-    if (params[pathVariable]) {
-      pathPattern.push(`:${pathVariable}`);
-    }
-  });
-
-  const absolutePath = '/';
-  return generatePath(absolutePath + pathPattern.join('/'), fullParams);
+  const route = getRoute(routeId);
+  return generatePath(getRoutePathPattern(route, cluster), fullParams);
 }
-// export function createRouteURL(routeName: string, params: RouteURLProps = {}) {
-//   const storeRoutes = store.getState().routes.routes;
-//   const route = (storeRoutes && storeRoutes[routeName]) || getRoute(routeName);
 
-//   if (!route) {
-//     return '';
-//   }
-
-//   let cluster: string | null = params.cluster || null;
-//   if (!cluster && getRouteUseClusterURL(route)) {
-//     cluster = getCluster();
-//     if (!cluster) {
-//       return '/';
-//     }
-//   }
-//   const fullParams = {
-//     ...params,
-//   };
-
-//   // Add cluster to the params if it is not already there
-//   if (!fullParams.cluster && !!cluster) {
-//     fullParams.cluster = cluster;
-//   }
-
-//   const url = getRoutePath(route);
-//   return generatePath(url, fullParams);
-// }
-
-// export function getDefaultRoutes() {
-//   return defaultRoutes;
-// }
+export function getRoutes() {
+  return Routes;
+}

@@ -6,6 +6,7 @@ import Box from '@mui/material/Box';
 
 import { Link, Loader, PageGrid, SectionHeader } from '@components/common';
 import BackLink from '@components/common/BackLink';
+import { CreateResourceButton } from '@components/common/CreateResourceButton';
 import Empty from '@components/common/EmptyContent';
 import ResourceListView from '@components/common/Resource/ResourceListView';
 import { ResourceTableColumn, ResourceTableProps } from '@components/common/Resource/ResourceTable';
@@ -43,7 +44,7 @@ function CustomResourceLink(props: { resource: KubeObject<KubeCRD>; crd: CRD; [o
   return (
     <Link
       sx={{ cursor: 'pointer' }}
-      routeName="customresources"
+      routeName="customresource"
       params={{
         crd: crd.metadata.name,
         namespace: resource.metadata.namespace || '-',
@@ -64,14 +65,17 @@ function CustomResourceListRenderer(props: CustomResourceListProps) {
   const { crd } = props;
   const { t } = useTranslation('glossary');
 
+  const CRClass = crd.makeCRClass();
+
   return (
     <PageGrid>
       <BackLink />
       <SectionHeader
         title={crd.spec.names.kind}
+        titleSideActions={[<CreateResourceButton resourceClass={CRClass} resourceName={crd.spec.names.kind} />]}
         actions={[
           <Box mr={2}>
-            <Link routeName="crds" params={{ name: crd.metadata.name }}>
+            <Link routeName="crd" params={{ name: crd.metadata.name }}>
               {t('glossary|CRD: {{ crdName }}', { crdName: crd.metadata.name })}
             </Link>
           </Box>,

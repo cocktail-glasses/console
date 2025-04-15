@@ -15,16 +15,16 @@ import { localeDate } from '@lib/util';
 import { JSONPath } from 'jsonpath-plus';
 
 export default function CustomResourceDetailsFromURL() {
-  const params = useParams<CustomResourceDetailsProps>();
+  const params = useParams() as CustomResourceDetailsProps;
 
   return <CustomResourceDetails {...params} />;
 }
 
-export interface CustomResourceDetailsProps {
+export type CustomResourceDetailsProps = {
   crd: string;
   crName: string;
   namespace: string;
-}
+};
 
 export function CustomResourceDetails(props: CustomResourceDetailsProps) {
   const { crd: crdName, crName, namespace: ns } = props;
@@ -140,7 +140,7 @@ function CustomResourceDetailsRenderer(props: CustomResourceDetailsRendererProps
             name: t('glossary|Definition'),
             value: (
               <Link
-                routeName="crds"
+                routeName="crd"
                 params={{
                   name: crd.metadata.name,
                 }}
@@ -149,7 +149,7 @@ function CustomResourceDetailsRenderer(props: CustomResourceDetailsRendererProps
               </Link>
             ),
           },
-          ...getExtraInfo(extraColumns, item!.jsonData),
+          ...getExtraInfo(extraColumns, item!.jsonData as KubeCRD),
         ]}
         backLink=""
       />

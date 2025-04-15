@@ -17,6 +17,7 @@ import {
   IoClastixKamajiV1alpha1TenantControlPlaneList,
   IoClastixKamajiV1alpha1TenantControlPlane,
 } from '@lib/kamaji';
+import { createRouteURL } from '@lib/router';
 import clsx from 'clsx';
 
 export default function KaaSClusterList() {
@@ -93,7 +94,7 @@ const ListContent = ({ tenantControlPlanes, isLoading }: ListContentProp) => {
   const handleChangeSearch = (_: ChangeEvent, v: string) => setSearch(v);
 
   const navigate = useNavigate();
-  const handleCreateClick = () => navigate('/kaas/clusters/create');
+  const handleCreateClick = () => navigate(createRouteURL('tenantClusterCreate'));
 
   return (
     <>

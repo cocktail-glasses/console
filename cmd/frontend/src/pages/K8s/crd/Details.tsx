@@ -14,7 +14,7 @@ import { ApiError } from '@lib/k8s/apiProxy';
 import CRD from '@lib/k8s/crd';
 
 export default function CustomResourceDefinitionDetails() {
-  const { name } = useParams<{ name: string }>();
+  const { name } = useParams() as { name: string };
   const [item, setItem] = useState<CRD | null>(null);
   const [error, setError] = useState<ApiError | null>(null);
   const { t } = useTranslation(['glossary', 'translation']);

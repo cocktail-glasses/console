@@ -1,10 +1,11 @@
-import { Children, isValidElement, useEffect, useMemo, useRef, useState } from 'react';
+import { Children, isValidElement, ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { generatePath, useLocation } from 'react-router-dom';
 
+import { Grid2Props } from '@mui/material';
 import Box from '@mui/material/Box';
 import Divider from '@mui/material/Divider';
-import Grid, { GridProps, GridSize } from '@mui/material/Grid';
+import Grid, { GridSize } from '@mui/material/Grid';
 import IconButton from '@mui/material/IconButton';
 import Input, { InputProps } from '@mui/material/Input';
 import InputLabel from '@mui/material/InputLabel';
@@ -31,12 +32,12 @@ import { SectionBox } from '@components/common/SectionBox';
 import SimpleTable, { NameValueTable } from '@components/common/SimpleTable';
 import { Icon } from '@iconify/react';
 import { labelSelectorToQuery, ResourceClasses } from '@lib/k8s';
+import { METRIC_REFETCH_INTERVAL_MS, PodMetrics } from '@lib/k8s/PodMetrics';
 import { ApiError } from '@lib/k8s/apiProxy';
 import {
   KubeCondition,
   KubeContainer,
   KubeContainerStatus,
-  KubeObject,
   KubeObjectClass,
   KubeObjectInterface,
 } from '@lib/k8s/cluster';
@@ -45,9 +46,7 @@ import { createRouteURL, RouteURLProps } from '@lib/router';
 import { getThemeName } from '@lib/themes';
 import { localeDate, useId } from '@lib/util';
 import Editor from '@monaco-editor/react';
-// import { useHasPreviousRoute } from '@lib/App/RouteSwitcher';
 import { PodListProps, PodListRenderer } from '@pages/K8s/pod/List';
-import { Location } from 'history';
 import { Base64 } from 'js-base64';
 import { DefaultDetailsViewSection, DetailsViewSection } from 'redux/detailsViewSectionSlice';
 import { HeadlampEventType, useEventCallback } from 'redux/headlampEventSlice';
@@ -89,7 +88,7 @@ export interface DetailsGridProps<T extends KubeObjectClass>
   namespace?: string;
   /** Sections to show in the details grid (besides the default ones). */
   extraSections?:
-    | ((item: InstanceType<T>) => boolean | DetailsViewSection[] | React.ReactNode[])
+    | ((item: InstanceType<T>) => boolean | DetailsViewSection[] | ReactNode[])
     | boolean
     | DetailsViewSection[];
   /** @deprecated Use extraSections instead. */
@@ -163,7 +162,7 @@ export function DetailsGrid<T extends KubeObjectClass>(props: DetailsGridProps<T
     onResourceUpdate?.(item as InstanceType<T>, error!);
   }, [item, error, onResourceUpdate]);
 
-  const actualBackLink: string | Location | undefined = useMemo(() => {
+  const actualBackLink: string | ReturnType<typeof useLocation> | undefined = useMemo(() => {
     if (!!backLink || backLink === '') {
       return backLink;
     }
@@ -196,7 +195,7 @@ export function DetailsGrid<T extends KubeObjectClass>(props: DetailsGridProps<T
     return createRouteURL(route);
   }, [item, backLink, location.state?.backLink, resourceType]);
 
-  const sections: DetailsViewSection[] = [];
+  const sections: (DetailsViewSection | ReactNode)[] = [];
 
   // Back link
   if (!!actualBackLink || actualBackLink === '') {
@@ -263,11 +262,11 @@ export function DetailsGrid<T extends KubeObjectClass>(props: DetailsGridProps<T
   // }
 
   if (extraSections) {
-    let actualExtraSections: DetailsViewSection[] = [];
+    let actualExtraSections: (DetailsViewSection | ReactNode)[] = [];
     if (Array.isArray(extraSections)) {
       actualExtraSections = extraSections;
     } else if (typeof extraSections === 'function') {
-      const extraSectionsResult = extraSections(item) || [];
+      const extraSectionsResult = extraSections(item!) || [];
       if (Array.isArray(extraSectionsResult)) {
         actualExtraSections = extraSectionsResult;
       }
@@ -321,7 +320,7 @@ export function DetailsGrid<T extends KubeObjectClass>(props: DetailsGridProps<T
       })}
     >
       {Children.toArray(
-        sectionsProcessed.map((section) => {
+        sectionsProcessed.map((section: React.ReactNode | DetailsViewSection) => {
           const Section = has(section, 'section') ? (section as DetailsViewSection).section : section;
           if (isValidElement(Section)) {
             return <ErrorBoundary>{Section}</ErrorBoundary>;
@@ -330,8 +329,7 @@ export function DetailsGrid<T extends KubeObjectClass>(props: DetailsGridProps<T
           } else if (typeof Section === 'function') {
             return (
               <ErrorBoundary>
-                <>{Section(item)}</>
-                {/* <Section resource={item} /> */}
+                <Section resource={item} />
               </ErrorBoundary>
             );
           }
@@ -341,7 +339,7 @@ export function DetailsGrid<T extends KubeObjectClass>(props: DetailsGridProps<T
   );
 }
 
-export interface PageGridProps extends GridProps {
+export interface PageGridProps extends Grid2Props {
   sections?: React.ReactNode;
   children?: React.ReactNode;
 }
@@ -938,7 +936,11 @@ export function OwnedPodsSection(props: OwnedPodsSectionProps) {
     fieldSelector: resource.kind === 'Node' ? `spec.nodeName=${resource.metadata.name}` : undefined,
   };
 
-  const [pods, error] = Pod.useList(queryData);
+  const { items: pods, errors } = Pod.useList(queryData);
+  const { items: podMetrics } = PodMetrics.useList({
+    ...queryData,
+    refetchInterval: METRIC_REFETCH_INTERVAL_MS,
+  });
   const onlyOneNamespace = !!resource.metadata.namespace || resource.kind === 'Namespace';
   const hideNamespaceFilter = onlyOneNamespace || noSearch;
 
@@ -946,7 +948,8 @@ export function OwnedPodsSection(props: OwnedPodsSectionProps) {
     <PodListRenderer
       hideColumns={hideColumns || onlyOneNamespace ? ['namespace'] : undefined}
       pods={pods}
-      error={error}
+      errors={errors}
+      metrics={podMetrics}
       noNamespaceFilter={hideNamespaceFilter}
     />
   );
@@ -1108,7 +1111,7 @@ export function VolumeSection(props: VolumeSectionProps) {
   function PrintVolumeLink(props: PrintVolumeLinkProps) {
     const { volumeName, volumeKind, volume } = props;
     const resourceClasses = ResourceClasses;
-    const classList = Object.keys(resourceClasses);
+    const classList = Object.keys(resourceClasses) as Array<keyof typeof resourceClasses>;
 
     for (const kind of classList) {
       if (kind.toLowerCase() === volumeKind.toLowerCase()) {

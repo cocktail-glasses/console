@@ -1,6 +1,6 @@
-import { KubeContainer, LabelSelector } from './cluster';
 import { KubeMetadata } from './KubeMetadata';
 import { KubeObject, KubeObjectInterface } from './KubeObject';
+import { KubeContainer, LabelSelector } from './cluster';
 import { KubePodSpec } from './pod';
 
 export interface KubeDeployment extends KubeObjectInterface {
@@ -41,7 +41,7 @@ class Deployment extends KubeObject<KubeDeployment> {
 
   getMatchLabelsList(): string[] {
     const labels = this.spec.selector.matchLabels || {};
-    return Object.keys(labels).map(key => `${key}=${labels[key]}`);
+    return Object.keys(labels).map((key) => `${key}=${labels[key]}`);
   }
 
   static getBaseObject(): KubeDeployment {
