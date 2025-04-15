@@ -42,7 +42,7 @@ import {
   KubeObjectInterface,
 } from '@lib/k8s/cluster';
 import Pod, { KubePod, KubeVolume } from '@lib/k8s/pod';
-import { createRouteURL, RouteURLProps } from '@lib/router';
+import { createRouteURL, RouteURLProps, useHasPreviousRoute } from '@lib/router';
 import { getThemeName } from '@lib/themes';
 import { localeDate, useId } from '@lib/util';
 import Editor from '@monaco-editor/react';
@@ -116,7 +116,7 @@ export function DetailsGrid<T extends KubeObjectClass>(props: DetailsGridProps<T
   } = props;
   const { t } = useTranslation();
   const location = useLocation();
-  // const hasPreviousRoute = useHasPreviousRoute();
+  const hasPreviousRoute = useHasPreviousRoute();
   const detailViews = useTypedSelector((state) => state.detailsViewSection.detailsViewSections);
   const detailViewsProcessors = useTypedSelector((state) => state.detailsViewSection.detailsViewSectionsProcessors);
   const dispatchHeadlampEvent = useEventCallback();
@@ -172,10 +172,10 @@ export function DetailsGrid<T extends KubeObjectClass>(props: DetailsGridProps<T
       return generatePath(stateLink.pathname);
     }
 
-    // if (!!hasPreviousRoute) {
-    //   // Will make it go back to the previous route
-    //   return '';
-    // }
+    if (hasPreviousRoute) {
+      // Will make it go back to the previous route
+      return '';
+    }
 
     let route;
 

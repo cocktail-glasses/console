@@ -1,16 +1,16 @@
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 
-import { WorkloadClass } from '@lib/k8s/Workload';
-import { Workload } from '@lib/k8s/Workload';
-
 import {
   ConditionsSection,
   ContainersSection,
-  DetailsGrid, // LogsButton,
+  DetailsGrid,
+  LogsButton,
   MetadataDictGrid,
   OwnedPodsSection,
 } from '@components/common/Resource';
+import { WorkloadClass } from '@lib/k8s/Workload';
+import { Workload } from '@lib/k8s/Workload';
 
 interface WorkloadDetailsProps<T extends WorkloadClass> {
   workloadKind: T;

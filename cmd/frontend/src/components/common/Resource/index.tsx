@@ -27,6 +27,7 @@ export { default as ResourceTableColumnChooser } from './ResourceTableColumnChoo
 export { addResourceTableColumnsProcessor } from '../../../redux/resourceTableSlice';
 export * from './RestartButton';
 export * from './ScaleButton';
+export * from './LogsButton';
 export { default as ScaleButton } from './ScaleButton';
 export * from './SimpleEditor';
 export { default as SimpleEditor } from './SimpleEditor';
