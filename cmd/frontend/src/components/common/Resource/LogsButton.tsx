@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { Box, FormControl, InputLabel, MenuItem, Select, styled, Switch } from '@mui/material';
+import { Box, FormControl, InputLabel, MenuItem, Select, Switch } from '@mui/material';
 import FormControlLabel from '@mui/material/FormControlLabel';
+import { styled } from '@mui/material/styles';
 
 import { KubeObject } from '../../../lib/k8s/KubeObject';
 import { request } from '../../../lib/k8s/apiProxy';
