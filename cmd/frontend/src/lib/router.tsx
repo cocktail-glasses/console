@@ -1,9 +1,9 @@
 // sort-imports-ignore
 // 이 파일에서는 preitter import 정렬을 무시합니다. kubeObject 클래스 때문에 @pages와 @lib의 임포트 순서가 중요합니다.
 import React, { Children, ReactNode, useEffect } from 'react';
-import { generatePath, useLocation, useNavigate, useNavigationType } from 'react-router';
+import { generatePath, useLocation, useNavigationType } from 'react-router';
 
-import { isUndefined, toLower } from 'lodash';
+import { groupBy, isUndefined, mapValues, reduce, toLower } from 'lodash';
 
 import Clusters from '@pages/Clusters/Clusters';
 import Home from '@pages/Home';
@@ -103,14 +103,18 @@ const K8sResourceMap = React.lazy(() =>
   import('@pages/K8s/resourceMap/GraphView').then((it) => ({ default: it.default }))
 );
 
-export interface RoutesGroup {
+export type RouteGroupTable = {
+  [id: string]: RouteGroup;
+};
+
+export type RouteGroup = {
   indexId: string;
   routes: Route[];
   // URL에 cluster prefix 여부
   useClusterURL?: boolean;
-}
+};
 
-export interface Route {
+export type Route = {
   id: string;
   path: string;
   element: () => ReactNode;
@@ -119,10 +123,10 @@ export interface Route {
 
   // URL에 cluster prefix 여부
   useClusterURL?: boolean;
-}
+};
 
-const Routes: RoutesGroup[] = [
-  {
+const Routes: RouteGroupTable = {
+  home: {
     indexId: 'home',
     routes: [
       { id: 'home', path: '/home', element: () => <Home /> },
@@ -130,7 +134,7 @@ const Routes: RoutesGroup[] = [
     ],
     useClusterURL: false,
   },
-  {
+  users: {
     indexId: 'users',
     routes: [
       { id: 'users', path: '/users', element: () => <UsersList /> },
@@ -139,13 +143,13 @@ const Routes: RoutesGroup[] = [
     ],
     useClusterURL: false,
   },
-  {
+  settings: {
     indexId: 'settings',
     routes: [{ id: 'settings', path: '/settings', element: () => <Settings /> }],
     useClusterURL: false,
   },
   // k8s
-  {
+  clusters: {
     indexId: 'clusters',
     routes: [
       {
@@ -157,7 +161,7 @@ const Routes: RoutesGroup[] = [
     ],
     useClusterURL: false,
   },
-  {
+  cluster: {
     indexId: 'cluster',
     routes: [
       {
@@ -168,7 +172,7 @@ const Routes: RoutesGroup[] = [
       },
     ],
   },
-  {
+  namespaces: {
     indexId: 'namespaces',
     routes: [
       {
@@ -185,7 +189,7 @@ const Routes: RoutesGroup[] = [
       },
     ],
   },
-  {
+  nodes: {
     indexId: 'nodes',
     routes: [
       {
@@ -202,7 +206,7 @@ const Routes: RoutesGroup[] = [
       },
     ],
   },
-  {
+  workloads: {
     indexId: 'workloads',
     routes: [
       {
@@ -213,7 +217,7 @@ const Routes: RoutesGroup[] = [
       },
     ],
   },
-  {
+  pods: {
     indexId: 'pods',
     routes: [
       {
@@ -230,7 +234,7 @@ const Routes: RoutesGroup[] = [
       },
     ],
   },
-  {
+  deployments: {
     indexId: 'deployments',
     routes: [
       {
@@ -247,7 +251,7 @@ const Routes: RoutesGroup[] = [
       },
     ],
   },
-  {
+  statefulSets: {
     indexId: 'statefulSets',
     routes: [
       {
@@ -264,7 +268,7 @@ const Routes: RoutesGroup[] = [
       },
     ],
   },
-  {
+  daemonSets: {
     indexId: 'daemonSets',
     routes: [
       {
@@ -281,7 +285,7 @@ const Routes: RoutesGroup[] = [
       },
     ],
   },
-  {
+  replicaSets: {
     indexId: 'replicaSets',
     routes: [
       {
@@ -298,7 +302,7 @@ const Routes: RoutesGroup[] = [
       },
     ],
   },
-  {
+  jobs: {
     indexId: 'jobs',
     routes: [
       {
@@ -315,7 +319,7 @@ const Routes: RoutesGroup[] = [
       },
     ],
   },
-  {
+  cronJobs: {
     indexId: 'cronJobs',
     routes: [
       {
@@ -333,7 +337,7 @@ const Routes: RoutesGroup[] = [
     ],
   },
 
-  {
+  persistentVolumeClaims: {
     indexId: 'persistentVolumeClaims',
     routes: [
       {
@@ -350,7 +354,7 @@ const Routes: RoutesGroup[] = [
       },
     ],
   },
-  {
+  persistentVolumes: {
     indexId: 'persistentVolumes',
     routes: [
       {
@@ -367,7 +371,7 @@ const Routes: RoutesGroup[] = [
       },
     ],
   },
-  {
+  storageClasses: {
     indexId: 'storageClasses',
     routes: [
       {
@@ -385,7 +389,7 @@ const Routes: RoutesGroup[] = [
     ],
   },
 
-  {
+  services: {
     indexId: 'services',
     routes: [
       {
@@ -402,7 +406,7 @@ const Routes: RoutesGroup[] = [
       },
     ],
   },
-  {
+  endpoints: {
     indexId: 'endpoints',
     routes: [
       {
@@ -419,7 +423,7 @@ const Routes: RoutesGroup[] = [
       },
     ],
   },
-  {
+  ingresses: {
     indexId: 'ingresses',
     routes: [
       {
@@ -436,7 +440,7 @@ const Routes: RoutesGroup[] = [
       },
     ],
   },
-  {
+  ingressclasses: {
     indexId: 'ingressclasses',
     routes: [
       {
@@ -453,7 +457,7 @@ const Routes: RoutesGroup[] = [
       },
     ],
   },
-  {
+  networkPolicies: {
     indexId: 'networkPolicies',
     routes: [
       {
@@ -471,7 +475,7 @@ const Routes: RoutesGroup[] = [
     ],
   },
 
-  {
+  gateways: {
     indexId: 'gateways',
     routes: [
       {
@@ -489,7 +493,7 @@ const Routes: RoutesGroup[] = [
     ],
   },
 
-  {
+  gatewayclasses: {
     indexId: 'gatewayclasses',
     routes: [
       {
@@ -507,7 +511,7 @@ const Routes: RoutesGroup[] = [
     ],
   },
 
-  {
+  httproutes: {
     indexId: 'httproutes',
     routes: [
       {
@@ -525,7 +529,7 @@ const Routes: RoutesGroup[] = [
     ],
   },
 
-  {
+  grpcroutes: {
     indexId: 'grpcroutes',
     routes: [
       {
@@ -543,7 +547,7 @@ const Routes: RoutesGroup[] = [
     ],
   },
 
-  {
+  serviceAccounts: {
     indexId: 'serviceAccounts',
     routes: [
       {
@@ -560,7 +564,7 @@ const Routes: RoutesGroup[] = [
       },
     ],
   },
-  {
+  roles: {
     indexId: 'roles',
     routes: [
       {
@@ -588,7 +592,7 @@ const Routes: RoutesGroup[] = [
       },
     ],
   },
-  {
+  roleBindings: {
     indexId: 'roleBindings',
     routes: [
       {
@@ -617,7 +621,7 @@ const Routes: RoutesGroup[] = [
     ],
   },
 
-  {
+  configMaps: {
     indexId: 'configMaps',
     routes: [
       {
@@ -634,7 +638,7 @@ const Routes: RoutesGroup[] = [
       },
     ],
   },
-  {
+  secrets: {
     indexId: 'secrets',
     routes: [
       {
@@ -651,7 +655,7 @@ const Routes: RoutesGroup[] = [
       },
     ],
   },
-  {
+  horizontalPodAutoscalers: {
     indexId: 'horizontalPodAutoscalers',
     routes: [
       {
@@ -668,7 +672,7 @@ const Routes: RoutesGroup[] = [
       },
     ],
   },
-  {
+  verticalPodAutoscalers: {
     indexId: 'verticalPodAutoscalers',
     routes: [
       {
@@ -685,7 +689,7 @@ const Routes: RoutesGroup[] = [
       },
     ],
   },
-  {
+  podDisruptionBudgets: {
     indexId: 'podDisruptionBudgets',
     routes: [
       {
@@ -702,7 +706,7 @@ const Routes: RoutesGroup[] = [
       },
     ],
   },
-  {
+  resourceQuotas: {
     indexId: 'resourceQuotas',
     routes: [
       {
@@ -719,7 +723,7 @@ const Routes: RoutesGroup[] = [
       },
     ],
   },
-  {
+  limitRanges: {
     indexId: 'limitRanges',
     routes: [
       {
@@ -736,7 +740,7 @@ const Routes: RoutesGroup[] = [
       },
     ],
   },
-  {
+  priorityClasses: {
     indexId: 'priorityClasses',
     routes: [
       {
@@ -753,7 +757,7 @@ const Routes: RoutesGroup[] = [
       },
     ],
   },
-  {
+  runtimeClasses: {
     indexId: 'runtimeClasses',
     routes: [
       {
@@ -770,7 +774,7 @@ const Routes: RoutesGroup[] = [
       },
     ],
   },
-  {
+  leases: {
     indexId: 'leases',
     routes: [
       {
@@ -787,7 +791,7 @@ const Routes: RoutesGroup[] = [
       },
     ],
   },
-  {
+  mutatingWebhookConfigurations: {
     indexId: 'mutatingWebhookConfigurations',
     routes: [
       {
@@ -804,7 +808,7 @@ const Routes: RoutesGroup[] = [
       },
     ],
   },
-  {
+  validatingWebhookConfigurations: {
     indexId: 'validatingWebhookConfigurations',
     routes: [
       {
@@ -821,7 +825,7 @@ const Routes: RoutesGroup[] = [
       },
     ],
   },
-  {
+  crds: {
     indexId: 'crds',
     routes: [
       {
@@ -850,7 +854,7 @@ const Routes: RoutesGroup[] = [
       },
     ],
   },
-  {
+  crs: {
     indexId: 'crs',
     routes: [
       {
@@ -861,7 +865,7 @@ const Routes: RoutesGroup[] = [
       },
     ],
   },
-  {
+  maps: {
     indexId: 'maps',
     routes: [
       {
@@ -872,7 +876,7 @@ const Routes: RoutesGroup[] = [
       },
     ],
   },
-  {
+  tenantClusters: {
     indexId: 'tenantClusters',
     routes: [
       {
@@ -896,26 +900,32 @@ const Routes: RoutesGroup[] = [
     ],
     useClusterURL: false,
   },
-];
+};
 
-export const routeTable: { [key: string]: Route } = Routes.reduce((ret: object, group: RoutesGroup) => {
-  const flatRoute = group.routes.reduce((subRet: object, route: Route) => {
-    const index = group.indexId === route.id;
-    return {
-      ...subRet,
-      [toLower(route.id)]: {
-        ...route,
-        index,
-        useClusterURL: route.useClusterURL,
-      },
-    };
-  }, {});
+// 라우트 id를 키로 가지는 라우트 객체를 반환
+// {route1Id: route1, route2Id, route2, ...}
+const getRouteById = (acc: object, group: RouteGroup) => {
+  const routes = mapValues(
+    groupBy(group.routes, (route: Route) => toLower(route.id)),
+    (route: Route[]) => {
+      // groupBy의 value는 array이므로 첫 번째 인덱스 선택
+      const isIndex = group.indexId === route[0].id;
+
+      return {
+        ...route[0],
+        index: isIndex,
+        useClusterURL: route[0].useClusterURL,
+      };
+    }
+  );
 
   return {
-    ...ret,
-    ...flatRoute,
+    ...acc,
+    ...routes,
   };
-}, {});
+};
+
+export const routeTable = reduce(Routes, getRouteById, {});
 
 // isUseClusterURL route가 cluster URL을 사용하는지 여부를 반환합니다.
 export function isUseClusterURL(route: Route): boolean {
