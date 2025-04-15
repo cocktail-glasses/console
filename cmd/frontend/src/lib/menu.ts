@@ -387,13 +387,6 @@ export const Menus: MenuType[] = [
   },
 
   {
-    id: 'tenantClusters',
-    label: 'Clusters',
-    icon: 'mdi:hexagon-multiple-outline',
-    route: 'tenantClusters',
-    group: 'kaas',
-  },
-  {
     id: 'crds',
     label: 'Custom Resources',
     icon: 'mdi:puzzle',
@@ -416,6 +409,14 @@ export const Menus: MenuType[] = [
     icon: 'mdi:map',
     route: 'maps',
     group: 'k8s',
+  },
+
+  {
+    id: 'tenantClusters',
+    label: 'Clusters',
+    icon: 'mdi:hexagon-multiple-outline',
+    route: 'tenantClusters',
+    group: 'kaas',
   },
 ];
 

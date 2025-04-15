@@ -5,7 +5,7 @@ import { createBrowserRouter, RouterProvider, RouteObject } from 'react-router-d
 import { useAtomValue, useSetAtom } from 'jotai';
 import { loadable } from 'jotai/utils';
 
-import { groupBy, has, map, size } from 'lodash';
+import { filter, groupBy, has, keyBy, map, size } from 'lodash';
 
 import { apiRequest } from './api/api';
 import { authCheck } from './api/common';
@@ -18,11 +18,11 @@ import { MenuType, Menus, Groups } from '@lib/menu';
 import {
   Route,
   getRoutes,
-  RoutesGroup,
   createRouteURL,
   getRoute,
   getRoutePathPattern,
   PreviousRouteProvider,
+  RouteGroup,
 } from '@lib/router';
 import { sidebarGroupId, sidebarGroups, sidebarMenus, sidebarMenuSelected, sidebarSub } from '@lib/stores';
 import Login from '@pages/Auth/Login';
@@ -33,7 +33,12 @@ type Translator = (...args: any[]) => any;
 
 // makeMenuList menu 데이터간의 root, sub 계층 구조를 만들고 root 메뉴 목록으로 반환함
 const makeMenuList = (t: Translator) => {
-  const menusByGroup = groupBy(Menus, (menu: MenuType) => `${menu.group}_${menu.parent ?? menu.id}`);
+  // 그룹 메뉴를 하나의 객체로 변환
+  const groupTable = keyBy(Groups, 'id');
+
+  const availableMenus = Menus.filter((menu: MenuType) => !!groupTable[menu.group]);
+
+  const menusByGroup = groupBy(availableMenus, (menu: MenuType) => `${menu.group}_${menu.parent ?? menu.id}`);
 
   const makeSubMenu = (subMenu: MenuType) => ({
     ...subMenu,
@@ -55,7 +60,7 @@ const makeMenuList = (t: Translator) => {
 
   return Object.values(menusByGroup)
     .filter((menus: MenuType[]) => {
-      const { false: rootMenu } = groupBy(menus, (menu: MenuType) => has(menu, 'parent'));
+      const rootMenu = filter(menus, (menu: MenuType) => !has(menu, 'parent'));
 
       return size(rootMenu) != 0;
     })
@@ -76,19 +81,26 @@ type Menu = {
 const makeRouteList = (menuList: Menu[]) => {
   const clusterName = getCluster();
 
-  return getRoutes()
-    .map((routeGroup: RoutesGroup) => {
-      const menu = Menus.find((menu: { id: string }) => menu.id === routeGroup.indexId);
-      const sub = menuList.find((m: Menu) => m.id === menu?.id || m.id === menu?.parent);
+  const menuTable = keyBy(Menus, 'id');
+
+  return Object.entries(getRoutes())
+    .filter(([id]: [string, RouteGroup]) => !!menuTable[id])
+    .map(([id, routeGroup]: [string, RouteGroup]) => {
+      const menu = menuTable[id];
+
+      const availableMenu = menuList.find((m: Menu) => m.id === menu.id || m.id === menu.parent);
+
       return routeGroup.routes.map((route: Route) => {
+        const r = getRoute(route.id);
+
         return {
-          id: route.id,
-          path: getRoutePathPattern(getRoute(route.id), clusterName),
-          index: routeGroup.indexId === route.id,
-          useClusterURL: routeGroup.useClusterURL,
+          id: r.id,
+          path: getRoutePathPattern(r, clusterName),
+          index: r.index,
+          useClusterURL: r.useClusterURL,
           element: (
-            <AuthRoute menu={menu} sub={sub}>
-              {route.element()}
+            <AuthRoute menu={menu} sub={availableMenu?.sub || []}>
+              {r.element()}
             </AuthRoute>
           ),
         };
