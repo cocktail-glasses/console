@@ -574,6 +574,11 @@ const Routes: RoutesGroup[] = [
         element: () => <K8sRoleDetails />,
       },
       {
+        id: 'clusterRoles',
+        path: '/roles',
+        element: () => <K8sRoleList />,
+      },
+      {
         id: 'clusterrole',
         path: '/clusterroles/:name',
 
@@ -594,6 +599,11 @@ const Routes: RoutesGroup[] = [
         id: 'roleBinding',
         path: '/roleBinding/:namespace/:name',
 
+        element: () => <K8sRoleBindingDetails />,
+      },
+      {
+        id: 'clusterRoleBindings',
+        path: '/rolebindings',
         element: () => <K8sRoleBindingDetails />,
       },
       {
@@ -917,6 +927,7 @@ export function isUseClusterURL(route: Route): boolean {
 // getRoutePathPattern URL 패턴을 반환합니다. clusterURL을 허용하는 route인 경우 cluster 명을 지정해주면 cluster prefix를 추가합니다.
 export function getRoutePathPattern(route: Route, cluster?: string | null) {
   if (!!cluster == false || !isUseClusterURL(route)) {
+    console.log(route);
     return route.path;
   }
 
@@ -940,6 +951,7 @@ export function createRouteURL(routeId: string, params: RouteURLProps = {}) {
     cluster,
     ...params,
   };
+  console.log('route id : ', routeId);
   const route = getRoute(routeId);
   return generatePath(getRoutePathPattern(route, cluster), fullParams);
 }
