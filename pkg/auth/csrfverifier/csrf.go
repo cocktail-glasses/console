@@ -3,6 +3,7 @@ package csrfverifier
 import (
 	"crypto/subtle"
 	"fmt"
+	"github.com/cocktailcloud/console/pkg/auth/sessions"
 	"net/http"
 	"net/url"
 	"strings"
@@ -29,8 +30,8 @@ func NewCSRFVerifier(refererURL *url.URL, secureCookies bool) *CSRFVerifier {
 
 func (c *CSRFVerifier) SetCSRFCookie(path string, w http.ResponseWriter) {
 	cookie := http.Cookie{
-		Name: CSRFCookieName,
-		//Value: sessions.RandomString(64),
+		Name:  CSRFCookieName,
+		Value: sessions.RandomString(64),
 		// JS needs to read this Cookie
 		HttpOnly: false,
 		Path:     path,
