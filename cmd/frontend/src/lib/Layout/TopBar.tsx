@@ -81,7 +81,7 @@ export default function TopBar() {
 
   function logout() {
     setAuthAtom('');
-    fetch('auth/logout', { method: 'POST' });
+    location.href = '/auth/logout';
   }
 
   if (hideAppBar) {
