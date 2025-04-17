@@ -125,6 +125,9 @@ type Config struct {
 
 	// Custom login command to display in the console
 	OCLoginCommand string
+
+	// oidc RP-Initiated logout 이후 리다이렉트 URL
+	PostLogoutRedirectURL string
 }
 
 type completedConfig struct {
@@ -201,6 +204,7 @@ func NewOAuth2Authenticator(ctx context.Context, config *Config) (*OAuth2Authent
 		secureCookies:          c.SecureCookies,
 		constructOAuth2Config:  a.oauth2ConfigConstructor,
 		internalK8sConfig:      c.K8sConfig,
+		postLogoutRedirectURL:  c.PostLogoutRedirectURL,
 	}
 
 	var tokenHandler loginMethod
