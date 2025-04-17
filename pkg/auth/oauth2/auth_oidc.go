@@ -159,6 +159,29 @@ func (o *oidcAuth) makeEndSessionEndpoint(endSessionEndpoint string, idToken str
 	return u.String()
 }
 
+// LogoutFromChannel oidc 프로바이더로부터 로그아웃 알림을 받아 동기화합니다.
+func (o *oidcAuth) LogoutFromChannel(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		klog.Errorf("failed to parse form: %v", err)
+		return
+	}
+
+	rawLogoutToken := r.FormValue("logout_token")
+	if rawLogoutToken == "" {
+		klog.Errorf("logout_token not found")
+		return
+	}
+
+	idToken, err := o.verify(r.Context(), rawLogoutToken)
+	if err != nil {
+		klog.Errorf("failed to logout_token verified: %v", err)
+		return
+	}
+
+	o.sessions.CleanupByUserId(idToken.Subject)
+}
+
 func (o *oidcAuth) getLoginState(w http.ResponseWriter, r *http.Request) (*sessions.LoginState, error) {
 	ls, err := o.sessions.GetSession(w, r)
 	if err != nil {

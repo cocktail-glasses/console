@@ -82,6 +82,9 @@ type loginMethod interface {
 	// LogoutRedirectURL returns the URL to redirect to after a logout.
 	LogoutRedirectURL() string
 
+	// LogoutFromChannel issuer로부터 로그아웃 요청시 처리합니다.
+	LogoutFromChannel(http.ResponseWriter, *http.Request)
+
 	// Authenticate checks if there's an authenticated session connected to the
 	// request based on a cookie, and returns a user associated to the cookie
 	// This does not itself perform an actual token request but it's based solely

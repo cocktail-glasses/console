@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
+	"github.com/cocktailcloud/console/pkg/auth/oauth2"
 	"github.com/cocktailcloud/console/pkg/auth/sessions"
 	"html/template"
 	"io/ioutil"
@@ -40,6 +41,7 @@ const (
 	AuthLoginCallbackEndpoint = "/auth/callback"
 	AuthLoginErrorEndpoint    = "/auth/error"
 	AuthLoginSuccessEndpoint  = "/"
+	AuthChannelLogoutEndpoint = "/auth/channel/logout"
 )
 
 // Private constants
@@ -270,6 +272,16 @@ func (s *Server) HTTPHandler() (http.Handler, error) {
 		s.Authenticator.LoginFunc(w, r)
 	})
 	handleFunc(authLogoutEndpoint, s.handleLogout)
+	handleFunc(AuthChannelLogoutEndpoint, func(w http.ResponseWriter, r *http.Request) {
+		oidcAuthenticator, ok := s.Authenticator.(*oauth2.OAuth2Authenticator)
+		if !ok {
+			// no-op
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+
+		oidcAuthenticator.LogoutFromChannel(w, r)
+	})
 	handleFunc(authCheckEndpoint, authHandler(okHandler))
 	handleFunc(AuthLoginCallbackEndpoint, s.Authenticator.CallbackFunc(fn))
 	handle(copyLoginEndpoint, authHandler(s.handleCopyLogin))
