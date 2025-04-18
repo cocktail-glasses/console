@@ -4,6 +4,7 @@ import { useDispatch } from 'react-redux';
 
 import Box from '@mui/material/Box';
 
+import DrawerModeSettings from './DrawerModeSettings';
 import NumRowsInput from './NumRowsInput';
 import ThemeChangeButton from './ThemeChangeButton';
 import { useSettings } from './hook';
@@ -67,6 +68,10 @@ export default function Settings() {
           {
             name: t('translation|Theme'),
             value: <ThemeChangeButton showBothIcons />,
+          },
+          {
+            name: t('translation|Resource details view'),
+            value: <DrawerModeSettings />,
           },
           {
             name: t('translation|Number of rows for tables'),

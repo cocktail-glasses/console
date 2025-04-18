@@ -1,0 +1,59 @@
+import { useTranslation } from 'react-i18next';
+import { useLocation } from 'react-router';
+
+import { useAtom, useAtomValue } from 'jotai';
+
+import { Box, Drawer, useMediaQuery } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
+
+import { ActionButton } from '..';
+
+import { detailDrawerEnabled, selectedResource } from '@lib/stores';
+import { KubeObjectDetails } from '@pages/K8s/resourceMap/details/KubeNodeDetails';
+
+export default function DetailsDrawer() {
+  const { t } = useTranslation();
+  const [selectedResourceValue, setSelectedResource] = useAtom(selectedResource);
+
+  const theme = useTheme();
+  const location = useLocation();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down('md'));
+  const isDetailDrawerEnabled = useAtomValue(detailDrawerEnabled);
+
+  function handleCloseDrawerReset() {
+    const currentPlacement = location.pathname;
+    const pathname = currentPlacement;
+
+    window.history.replaceState({}, '', pathname);
+  }
+
+  function closeDrawer() {
+    setSelectedResource(null);
+    handleCloseDrawerReset();
+  }
+
+  if (!selectedResourceValue || isSmallScreen) {
+    return null;
+  }
+
+  return (
+    isDetailDrawerEnabled && (
+      <Drawer variant="persistent" anchor="right" open onClose={() => closeDrawer()}>
+        <Box sx={{ paddingX: '1rem', marginY: '3rem' }} width={'45vw'}>
+          {/* Note: the top margin is needed to not clip into the topbar */}
+          <Box
+            sx={{
+              // marginTop: '3rem',
+              display: 'flex',
+              padding: '1rem',
+              justifyContent: 'right',
+            }}
+          >
+            <ActionButton onClick={() => closeDrawer()} icon="mdi:close" description={t('Close')} />
+          </Box>
+          <Box>{selectedResourceValue && <KubeObjectDetails resource={selectedResourceValue} />}</Box>
+        </Box>
+      </Drawer>
+    )
+  );
+}
