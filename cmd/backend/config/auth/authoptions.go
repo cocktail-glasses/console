@@ -261,6 +261,7 @@ func (c *completedOptions) getAuthenticator(
 	if c.AuthType == flagvalues.AuthTypeCocktail {
 		return cocktail.NewCocktailAuthenticator(&cocktail.Config{
 			IssuerURL:               c.IssuerURL.String(),
+			LogoutRedirectURL:       proxy.SingleJoiningSlash(baseURL.String(), server.AuthLoginEndpoint),
 			CookiePath:              "/",
 			SecureCookies:           useSecureCookies,
 			CookieEncryptionKey:     sessionConfig.CookieEncryptionKey,
@@ -301,6 +302,9 @@ func (c *completedOptions) getAuthenticator(
 		SecureCookies:           useSecureCookies,
 		CookieEncryptionKey:     sessionConfig.CookieEncryptionKey,
 		CookieAuthenticationKey: sessionConfig.CookieAuthenticationKey,
+
+		// OIDC RP-Initiated logout 콜백 엔드포인트
+		PostLogoutRedirectURL: proxy.SingleJoiningSlash(baseURL.String(), server.AuthLoginEndpoint),
 	}
 
 	if c.LogoutRedirectURL != nil {

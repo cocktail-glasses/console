@@ -31,15 +31,17 @@ var (
 )
 
 type CocktailAuthenticator struct {
-	useEnhancedAuth bool
-	loginURL        string
-	sessions        *CombinedSessionStore
-	user            *auth.User
+	useEnhancedAuth   bool
+	loginURL          string
+	sessions          *CombinedSessionStore
+	user              *auth.User
+	logoutRedirectURL string
 }
 
 type Config struct {
 	IssuerURL string
 
+	LogoutRedirectURL string
 	// cookiePath is an abstraction leak. (unfortunately, a necessary one.)
 	CookiePath              string
 	SecureCookies           bool
@@ -56,8 +58,9 @@ func NewCocktailAuthenticator(c *Config) (*CocktailAuthenticator, error) {
 		c.CookiePath,
 	)
 	return &CocktailAuthenticator{
-		sessions: sessionStore,
-		loginURL: c.IssuerURL,
+		sessions:          sessionStore,
+		loginURL:          c.IssuerURL,
+		logoutRedirectURL: c.LogoutRedirectURL,
 	}, nil
 }
 
@@ -65,7 +68,13 @@ func (a *CocktailAuthenticator) LoginFunc(w http.ResponseWriter, r *http.Request
 	http.Redirect(w, r, "/login", http.StatusSeeOther)
 }
 func (a *CocktailAuthenticator) LogoutFunc(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusNoContent)
+
+	err := a.sessions.DeleteSession(w, r)
+	if err != nil {
+		klog.Error("cocktail logout error : ", err)
+	}
+	
+	http.Redirect(w, r, a.logoutRedirectURL, http.StatusSeeOther)
 }
 
 func (a *CocktailAuthenticator) Authenticate(w http.ResponseWriter, r *http.Request) (*auth.User, error) {

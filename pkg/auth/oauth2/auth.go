@@ -82,6 +82,9 @@ type loginMethod interface {
 	// LogoutRedirectURL returns the URL to redirect to after a logout.
 	LogoutRedirectURL() string
 
+	// LogoutFromChannel issuer로부터 로그아웃 요청시 처리합니다.
+	LogoutFromChannel(http.ResponseWriter, *http.Request)
+
 	// Authenticate checks if there's an authenticated session connected to the
 	// request based on a cookie, and returns a user associated to the cookie
 	// This does not itself perform an actual token request but it's based solely
@@ -125,6 +128,9 @@ type Config struct {
 
 	// Custom login command to display in the console
 	OCLoginCommand string
+
+	// oidc RP-Initiated logout 이후 리다이렉트 URL
+	PostLogoutRedirectURL string
 }
 
 type completedConfig struct {
@@ -201,6 +207,7 @@ func NewOAuth2Authenticator(ctx context.Context, config *Config) (*OAuth2Authent
 		secureCookies:          c.SecureCookies,
 		constructOAuth2Config:  a.oauth2ConfigConstructor,
 		internalK8sConfig:      c.K8sConfig,
+		postLogoutRedirectURL:  c.PostLogoutRedirectURL,
 	}
 
 	var tokenHandler loginMethod

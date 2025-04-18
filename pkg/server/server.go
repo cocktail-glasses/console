@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
+	"github.com/cocktailcloud/console/pkg/auth/oauth2"
 	"github.com/cocktailcloud/console/pkg/auth/sessions"
 	"html/template"
 	"io/ioutil"
@@ -36,9 +37,11 @@ import (
 
 // Public constants
 const (
+	AuthLoginEndpoint         = "/auth/login"
 	AuthLoginCallbackEndpoint = "/auth/callback"
 	AuthLoginErrorEndpoint    = "/auth/error"
 	AuthLoginSuccessEndpoint  = "/"
+	AuthChannelLogoutEndpoint = "/auth/channel/logout"
 )
 
 // Private constants
@@ -60,7 +63,6 @@ const (
 	alertManagerProxyEndpoint             = "/api/alertmanager"
 	alertManagerTenancyProxyEndpoint      = "/api/alertmanager-tenancy"
 	alertmanagerUserWorkloadProxyEndpoint = "/api/alertmanager-user-workload"
-	authLoginEndpoint                     = "/auth/login"
 	authLogoutEndpoint                    = "/auth/logout"
 	authCheckEndpoint                     = "/auth/check"
 	catalogdEndpoint                      = "/api/catalogd/"
@@ -264,12 +266,22 @@ func (s *Server) HTTPHandler() (http.Handler, error) {
 	authHandlerWithUser := func(h HandlerWithUser) http.HandlerFunc {
 		return authMiddlewareWithUser(authenticator, s.CSRFVerifier, h)
 	}
-	handleFunc(authLoginEndpoint, func(w http.ResponseWriter, r *http.Request) {
+	handleFunc(AuthLoginEndpoint, func(w http.ResponseWriter, r *http.Request) {
 		// 프론트 HMR을 사용하면 인덱스 핸들러를 타지 않기 때문에, 공통으로 사용할 수 있는 로그인 API에 CSRF 쿠키 설정 추가
 		s.CSRFVerifier.SetCSRFCookie(s.BaseURL.Path, w)
 		s.Authenticator.LoginFunc(w, r)
 	})
-	handleFunc(authLogoutEndpoint, allowMethod(http.MethodPost, s.handleLogout))
+	handleFunc(authLogoutEndpoint, s.handleLogout)
+	handleFunc(AuthChannelLogoutEndpoint, func(w http.ResponseWriter, r *http.Request) {
+		oidcAuthenticator, ok := s.Authenticator.(*oauth2.OAuth2Authenticator)
+		if !ok {
+			// no-op
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+
+		oidcAuthenticator.LogoutFromChannel(w, r)
+	})
 	handleFunc(authCheckEndpoint, authHandler(okHandler))
 	handleFunc(AuthLoginCallbackEndpoint, s.Authenticator.CallbackFunc(fn))
 	handle(copyLoginEndpoint, authHandler(s.handleCopyLogin))
@@ -555,7 +567,7 @@ func (s *Server) indexHandler(w http.ResponseWriter, r *http.Request) {
 		AuthDisabled:              s.Authenticator.IsStatic(),
 		ConsoleVersion:            version.Version,
 		BasePath:                  s.BaseURL.Path,
-		LoginURL:                  proxy.SingleJoiningSlash(s.BaseURL.String(), authLoginEndpoint),
+		LoginURL:                  proxy.SingleJoiningSlash(s.BaseURL.String(), AuthLoginEndpoint),
 		LoginSuccessURL:           proxy.SingleJoiningSlash(s.BaseURL.String(), AuthLoginSuccessEndpoint),
 		LoginErrorURL:             proxy.SingleJoiningSlash(s.BaseURL.String(), AuthLoginErrorEndpoint),
 		LogoutURL:                 authLogoutEndpoint,

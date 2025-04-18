@@ -3,7 +3,9 @@ package oauth2
 import (
 	"context"
 	"fmt"
+	"k8s.io/klog/v2"
 	"net/http"
+	"net/url"
 	"strings"
 	"sync"
 	"time"
@@ -41,6 +43,7 @@ type oidcConfig struct {
 	secureCookies          bool
 	constructOAuth2Config  oauth2ConfigConstructor
 	internalK8sConfig      *rest.Config
+	postLogoutRedirectURL  string // oidc RP-Initiated logout 처리 이후 리다이렉트 URL
 }
 
 func newOIDCAuth(ctx context.Context, sessionStore *sessions.CombinedSessionStore, c *oidcConfig) (*oidcAuth, error) {
@@ -127,8 +130,56 @@ func (o *oidcAuth) DeleteCookie(w http.ResponseWriter, r *http.Request) {
 }
 
 func (o *oidcAuth) logout(w http.ResponseWriter, r *http.Request) {
+	user, err := o.Authenticate(w, r)
+	if err != nil {
+		klog.V(4).Infof("authentication failed: %v, redirecting to: %q", err, o.postLogoutRedirectURL)
+		http.Redirect(w, r, o.postLogoutRedirectURL, http.StatusSeeOther)
+		return
+	}
+
+	endSessionEndpoint := o.makeEndSessionEndpoint(o.LogoutRedirectURL(), user.Token, o.postLogoutRedirectURL)
 	o.DeleteCookie(w, r)
-	w.WriteHeader(http.StatusNoContent)
+	klog.Infof("cleared session: %s, OIDC RP-Initiated logout processing..., redirecting to: %q", user.Username, endSessionEndpoint)
+	http.Redirect(w, r, endSessionEndpoint, http.StatusSeeOther)
+}
+
+func (o *oidcAuth) makeEndSessionEndpoint(endSessionEndpoint string, idToken string, redirectUri string) string {
+	u, err := url.Parse(endSessionEndpoint)
+	if err != nil {
+		return ""
+	}
+
+	q := u.Query()
+
+	q.Set("id_token_hint", idToken)
+	q.Set("post_logout_redirect_uri", redirectUri)
+
+	u.RawQuery = q.Encode()
+
+	return u.String()
+}
+
+// LogoutFromChannel oidc 프로바이더로부터 로그아웃 알림을 받아 동기화합니다.
+func (o *oidcAuth) LogoutFromChannel(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		klog.Errorf("failed to parse form: %v", err)
+		return
+	}
+
+	rawLogoutToken := r.FormValue("logout_token")
+	if rawLogoutToken == "" {
+		klog.Errorf("logout_token not found")
+		return
+	}
+
+	idToken, err := o.verify(r.Context(), rawLogoutToken)
+	if err != nil {
+		klog.Errorf("failed to logout_token verified: %v", err)
+		return
+	}
+
+	o.sessions.CleanupByUserId(idToken.Subject)
 }
 
 func (o *oidcAuth) getLoginState(w http.ResponseWriter, r *http.Request) (*sessions.LoginState, error) {

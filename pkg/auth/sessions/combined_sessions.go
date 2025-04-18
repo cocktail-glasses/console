@@ -2,6 +2,7 @@ package sessions
 
 import (
 	"fmt"
+	"k8s.io/klog/v2"
 	"net/http"
 	"os"
 	"strings"
@@ -99,6 +100,24 @@ func (cs *CombinedSessionStore) GetSession(w http.ResponseWriter, r *http.Reques
 
 	loginState := cs.serverStore.GetSession(sessionToken, refreshToken)
 	return loginState, nil
+}
+
+// CleanupByUserId 사용자 Id로 서버 세션을 정리합니다.
+func (cs *CombinedSessionStore) CleanupByUserId(userId string) {
+	cleanupTokens := []string{}
+	for sessionToken, loginState := range cs.serverStore.byToken {
+		if userId == loginState.userID {
+			cleanupTokens = append(cleanupTokens, sessionToken)
+		}
+	}
+
+	if size := len(cleanupTokens); size > 0 {
+		klog.Infof("found tokens(%d) to cleanup", size)
+	}
+	
+	for _, cleanupToken := range cleanupTokens {
+		cs.serverStore.DeleteBySessionToken(cleanupToken)
+	}
 }
 
 func (cs *CombinedSessionStore) GetCookieRefreshToken(r *http.Request) string {
