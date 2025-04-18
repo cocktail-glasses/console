@@ -22,11 +22,14 @@ import {
 import { MRT_Localization_EN } from 'material-react-table/locales/en';
 import { MRT_Localization_KO } from 'material-react-table/locales/ko';
 
+import { includes, isString, toLower } from 'lodash';
+
 import Empty from '@components/common/EmptyContent';
 import Loader from '@components/common/Loader';
 import helpers from '@helpers';
 import { useURLState } from '@lib/util';
 import { useSettings } from '@pages/Settings/hook';
+import { notificationsSlice } from 'redux/notificationsSlice';
 
 /**
  * Column definition
@@ -366,6 +369,14 @@ export default function Table<RowItem extends Record<string, any>>({
   const rows = useMRT_Rows(table);
 
   if (errorMessage) {
+    if (isString(errorMessage) && includes(toLower(errorMessage), 'not found')) {
+      return (
+        <Paper variant="outlined">
+          <Empty>{t('No data to be shown.')}</Empty>
+        </Paper>
+      );
+    }
+
     return <Empty color="error">{errorMessage}</Empty>;
   }
 
