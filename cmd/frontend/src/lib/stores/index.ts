@@ -56,12 +56,20 @@ if (process.env.NODE_ENV !== 'production') {
   settings.debugLabel = 'settings';
 }
 
-export const detailDrawerEnabled = atom<boolean>(false);
+export const detailDrawerEnabled = atomWithStorage<boolean>('detailDrawerEnabled', true);
 if (process.env.NODE_ENV !== 'production') {
   detailDrawerEnabled.debugLabel = 'detailDrawerEnabled';
 }
 
-export const selectedResource = atom<{ kind: any; metadata: object } | null>(null);
+export const selectedResource = atom<{
+  kind: string;
+  metadata: { name: string; namespace?: string };
+  /**
+   * If the selected resource is a custom resource you should provide
+   * the name of the custom resource definition
+   */
+  customResourceDefinition?: string;
+} | null>(null);
 if (process.env.NODE_ENV !== 'production') {
   selectedResource.debugLabel = 'selectedResource';
 }

@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 
@@ -10,16 +9,13 @@ import Loader from '@components/common/Loader';
 import { ConditionsTable, MainInfoSection, PageGrid } from '@components/common/Resource';
 import { SectionBox } from '@components/common/SectionBox';
 import SimpleTable from '@components/common/SimpleTable';
-import { ApiError } from '@lib/k8s/apiProxy';
 import CRD from '@lib/k8s/crd';
 
-export default function CustomResourceDefinitionDetails() {
-  const { name } = useParams() as { name: string };
-  const [item, setItem] = useState<CRD | null>(null);
-  const [error, setError] = useState<ApiError | null>(null);
+export default function CustomResourceDefinitionDetails(props: { name?: string }) {
+  const params = useParams<{ name: string }>();
+  const { name = params.name } = props;
+  const [item, error] = CRD.useGet(name!);
   const { t } = useTranslation(['glossary', 'translation']);
-
-  CRD.useApiGet(setItem, name, undefined, setError);
 
   return !item ? (
     <Loader title={t('translation|Loading resource definition details')} />

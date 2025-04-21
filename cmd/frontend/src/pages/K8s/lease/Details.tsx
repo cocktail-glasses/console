@@ -4,8 +4,9 @@ import { useParams } from 'react-router';
 import { DateLabel, DetailsGrid } from '@components/common';
 import { Lease } from '@lib/k8s/lease';
 
-export default function LeaseDetails() {
-  const { namespace, name } = useParams<{ namespace: string; name: string }>();
+export default function LeaseDetails(props: { name?: string; namespace?: string }) {
+  const params = useParams<{ namespace: string; name: string }>();
+  const { name = params.name, namespace = params.namespace } = props;
   const { t } = useTranslation();
 
   return (

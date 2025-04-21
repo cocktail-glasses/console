@@ -6,8 +6,9 @@ import { Link } from '@components/common';
 import { DetailsGrid } from '@components/common/Resource';
 import ServiceAccount from '@lib/k8s/serviceAccount';
 
-export default function ServiceAccountDetails() {
-  const { namespace, name } = useParams<{ namespace: string; name: string }>();
+export default function ServiceAccountDetails(props: { name?: string; namespace?: string }) {
+  const params = useParams<{ namespace: string; name: string }>();
+  const { name = params.name, namespace = params.namespace } = props;
   const { t } = useTranslation('glossary');
 
   return (

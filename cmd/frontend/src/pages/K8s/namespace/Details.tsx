@@ -11,8 +11,9 @@ import { LimitRange } from '@lib/k8s/limitRange';
 import Namespace, { KubeNamespace } from '@lib/k8s/namespace';
 import ResourceQuota from '@lib/k8s/resourceQuota';
 
-export default function NamespaceDetails() {
-  const { name } = useParams<{ name: string }>();
+export default function NamespaceDetails(props: { name?: string }) {
+  const params = useParams<{ name: string }>();
+  const { name = params.name } = props;
   const { t } = useTranslation(['glossary', 'translation']);
 
   function makeStatusLabel(namespace: Namespace | null) {

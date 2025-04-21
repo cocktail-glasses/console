@@ -6,6 +6,8 @@ import Deployment from '@lib/k8s/deployment';
 import Job from '@lib/k8s/job';
 import ReplicaSet from '@lib/k8s/replicaSet';
 import ConfigDetails from '@pages/K8s/configmap/Details';
+import { CustomResourceDetails } from '@pages/K8s/crd/CustomResourceDetails';
+import CustomResourceDefinitionDetails from '@pages/K8s/crd/Details';
 import CronJobDetails from '@pages/K8s/cronjob/Details';
 import DaemonSetDetails from '@pages/K8s/daemonset/Details';
 import EndpointDetails from '@pages/K8s/endpoints/Details';
@@ -70,9 +72,12 @@ const kindComponentMap: Record<string, (props: { name?: string; namespace?: stri
   MutatingWebhookConfiguration: MutatingWebhookConfigList,
   ValidatingWebhookConfiguration: ValidatingWebhookConfigurationDetails,
   IngressClass: IngressClassDetails,
+  CustomResourceDefinition: CustomResourceDefinitionDetails,
+  crd: CustomResourceDefinitionDetails,
 };
 
 export const canRenderDetails = (maybeKind: string) =>
+  maybeKind === 'customresource' ||
   Object.entries(kindComponentMap).find(([key]) => key.toLowerCase() === maybeKind?.toLowerCase()) !== undefined;
 
 function DetailsNotFound() {
@@ -83,13 +88,28 @@ function DetailsNotFound() {
  * Shows details page for a given Kube resource
  */
 export const KubeObjectDetails = memo(
-  ({ resource }: { resource: { kind: string; metadata: { name: string; namespace?: string } } }) => {
+  ({
+    resource,
+    customResourceDefinition,
+  }: {
+    resource: {
+      kind: string;
+      metadata: { name: string; namespace?: string };
+    };
+    customResourceDefinition?: string;
+  }) => {
     const kind = resource.kind;
     const { name, namespace } = resource.metadata;
 
     const Component =
       Object.entries(kindComponentMap).find(([key]) => key.toLowerCase() === kind?.toLowerCase())?.[1] ??
       DetailsNotFound;
+
+    const content = customResourceDefinition ? (
+      <CustomResourceDetails crName={name} crd={customResourceDefinition} namespace={namespace!} />
+    ) : (
+      <Component name={name} namespace={namespace} />
+    );
 
     useEffect(() => {
       if (!kindComponentMap[kind]) {
@@ -99,9 +119,7 @@ export const KubeObjectDetails = memo(
 
     return (
       <Box sx={{ overflow: 'hidden' }}>
-        <Box sx={{ marginTop: '-70px' }}>
-          <Component name={name} namespace={namespace} />
-        </Box>
+        <Box sx={{ marginTop: '-70px' }}>{content}</Box>
       </Box>
     );
   }

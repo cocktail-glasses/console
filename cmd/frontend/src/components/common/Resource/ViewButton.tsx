@@ -17,12 +17,14 @@ function ViewButton({ item, initialToggle = false }: ViewButtonProps) {
   const [toggle, setToggle] = useState(initialToggle);
   const { t } = useTranslation();
 
-  function handleButtonClick() {
-    setToggle((toggle) => !toggle);
-  }
   return (
     <>
-      <ActionButton description={t('View YAML')} onClick={handleButtonClick} icon="mdi:eye" edge="end" />
+      <ActionButton
+        description={t('translation|View YAML')}
+        onClick={() => setToggle(true)}
+        icon="mdi:eye"
+        // edge="end"
+      />
       <EditorDialog item={item.jsonData} open={toggle} onClose={() => setToggle((toggle) => !toggle)} onSave={null} />
     </>
   );

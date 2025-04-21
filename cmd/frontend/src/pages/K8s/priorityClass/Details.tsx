@@ -4,9 +4,10 @@ import { useParams } from 'react-router-dom';
 import { DetailsGrid } from '@components/common';
 import PriorityClass from '@lib/k8s/priorityClass';
 
-export default function PriorityClassDetails() {
+export default function PriorityClassDetails(props: { name?: string }) {
+  const params = useParams<{ namespace: string; name: string }>();
+  const { name = params.name } = props;
   const { t } = useTranslation(['translation']);
-  const { name } = useParams<{ name: string }>();
 
   return (
     <DetailsGrid
