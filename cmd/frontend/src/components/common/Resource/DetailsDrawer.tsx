@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router';
 
@@ -5,6 +6,8 @@ import { useAtom, useAtomValue } from 'jotai';
 
 import { Box, Drawer, useMediaQuery } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
+
+import { join } from 'lodash';
 
 import { ActionButton } from '..';
 
@@ -14,6 +17,8 @@ import { KubeObjectDetails } from '@pages/K8s/resourceMap/details/KubeNodeDetail
 export default function DetailsDrawer() {
   const { t } = useTranslation();
   const [selectedResourceValue, setSelectedResource] = useAtom(selectedResource);
+
+  const contentRef = useRef<HTMLDivElement | null>();
 
   const theme = useTheme();
   const location = useLocation();
@@ -32,6 +37,22 @@ export default function DetailsDrawer() {
     handleCloseDrawerReset();
   }
 
+  const key = join(
+    [
+      selectedResourceValue?.kind,
+      selectedResourceValue?.metadata.namespace,
+      selectedResourceValue?.metadata.name,
+      selectedResourceValue?.customResourceDefinition,
+    ],
+    '_'
+  );
+
+  useEffect(() => {
+    if (contentRef.current) {
+      contentRef.current.scrollTop = 0;
+    }
+  }, [key]);
+
   if (!selectedResourceValue || isSmallScreen) {
     return null;
   }
@@ -44,6 +65,7 @@ export default function DetailsDrawer() {
         open
         onClose={closeDrawer}
         PaperProps={{
+          ref: contentRef,
           sx: {
             marginTop: '2rem',
             paddingBottom: '100px',
