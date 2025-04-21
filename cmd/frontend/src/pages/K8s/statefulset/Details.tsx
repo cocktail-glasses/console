@@ -5,8 +5,9 @@ import { ContainersSection, DetailsGrid, MetadataDictGrid, OwnedPodsSection } fr
 import { StringDict } from '@lib/k8s/cluster';
 import StatefulSet from '@lib/k8s/statefulSet';
 
-export default function StatefulSetDetails() {
-  const { namespace, name } = useParams<{ namespace: string; name: string }>();
+export default function StatefulSetDetails(props: { name?: string; namespace?: string }) {
+  const params = useParams<{ namespace: string; name: string }>();
+  const { name = params.name, namespace = params.namespace } = props;
   const { t } = useTranslation('glossary');
 
   return (

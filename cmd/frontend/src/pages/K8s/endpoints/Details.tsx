@@ -9,8 +9,9 @@ import SimpleTable from '@components/common/SimpleTable';
 import { ResourceClasses } from '@lib/k8s';
 import Endpoints, { KubeEndpoint } from '@lib/k8s/endpoints';
 
-export default function EndpointDetails() {
-  const { namespace, name } = useParams<{ namespace: string; name: string }>();
+export default function EndpointDetails(props: { name?: string; namespace?: string }) {
+  const params = useParams<{ namespace: string; name: string }>();
+  const { name = params.name, namespace = params.namespace } = props;
   const location = useLocation();
   const { t } = useTranslation(['glossary', 'translation']);
 
@@ -51,10 +52,10 @@ export default function EndpointDetails() {
                             {
                               label: t('Target'),
                               getter: (address) => {
-                                const targetRefClass = !!address.targetRef?.kind
+                                const targetRefClass = address.targetRef?.kind
                                   ? ResourceClasses[address.targetRef?.kind]
                                   : null;
-                                if (!!targetRefClass) {
+                                if (targetRefClass) {
                                   return (
                                     <Link
                                       routeName={targetRefClass.detailsRoute}

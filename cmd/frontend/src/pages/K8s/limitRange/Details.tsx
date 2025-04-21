@@ -7,9 +7,10 @@ import Typography from '@mui/material/Typography';
 import { DetailsGrid, MetadataDictGrid } from '@components/common';
 import { LimitRange } from '@lib/k8s/limitRange';
 
-export default function LimitRangeDetails() {
+export default function LimitRangeDetails(props: { name?: string; namespace?: string }) {
+  const params = useParams<{ namespace: string; name: string }>();
+  const { name = params.name, namespace = params.namespace } = props;
   const { t } = useTranslation(['translation']);
-  const { namespace, name } = useParams<{ namespace: string; name: string }>();
   return (
     <DetailsGrid
       resourceType={LimitRange}

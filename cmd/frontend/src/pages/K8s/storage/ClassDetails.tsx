@@ -4,8 +4,9 @@ import { useParams } from 'react-router-dom';
 import { DetailsGrid } from '@components/common/Resource';
 import StorageClass from '@lib/k8s/storageClass';
 
-export default function StorageClassDetails() {
-  const { name } = useParams<{ name: string }>();
+export default function StorageClassDetails(props: { name?: string }) {
+  const params = useParams<{ name: string }>();
+  const { name = params.name } = props;
   const { t } = useTranslation('glossary');
 
   return (

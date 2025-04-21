@@ -7,8 +7,9 @@ import { SectionBox } from '@components/common/SectionBox';
 import { NameValueTable, NameValueTableRow } from '@components/common/SimpleTable';
 import Secret from '@lib/k8s/secret';
 
-export default function SecretDetails() {
-  const { namespace, name } = useParams<{ namespace: string; name: string }>();
+export default function SecretDetails(props: { name?: string; namespace?: string }) {
+  const params = useParams<{ namespace: string; name: string }>();
+  const { name = params.name, namespace = params.namespace } = props;
   const { t } = useTranslation();
 
   return (
