@@ -417,6 +417,9 @@ export async function connectStreamWithParams<T>(
       // If we can't find the kubeconfig, we'll just use the base URL.
       url = combinePath(BASE_WS_URL, fullPath);
     }
+  } else {
+    // cluster가 없는 경우 /k8s prefix 적용
+    url = combinePath('/k8s', path);
   }
 
   let socket: WebSocket | null = null;
