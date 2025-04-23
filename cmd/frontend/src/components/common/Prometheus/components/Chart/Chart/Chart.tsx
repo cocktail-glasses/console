@@ -1,0 +1,216 @@
+import { useEffect, useState } from 'react';
+
+import { Alert, Box } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
+
+import { getTimeRange } from '../../../util';
+
+import { EmptyContent, Loader } from '@components/common';
+import { FetchMetricsError } from '@lib/Prometheus/request';
+import { Area, AreaChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+
+/**
+ * Props for the Chart component.
+ * @interface ChartProps
+ * @property {Array<Object>} plots - Array of plot configurations.
+ * @property {string} plots[].query - The Prometheus query string.
+ * @property {string} plots[].name - Display name for the plot.
+ * @property {string} plots[].fillColor - Fill color for the plot area.
+ * @property {string} plots[].strokeColor - Stroke color for the plot line.
+ * @property {Function} plots[].dataProcessor - Function to process the raw metrics data.
+ * @property {Function} fetchMetrics - Function to fetch metrics data from Prometheus.
+ * @property {string} interval - Time interval for the chart (e.g. '10m', '1h', '24h').
+ * @property {string} prometheusPrefix - URL prefix for Prometheus API calls.
+ * @property {boolean} autoRefresh - Whether to automatically refresh the chart data.
+ * @property {Object} xAxisProps - Props to pass to the X axis component.
+ * @property {Object} yAxisProps - Props to pass to the Y axis component.
+ * @property {Function} [CustomTooltip] - Optional custom tooltip component.
+ */
+export interface ChartProps {
+  plots: Array<{
+    query: string;
+    name: string;
+    fillColor: string;
+    strokeColor: string;
+    dataProcessor: (data: any) => any[];
+  }>;
+  fetchMetrics: (query: { query: string; from: number; to: number; step: number }) => Promise<any>;
+  interval: string;
+  autoRefresh: boolean;
+  xAxisProps: {
+    [key: string]: any;
+  };
+  yAxisProps: {
+    [key: string]: any;
+  };
+  CustomTooltip?: ({ active, payload, label }: any) => JSX.Element | null;
+}
+
+export default function Chart(props: ChartProps) {
+  enum ChartState {
+    LOADING,
+    ERROR,
+    NO_DATA,
+    SUCCESS,
+  }
+  const { fetchMetrics, xAxisProps, yAxisProps } = props;
+  const [metrics, setMetrics] = useState<Array<any>>([]);
+  const [state, setState] = useState<ChartState | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const theme = useTheme();
+  const timeRange = getTimeRange(props.interval);
+
+  const fetchMetricsData = async (
+    plots: Array<{ query: string; name: string; dataProcessor: (data: any) => any }>,
+    firstLoad: boolean = false
+  ) => {
+    const { from, to, step } = getTimeRange(props.interval);
+
+    const fetchedMetrics: {
+      [key: string]: {
+        data: { timestamp: number; y: number }[];
+        state: ChartState;
+      };
+    } = {};
+
+    if (firstLoad) {
+      setState(ChartState.LOADING);
+    }
+    for (const plot of plots) {
+      let response;
+      try {
+        response = await fetchMetrics({
+          query: plot.query,
+          from: from,
+          to: to,
+          step: step,
+        });
+      } catch (e: unknown) {
+        if (e instanceof FetchMetricsError) {
+          fetchedMetrics[plot.name] = { data: [], state: ChartState.ERROR };
+          if (e.statusCode >= 500 && e.statusCode <= 599) {
+            setError(`Metric Service Unavailable (${e.statusCode}: ${e.message})`);
+          } else {
+            setError(e.message);
+          }
+
+          setState(ChartState.ERROR);
+        }
+
+        break;
+      }
+
+      if (response.status !== 'success') {
+        fetchedMetrics[plot.name] = { data: [], state: ChartState.ERROR };
+        continue;
+      }
+
+      if (response['data']['result'].length === 0) {
+        fetchedMetrics[plot.name] = { data: [], state: ChartState.NO_DATA };
+        continue;
+      }
+
+      const data = plot.dataProcessor(response);
+      fetchedMetrics[plot.name] = { data: data, state: ChartState.SUCCESS };
+    }
+
+    // if all the plots are in no data state, set the state to no data
+    if (Object.values(fetchedMetrics).every((plot) => plot.state === ChartState.NO_DATA)) {
+      setState(ChartState.NO_DATA);
+    }
+    // if all the plots are in success state, set the state to success
+    else if (Object.values(fetchedMetrics).every((plot) => plot.state === ChartState.SUCCESS)) {
+      // merge the data from all the plots into a single object
+      const mergedData = fetchedMetrics[Object.keys(fetchedMetrics)[0]].data.map((element, index) => {
+        const mergedElement: { timestamp: number; [key: string]: number } = { timestamp: element.timestamp };
+        for (const plotName of Object.keys(fetchedMetrics)) {
+          mergedElement[plotName] = fetchedMetrics[plotName].data[index].y;
+        }
+        return mergedElement;
+      });
+      setMetrics(mergedData);
+      setState(ChartState.SUCCESS);
+    } else {
+      // default to error if any of the plots has no data or is in error state
+      setState(ChartState.ERROR);
+    }
+  };
+
+  // Fetch data on initial load
+  useEffect(() => {
+    fetchMetricsData(props.plots, true);
+  }, []);
+
+  // if reload is true, set up a timer to refresh data every 10 seconds
+  // Set up a timer to refresh data every 10 seconds
+  useEffect(() => {
+    if (props.autoRefresh) {
+      const refreshInterval = setInterval(() => {
+        fetchMetricsData(props.plots, false);
+      }, 10000);
+
+      return () => {
+        clearInterval(refreshInterval);
+      };
+    }
+  }, [props.autoRefresh, props.plots, props.interval]);
+
+  let chartContent;
+
+  if (state === ChartState.SUCCESS) {
+    chartContent = (
+      <AreaChart data={metrics} style={{ fontSize: 14 }}>
+        <XAxis
+          stroke={theme.palette.chartStyles.labelColor}
+          fontSize={12}
+          {...xAxisProps}
+          type="number"
+          domain={[timeRange.from, timeRange.to]}
+          allowDataOverflow
+        />
+        <YAxis fontSize={14} stroke={theme.palette.chartStyles.labelColor} {...yAxisProps} />
+        {props.CustomTooltip === undefined ? <Tooltip /> : <Tooltip content={props.CustomTooltip} />}
+        <Legend />
+        <CartesianGrid strokeDasharray="2 4" stroke={theme.palette.divider} vertical={false} />
+        {props.plots.map((plot) => (
+          <Area
+            stackId="1"
+            type="step"
+            dataKey={plot.name}
+            stroke={plot.strokeColor}
+            strokeWidth={2}
+            fill={plot.fillColor}
+            activeDot={{ r: 2 }}
+            animationDuration={props.autoRefresh ? 0 : 400} // Disable animation when refreshing
+          />
+        ))}
+      </AreaChart>
+    );
+  } else if (state === ChartState.LOADING) {
+    chartContent = <Loader title="Fetching Data" />;
+  } else if (state === ChartState.ERROR) {
+    chartContent = (
+      <Box width="100%" height="100%" p={2} display="flex" justifyContent="center" alignItems="center">
+        <Box>
+          <Alert severity="warning" sx={{ fontSize: '20px', color: '#EF4444', alignItems: 'center' }}>
+            {error}
+          </Alert>
+        </Box>
+      </Box>
+    );
+  } else {
+    chartContent = (
+      <Box width="100%" height="100%" p={2} display="flex" justifyContent="center" alignItems="center">
+        <Box>
+          <EmptyContent>No Data</EmptyContent>
+        </Box>
+      </Box>
+    );
+  }
+
+  return (
+    <ResponsiveContainer width="100%" height="100%">
+      {chartContent}
+    </ResponsiveContainer>
+  );
+}

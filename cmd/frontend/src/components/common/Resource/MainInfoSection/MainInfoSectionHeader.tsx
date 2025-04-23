@@ -1,6 +1,8 @@
 import { Children, isValidElement } from 'react';
 import { useLocation } from 'react-router-dom';
 
+import { useAtomValue } from 'jotai';
+
 import { has } from 'lodash';
 
 import ErrorBoundary from '../../ErrorBoundary';
@@ -11,8 +13,8 @@ import { RestartButton } from '../RestartButton';
 import ScaleButton from '../ScaleButton';
 
 import { KubeObject } from '@lib/k8s/cluster';
-import { DefaultHeaderAction, HeaderAction } from 'redux/actionButtonsSlice';
-import { useTypedSelector } from 'redux/reducers/reducers';
+import { HeaderAction, headerAction, headerActionsProcessor } from '@lib/stores/headerAction';
+import { DefaultHeaderAction } from '@lib/stores/headerAction';
 
 export interface MainInfoHeaderProps {
   resource: KubeObject | null;
@@ -31,8 +33,10 @@ export interface MainInfoHeaderProps {
 
 export function MainInfoHeader(props: MainInfoHeaderProps) {
   const { resource, title, actions = [], headerStyle = 'main', noDefaultActions = false } = props;
-  const headerActions = useTypedSelector((state) => state.actionButtons.headerActions);
-  const headerActionsProcessors = useTypedSelector((state) => state.actionButtons.headerActionsProcessors);
+  // const headerActions = useTypedSelector((state) => state.actionButtons.headerActions);
+  // const headerActionsProcessors = useTypedSelector((state) => state.actionButtons.headerActionsProcessors);
+  const headerActions = useAtomValue(headerAction);
+  const headerActionsProcessors = useAtomValue(headerActionsProcessor);
   function setupAction(headerAction: HeaderAction) {
     let Action = has(headerAction, 'action') ? (headerAction as any).action : headerAction;
 

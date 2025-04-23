@@ -28,6 +28,7 @@ import { sidebarGroupId, sidebarGroups, sidebarMenus, sidebarMenuSelected, sideb
 import Login from '@pages/Auth/Login';
 import ErrorComponent from '@pages/Common/ErrorPage';
 import { enqueueSnackbar, SnackbarProvider } from 'notistack';
+import Plugins from 'src/plugin/Plugins';
 
 type Translator = (...args: any[]) => any;
 
@@ -200,6 +201,7 @@ export default function AppContainer() {
         horizontal: 'left',
       }}
     >
+      <Plugins />
       <RouterProvider router={router} />
     </SnackbarProvider>
   );

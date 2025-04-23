@@ -2,6 +2,8 @@ import { Children, isValidElement, ReactNode, useEffect, useMemo, useRef, useSta
 import { useTranslation } from 'react-i18next';
 import { generatePath, useLocation } from 'react-router-dom';
 
+import { useAtomValue } from 'jotai';
+
 import { Grid2Props } from '@mui/material';
 import Box from '@mui/material/Box';
 import Divider from '@mui/material/Divider';
@@ -43,14 +45,15 @@ import {
 } from '@lib/k8s/cluster';
 import Pod, { KubePod, KubeVolume } from '@lib/k8s/pod';
 import { createRouteURL, RouteURLProps, useHasPreviousRoute } from '@lib/router';
+import { detailsViewSections, detailsViewSectionsProcessors } from '@lib/stores/detailViewSection';
+import { DefaultDetailsViewSection } from '@lib/stores/detailViewSection';
+import { DetailsViewSection } from '@lib/stores/detailViewSection';
 import { getThemeName } from '@lib/themes';
 import { localeDate, useId } from '@lib/util';
 import Editor from '@monaco-editor/react';
 import { PodListProps, PodListRenderer } from '@pages/K8s/pod/List';
 import { Base64 } from 'js-base64';
-import { DefaultDetailsViewSection, DetailsViewSection } from 'redux/detailsViewSectionSlice';
 import { HeadlampEventType, useEventCallback } from 'redux/headlampEventSlice';
-import { useTypedSelector } from 'redux/reducers/reducers';
 import YAML from 'yaml';
 
 export { MainInfoSection };
@@ -117,9 +120,12 @@ export function DetailsGrid<T extends KubeObjectClass>(props: DetailsGridProps<T
   const { t } = useTranslation();
   const location = useLocation();
   const hasPreviousRoute = useHasPreviousRoute();
-  const detailViews = useTypedSelector((state) => state.detailsViewSection.detailsViewSections);
-  const detailViewsProcessors = useTypedSelector((state) => state.detailsViewSection.detailsViewSectionsProcessors);
+  // const detailViews = useTypedSelector((state) => state.detailsViewSection.detailsViewSections);
+  // const detailViewsProcessors = useTypedSelector((state) => state.detailsViewSection.detailsViewSectionsProcessors);
   const dispatchHeadlampEvent = useEventCallback();
+
+  const detailViews = useAtomValue(detailsViewSections);
+  const detailViewsProcessors = useAtomValue(detailsViewSectionsProcessors);
 
   // This component used to have a MainInfoSection with all these props passed to it, so we're
   // using them to accomplish the same behavior.

@@ -1,0 +1,68 @@
+import { blue } from '@mui/material/colors';
+import { alpha, useTheme } from '@mui/material/styles';
+
+import { createTickTimestampFormatter, dataProcessor } from '../../../util';
+import Chart from '../Chart/Chart';
+import { CustomTooltip } from '../common';
+
+import { fetchMetrics } from '@lib/Prometheus/request';
+
+/**
+ * Props for the CPUChart component
+ * @interface CPUChartProps
+ * @property {string} query - The Prometheus query to fetch CPU metrics
+ * @property {string} prometheusPrefix - The prefix for Prometheus metrics
+ * @property {string} interval - The time interval for data points
+ * @property {boolean} autoRefresh - Whether to automatically refresh the chart data
+ */
+interface CPUChartProps {
+  query: string;
+  interval: string;
+  autoRefresh: boolean;
+}
+
+export function CPUChart(props: CPUChartProps) {
+  const xTickFormatter = createTickTimestampFormatter(props.interval);
+  const theme = useTheme();
+
+  const XTickProps = {
+    dataKey: 'timestamp',
+    tickLine: false,
+    tick: (props: any) => {
+      const value = xTickFormatter(props.payload.value);
+      return (
+        value !== '' && (
+          <g transform={`translate(${props.x},${props.y})`} fill={theme.palette.chartStyles.labelColor}>
+            <text x={0} y={10} dy={0} textAnchor="middle">
+              {value}
+            </text>
+          </g>
+        )
+      );
+    },
+  };
+
+  const YTickProps = {
+    domain: ['dataMin', 'auto'],
+    width: 60,
+  };
+
+  return (
+    <Chart
+      plots={[
+        {
+          query: props.query,
+          name: 'cpu (cores)',
+          strokeColor: alpha(blue[400], 0.8),
+          fillColor: alpha(blue[400], 0.1),
+          dataProcessor: dataProcessor,
+        },
+      ]}
+      xAxisProps={XTickProps}
+      yAxisProps={YTickProps}
+      CustomTooltip={CustomTooltip}
+      fetchMetrics={fetchMetrics}
+      {...props}
+    />
+  );
+}

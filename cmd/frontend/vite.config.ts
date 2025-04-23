@@ -33,6 +33,10 @@ export default defineConfig({
         target: backendUrl,
         changeOrigin: true,
       },
+      '/select': {
+        target: backendUrl,
+        changeOrigin: true,
+      },
       '/auth': {
         target: backendUrl,
         changeOrigin: true,
