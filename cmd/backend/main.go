@@ -34,6 +34,7 @@ const (
 	packageAPIServerURL           = "http://package:9092"
 	clusterManagementAPIServerURL = "http://cocktail-cluster-mgmt:8092"
 	apmAPIServerURL               = "http://cocktail-apm:9100"
+	victoriaMetricsURL            = "http://vmselect-shortterm.tenant-root:8481"
 )
 
 func main() {
@@ -370,6 +371,16 @@ func main() {
 		TLSClientConfig: oscrypto.SecureTLSConfig(&tls.Config{}),
 		HeaderBlacklist: []string{"Cookie", "X-CSRFToken"},
 		Endpoint:        clusterManagementAPIServerURL,
+	}
+
+	victoriaMetricsURL, err := url.Parse(victoriaMetricsURL)
+	if err != nil {
+		klog.Fatalf("failed to parse %q", victoriaMetricsURL)
+	}
+	srv.VictoriaMetricsProxyConfig = &proxy.Config{
+		TLSClientConfig: oscrypto.SecureTLSConfig(&tls.Config{}),
+		HeaderBlacklist: []string{"Cookie", "X-CSRFToken"},
+		Endpoint:        victoriaMetricsURL,
 	}
 
 	srv.AnonymousInternalProxiedK8SRT, err = rest.TransportFor(rest.AnonymousClientConfig(srv.InternalProxiedK8SClientConfig))
