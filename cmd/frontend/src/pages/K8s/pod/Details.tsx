@@ -22,8 +22,8 @@ import AuthVisible from '@components/common/Resource/AuthVisible';
 import Terminal from '@components/common/Terminal';
 import { KubeContainerStatus } from '@lib/k8s/cluster';
 import Pod from '@lib/k8s/pod';
+import { DefaultHeaderAction } from '@lib/stores/headerAction';
 import { Terminal as XTerminal } from '@xterm/xterm';
-import { DefaultHeaderAction } from 'redux/actionButtonsSlice';
 import { EventStatus, HeadlampEventType, useEventCallback } from 'redux/headlampEventSlice';
 
 const PaddedFormControlLabel = styled(FormControlLabel)(({ theme }) => ({

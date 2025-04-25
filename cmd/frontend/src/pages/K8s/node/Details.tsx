@@ -21,10 +21,10 @@ import { InlineIcon } from '@iconify/react';
 import { apply, drainNode, drainNodeStatus } from '@lib/k8s/apiProxy';
 import { KubeMetrics } from '@lib/k8s/cluster';
 import Node from '@lib/k8s/node';
+import { DefaultHeaderAction } from '@lib/stores/headerAction';
 import { getCluster, timeAgo } from '@lib/util';
 import { CpuCircularChart, MemoryCircularChart } from '@pages/K8s/cluster/Charts';
 import { useSnackbar } from 'notistack';
-import { DefaultHeaderAction } from 'redux/actionButtonsSlice';
 import { clusterAction } from 'redux/clusterActionSlice';
 
 function NodeConditionsLabel(props: { node: Node }) {

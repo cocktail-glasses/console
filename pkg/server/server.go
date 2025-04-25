@@ -87,6 +87,7 @@ const (
 	sha256Prefix                          = "sha256~"
 	tokenizerPageTemplateName             = "tokener.html"
 	updatesEndpoint                       = "/api/check-updates"
+	victoriaMetricsEndpoint               = "/select/"
 )
 
 type jsGlobals struct {
@@ -146,6 +147,7 @@ type Server struct {
 	BackupAPIProxyConfig            *proxy.Config
 	PackageAPIProxyConfig           *proxy.Config
 	ClusterManagementAPIProxyConfig *proxy.Config
+	VictoriaMetricsProxyConfig      *proxy.Config
 
 	AddPage                            string
 	AuthDisabled                       bool
@@ -426,6 +428,12 @@ func (s *Server) HTTPHandler() (http.Handler, error) {
 	handle(clusterManagementAPIEndpoint2, http.StripPrefix(
 		s.BaseURL.Path,
 		authHandler(clusterManagementAPIProxy2.ServeHTTP)),
+	)
+
+	victoriaMetricsProxy := proxy.NewProxy(s.VictoriaMetricsProxyConfig)
+	handle(victoriaMetricsEndpoint, http.StripPrefix(
+		s.BaseURL.Path,
+		authHandler(victoriaMetricsProxy.ServeHTTP)),
 	)
 
 	handle("/api/console/monitoring-dashboard-config", authHandler(s.handleMonitoringDashboardConfigmaps))
