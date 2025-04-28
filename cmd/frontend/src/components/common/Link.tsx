@@ -1,3 +1,4 @@
+import { forwardRef } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 
 import { useAtomValue, useSetAtom } from 'jotai';
@@ -76,38 +77,40 @@ function KubeObjectLink(props: {
   );
 }
 
-function PureLink(
-  props: React.PropsWithChildren<LinkProps | LinkObjectProps> & {
-    /** if onClick callback is provided navigation is disabled */
-    onClick?: () => void;
-  }
-) {
-  if ((props as LinkObjectProps).kubeObject) {
-    const { kubeObject, ...otherProps } = props as LinkObjectProps;
-    return <KubeObjectLink kubeObject={kubeObject!} {...otherProps} />;
-  }
-  const { routeName, params = {}, search, state, ...otherProps } = props as LinkObjectProps;
+const PureLink = forwardRef(
+  (
+    props: React.PropsWithChildren<LinkProps | LinkObjectProps> & {
+      /** if onClick callback is provided navigation is disabled */
+      onClick?: () => void;
+    }
+  ) => {
+    if ((props as LinkObjectProps).kubeObject) {
+      const { kubeObject, ...otherProps } = props as LinkObjectProps;
+      return <KubeObjectLink kubeObject={kubeObject!} {...otherProps} />;
+    }
+    const { routeName, params = {}, search, state, ...otherProps } = props as LinkObjectProps;
 
-  return (
-    <MuiLink
-      component={RouterLink}
-      to={{
-        pathname: createRouteURL(routeName, params),
-        search,
-      }}
-      state={state}
-      {...otherProps}
-      onClick={(e) => {
-        if (otherProps.onClick) {
-          e.preventDefault();
-          otherProps.onClick();
-        }
-      }}
-    >
-      {props.children}
-    </MuiLink>
-  );
-}
+    return (
+      <MuiLink
+        component={RouterLink}
+        to={{
+          pathname: createRouteURL(routeName, params),
+          search,
+        }}
+        state={state}
+        {...otherProps}
+        onClick={(e) => {
+          if (otherProps.onClick) {
+            e.preventDefault();
+            otherProps.onClick();
+          }
+        }}
+      >
+        {props.children}
+      </MuiLink>
+    );
+  }
+);
 
 export default function Link(props: React.PropsWithChildren<LinkProps | LinkObjectProps>) {
   const drawerEnabled = useAtomValue(detailDrawerEnabled);
