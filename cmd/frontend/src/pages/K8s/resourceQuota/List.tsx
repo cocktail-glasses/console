@@ -48,8 +48,8 @@ export function ResourceQuotaRenderer(props: ResourceQuotaProps) {
           getValue: (item) => item.requests.join(', '),
           render: (item) => {
             const requests: JSX.Element[] = [];
-            item.requests.forEach((request: string) => {
-              requests.push(<PaddedChip label={request} variant="outlined" size="small" />);
+            item.requests.forEach((request: string, i: number) => {
+              requests.push(<PaddedChip key={i} label={request} variant="outlined" size="small" />);
             });
             return <WrappingBox>{requests}</WrappingBox>;
           },
@@ -60,8 +60,8 @@ export function ResourceQuotaRenderer(props: ResourceQuotaProps) {
           getValue: (item) => item?.limits?.join(', '),
           render: (item) => {
             const limits: JSX.Element[] = [];
-            item.limits.forEach((limit: string) => {
-              limits.push(<PaddedChip label={limit} variant="outlined" size="small" />);
+            item.limits.forEach((limit: string, i: number) => {
+              limits.push(<PaddedChip key={i} label={limit} variant="outlined" size="small" />);
             });
             return <WrappingBox>{limits}</WrappingBox>;
           },

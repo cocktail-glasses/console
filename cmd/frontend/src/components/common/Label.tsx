@@ -1,3 +1,5 @@
+import { forwardRef } from 'react';
+
 import { Chip } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import Typography, { TypographyProps } from '@mui/material/Typography';
@@ -70,7 +72,7 @@ export interface StatusLabelProps {
   [otherProps: string]: any;
 }
 
-export function StatusLabel(props: StatusLabelProps) {
+export const StatusLabel = forwardRef((props: StatusLabelProps) => {
   const { status, sx, className = '', children, ...other } = props;
   const theme = useTheme();
 
@@ -166,7 +168,7 @@ export function StatusLabel(props: StatusLabelProps) {
     //   {...other}
     // />
   );
-}
+});
 
 export function makeStatusLabel(label: string, successStatusName: string) {
   return <StatusLabel status={label === successStatusName ? 'success' : 'error'}>{label}</StatusLabel>;

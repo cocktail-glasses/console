@@ -1,3 +1,5 @@
+import { Children } from 'react';
+
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
@@ -53,7 +55,7 @@ export default function SectionHeader(props: SectionHeaderProps) {
             )}
             {!!titleSideActions && (
               <Box ml={1} justifyContent="center">
-                {titleSideActions}
+                {Children.toArray(titleSideActions)}
               </Box>
             )}
           </Box>
