@@ -220,7 +220,9 @@ const commonRules = {
   mixins: {
     toolbar: {
       minHeight: 48,
-      '@media (min-width:600px)': 48,
+      '@media (min-width:600px)': {
+        minHeight: 48,
+      },
     },
   },
 };
