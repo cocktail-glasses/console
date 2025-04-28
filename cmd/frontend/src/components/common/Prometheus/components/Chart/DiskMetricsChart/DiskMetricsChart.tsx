@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useAtomValue } from 'jotai';
 
 import { Pause, PlayArrow } from '@mui/icons-material';
-import { Box, IconButton } from '@mui/material';
+import { Box, IconButton, Paper } from '@mui/material';
 
 import { getPrometheusInterval } from '../../../util';
 import { DiskChart } from '../DiskChart/DiskChart';
@@ -34,38 +34,40 @@ export function DiskMetricsChart(props: DiskMetricsChartProps) {
 
   return (
     <SectionBox>
-      <Box
-        display="flex"
-        justifyContent="space-around"
-        alignItems="center"
-        style={{ marginBottom: '0.5rem', margin: '0 auto', width: '0%' }}
-      >
-        {[
-          <Box>Disk</Box>,
-          <Box pl={2}>
-            <IconButton onClick={() => setRefresh((refresh) => !refresh)} size="large">
-              {refresh ? <Pause /> : <PlayArrow />}
-            </IconButton>
-          </Box>,
-        ]}
-      </Box>
+      <Paper variant="outlined" sx={{ p: 1 }}>
+        <Box
+          display="flex"
+          justifyContent="space-around"
+          alignItems="center"
+          style={{ marginBottom: '0.5rem', margin: '0 auto', width: '0%' }}
+        >
+          {[
+            <Box>Disk</Box>,
+            <Box pl={2}>
+              <IconButton onClick={() => setRefresh((refresh) => !refresh)} size="large">
+                {refresh ? <Pause /> : <PlayArrow />}
+              </IconButton>
+            </Box>,
+          ]}
+        </Box>
 
-      <Box
-        style={{
-          justifyContent: 'center',
-          display: 'flex',
-          height: '40vh',
-          width: '80%',
-          margin: '0 auto',
-        }}
-      >
-        <DiskChart
-          usageQuery={props.usageQuery!}
-          capacityQuery={props.capacityQuery!}
-          interval={interval}
-          autoRefresh={refresh}
-        />
-      </Box>
+        <Box
+          style={{
+            justifyContent: 'center',
+            display: 'flex',
+            height: '40vh',
+            width: '80%',
+            margin: '0 auto',
+          }}
+        >
+          <DiskChart
+            usageQuery={props.usageQuery!}
+            capacityQuery={props.capacityQuery!}
+            interval={interval}
+            autoRefresh={refresh}
+          />
+        </Box>
+      </Paper>
     </SectionBox>
   );
 }
