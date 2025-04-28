@@ -1,6 +1,6 @@
 import { Suspense, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { createBrowserRouter, RouterProvider, RouteObject } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, ShouldRevalidateFunctionArgs } from 'react-router-dom';
 
 import { useAtomValue, useSetAtom } from 'jotai';
 import { loadable } from 'jotai/utils';
@@ -115,13 +115,17 @@ function AuthRoute(props: { children: React.ReactNode | JSX.Element; [otherProps
   const setSidebarMenuSelected = useSetAtom(sidebarMenuSelected);
   const setSubList = useSetAtom(sidebarSub);
   const setSidebarGroup = useSetAtom(sidebarGroupId);
-  setSidebarMenuSelected(menu);
-  setSidebarGroup(menu.group);
-  if (sub?.length > 0) {
-    setSubList(sub);
-  } else {
-    setSubList([]);
-  }
+
+  useEffect(() => {
+    setSidebarMenuSelected(menu);
+    setSidebarGroup(menu.group);
+    if (sub?.length > 0) {
+      setSubList(sub);
+    } else {
+      setSubList([]);
+    }
+  }, [menu, sub]);
+
   return <Suspense fallback={<Loader title="Loading..." />}>{children}</Suspense>;
 }
 
@@ -131,10 +135,37 @@ export default function AppContainer() {
   const setSidebarGroups = useSetAtom(sidebarGroups);
   const setSidebarList = useSetAtom(sidebarMenus);
   const { t } = useTranslation(['glossary']);
-  let routes: RouteObject[] = [
+
+  const menuList = makeMenuList(t);
+  const routeList = makeRouteList(menuList);
+
+  const routes = [
+    {
+      path: '/',
+      element: (
+        <PreviousRouteProvider>
+          <BasicLayout />
+        </PreviousRouteProvider>
+      ),
+      loader: () => {
+        authCheck().then((isAuthenticated: boolean) => {
+          if (!isAuthenticated) location.href = '/auth/login';
+        });
+        return true;
+      },
+      shouldRevalidate: ({ currentUrl, nextUrl }: ShouldRevalidateFunctionArgs) => {
+        // url이 변경되면 loader를 호출합니다.
+        return currentUrl.pathname !== nextUrl.pathname;
+      },
+      children: routeList,
+    },
+    {
+      path: '/login',
+      element: <Login />,
+    },
     {
       path: '*',
-      element: <Loader title="Loading..." />,
+      element: <ErrorComponent />,
     },
   ];
 
@@ -154,43 +185,11 @@ export default function AppContainer() {
     }
   }, [load.state]);
 
-  if (load.state == 'hasData') {
-    const menuList = makeMenuList(t);
-    const routeList = makeRouteList(menuList);
-
-    routes = [
-      {
-        path: '/',
-        element: (
-          <PreviousRouteProvider>
-            <BasicLayout />
-          </PreviousRouteProvider>
-        ),
-        loader: () => {
-          authCheck().then((isAuthenticated: boolean) => {
-            if (!isAuthenticated) location.href = '/auth/login';
-          });
-          return true;
-        },
-        shouldRevalidate: ({ currentUrl, nextUrl }) => {
-          // url이 변경되면 loader를 호출합니다.
-          return currentUrl.pathname !== nextUrl.pathname;
-        },
-        children: routeList,
-      },
-      {
-        path: '/login',
-        element: <Login />,
-      },
-      {
-        path: '*',
-        element: <ErrorComponent />,
-      },
-    ];
-
+  useEffect(() => {
+    // 렌더링 중 다른 컴포넌트의 state를 변경하면 에러가 발생하기 때문에 렌더링 이후 useEffect에서 호출합니다.
     setSidebarGroups(Groups);
     setSidebarList(menuList);
-  }
+  }, [menuList, Groups]);
 
   const router = createBrowserRouter(routes);
 
