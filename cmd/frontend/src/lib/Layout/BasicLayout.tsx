@@ -1,6 +1,8 @@
 // import VersionDialog from '@lib/App/VersionDialog';
 import { Outlet } from 'react-router-dom';
 
+import { useAtomValue } from 'jotai';
+
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -12,12 +14,22 @@ import DetailsDrawer from '@components/common/Resource/DetailsDrawer';
 // import AlertNotification from '@components/common/AlertNotification';
 import Sidebar, { NavigationTabs } from '@lib/Layout/Sidebar';
 import TopBar from '@lib/Layout/TopBar';
+import { additionalLayoutStyle } from '@lib/stores/layout';
 
 const Div = styled('div')``;
 const Main = styled('main')``;
 
 export default function Layout() {
   const theme = useTheme();
+
+  const defaultStyle = {
+    flexGrow: 1,
+    marginLeft: 'initial',
+    overflowX: 'hidden',
+    overflowY: 'auto',
+    paddingBottom: '100px',
+  };
+  const additionalStyle = useAtomValue(additionalLayoutStyle);
 
   return (
     <Box
@@ -34,16 +46,7 @@ export default function Layout() {
       <CssBaseline />
       <TopBar />
       <Sidebar />
-      <Main
-        id="main"
-        sx={{
-          flexGrow: 1,
-          marginLeft: 'initial',
-          overflowX: 'hidden',
-          overflowY: 'auto',
-          paddingBottom: '100px',
-        }}
-      >
+      <Main id="main" sx={[defaultStyle, additionalStyle]}>
         {/* <AlertNotification /> */}
         <Box>
           <Div id="toolbar" sx={theme.mixins.toolbar} />
