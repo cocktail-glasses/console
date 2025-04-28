@@ -12,6 +12,8 @@ import {
 } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { useSetAtom } from 'jotai';
+
 import { Box, Chip, Theme } from '@mui/material';
 import { ThemeProvider, styled } from '@mui/material/styles';
 
@@ -36,6 +38,7 @@ import { NamespacesAutocomplete } from '@components/common';
 import { Icon } from '@iconify/react';
 import Namespace from '@lib/k8s/namespace';
 import K8sNode from '@lib/k8s/node';
+import { additionalLayoutStyle } from '@lib/stores/layout';
 import { Edge, Node, Panel, ReactFlowProvider } from '@xyflow/react';
 import '@xyflow/react/dist/base.css';
 import { useTypedSelector } from 'redux/reducers/reducers';
@@ -99,6 +102,15 @@ function GraphViewContent({
   defaultFilters = defaultFiltersValue,
 }: GraphViewContentProps) {
   const { t } = useTranslation();
+
+  const setLayoutStyle = useSetAtom(additionalLayoutStyle);
+  useEffect(() => {
+    setLayoutStyle({ paddingBottom: '0px' });
+
+    return () => {
+      setLayoutStyle(null);
+    };
+  }, []);
 
   // List of selected namespaces
   const namespaces = useTypedSelector((state) => state.filter).namespaces;
