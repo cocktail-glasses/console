@@ -15,15 +15,15 @@ export default function IngressClassList() {
       }}
       resourceClass={IngressClass}
       columns={[
-        {
-          id: 'default',
-          label: '',
-          gridTemplate: 0.1,
-          getValue: (resource) => (resource?.isDefault ? t('Default Ingress Class') : null),
-          render: (resource: IngressClass) => (resource && resource.isDefault ? <DefaultLabel /> : null),
-          sort: false,
-          disableFiltering: true,
-        },
+        // {
+        //   id: 'default',
+        //   label: '',
+        //   gridTemplate: 0.1,
+        //   getValue: (resource) => (resource?.isDefault ? t('Default Ingress Class') : null),
+        //   render: (resource: IngressClass) => (resource && resource.isDefault ? <DefaultLabel /> : null),
+        //   sort: false,
+        //   disableFiltering: true,
+        // },
         'name',
         {
           id: 'controller',

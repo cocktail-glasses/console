@@ -86,6 +86,7 @@ function CrInstancesView({ crds }: { crds: CRD[]; key: string }) {
         data={crInstancesList}
         columns={[
           {
+            gridTemplate: 'auto',
             label: 'Instance name',
             getValue: (cr) => {
               return cr.metadata.name;

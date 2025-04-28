@@ -73,6 +73,7 @@ export default function NamespacesList() {
           'name',
           {
             id: 'status',
+            gridTemplate: '0.5fr',
             label: t('translation|Status'),
             getValue: (ns) => ns.status.phase,
             render: makeStatusLabel,

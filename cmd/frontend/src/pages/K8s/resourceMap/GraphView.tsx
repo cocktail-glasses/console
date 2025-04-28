@@ -60,6 +60,8 @@ export const useFullGraphContext = () => useContext<FullGraphContent>(FullGraphC
 export const useNode = (id: string) => {
   const { lookup } = useFullGraphContext();
 
+  if (!lookup) return;
+
   return lookup.getNode(id);
 };
 
