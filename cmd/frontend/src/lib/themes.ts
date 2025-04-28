@@ -129,7 +129,7 @@ const commonRules = {
     },
     tables: {
       head: {
-        background: '#faf9f8',
+        background: 'hsl(220, 35%, 97%)',
         color: '#242424',
         borderColor: 'rgba(0,0,0,0.12)',
       },
@@ -232,7 +232,7 @@ const darkTheme = createTheme({
     ...commonRules.palette,
     tables: {
       head: {
-        background: '#000',
+        background: 'rgb(15, 17, 20)',
         color: '#aeaeae',
         borderColor: 'rgba(255,255,255,0.12)',
       },
