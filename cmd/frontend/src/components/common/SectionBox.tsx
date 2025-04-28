@@ -25,7 +25,7 @@ export function SectionBox(props: SectionBoxProps) {
 
   let titleElem: React.ReactNode;
   // If backLink is a boolean, then we want to use the browser's history if true.
-  const actualBackLink = typeof backLink === 'boolean' ? (!!backLink ? '' : undefined) : backLink;
+  const actualBackLink = typeof backLink === 'boolean' ? (backLink ? '' : undefined) : backLink;
 
   if (typeof title === 'string') {
     titleElem = <SectionHeader title={title as string} {...headerProps} />;
@@ -42,10 +42,8 @@ export function SectionBox(props: SectionBoxProps) {
           sx={(theme) => ({
             paddingTop: 0,
             paddingBottom: 0,
-            paddingLeft: 0,
-            paddingRight: 0,
-            // paddingLeft: theme.spacing(2),
-            // paddingRight: theme.spacing(2),
+            paddingLeft: theme.spacing(2),
+            paddingRight: theme.spacing(2),
             [theme.breakpoints.down('sm')]: {
               paddingLeft: 0,
               paddingRight: 0,
