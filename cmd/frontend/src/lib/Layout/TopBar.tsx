@@ -243,7 +243,7 @@ function PureTopBar({
       <Icon icon="mdi:account" />
     </IconButton>
   );
-  const settingMunu = <SettingsButton onClickExtra={handleMenuClose} />;
+  const settingMunu = <SettingsButton onClickExtra={() => navigate(createRouteURL('settings'))} />;
   const notificationMenu = <NotificationButton onClickExtra={handleMenuClose} />;
   const renderUserMenu = (
     <Menu
@@ -276,7 +276,7 @@ function PureTopBar({
         </ListItemIcon>
         <ListItemText primary={t('Log out')} />
       </MenuItem>
-      <MenuItem
+      {/* <MenuItem
         component="a"
         onClick={() => {
           navigate(createRouteURL('settings'));
@@ -298,7 +298,7 @@ function PureTopBar({
           <Icon icon="mdi:information-outline" />
         </ListItemIcon>
         <ListItemText>{''}</ListItemText>
-      </MenuItem>
+      </MenuItem> */}
     </Menu>
   );
 
@@ -450,7 +450,7 @@ function PureTopBar({
               {/* <AppBarActions
                 appBarActions={processAppBarActions(allAppBarActions, appBarActionsProcessors)}
               /> */}
-              {notificationMenu}
+              {/* {notificationMenu} */}
               {settingMunu}
               {userMenu}
             </>
