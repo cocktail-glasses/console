@@ -11,6 +11,7 @@ import { useSettings } from './hook';
 
 import { ActionButton, NameValueTable, SectionBox } from '@components/common';
 import TimezoneSelect from '@components/common/TimezoneSelect';
+import { useHasPreviousRoute } from '@lib/router';
 import LocaleSelect from 'i18n/LocaleSelect/LocaleSelect';
 import { setVersionDialogOpen } from 'redux/actions/actions';
 import { setAppSettings } from 'redux/configSlice';
@@ -49,7 +50,7 @@ export default function Settings() {
           />,
         ],
       }}
-      backLink
+      backLink={useHasPreviousRoute()}
     >
       <NameValueTable
         valueCellProps={{

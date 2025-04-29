@@ -11,13 +11,13 @@ export interface MenuType {
 }
 
 export const Menus: MenuType[] = [
-  {
-    id: 'home',
-    label: 'Home',
-    icon: 'mdi:home',
-    route: 'home',
-    group: 'config',
-  },
+  // {
+  //   id: 'home',
+  //   label: 'Home',
+  //   icon: 'mdi:home',
+  //   route: 'home',
+  //   group: 'config',
+  // },
   {
     id: 'settings',
     label: 'Settings',
@@ -25,14 +25,14 @@ export const Menus: MenuType[] = [
     route: 'settings',
     group: 'config',
   },
-  {
-    id: 'users',
-    label: 'Users',
-    icon: 'mdi:account',
-    route: 'users',
-    parent: 'settings',
-    group: 'config',
-  },
+  // {
+  //   id: 'users',
+  //   label: 'Users',
+  //   icon: 'mdi:account',
+  //   route: 'users',
+  //   parent: 'settings',
+  //   group: 'config',
+  // },
 
   {
     id: 'clusters',
@@ -504,7 +504,7 @@ export interface GroupType {
 }
 
 export const Groups: GroupType[] = [
-  { id: 'config', label: 'Configuration', icon: 'mdi:star' },
+  { id: 'config', label: 'Configuration', icon: 'mdi:settings' /* 'mdi:star' */ },
   { id: 'k8s', label: 'Kubernetes', icon: 'mdi:kubernetes' },
   // { id: "build", label: "Build", icon: "mdi:connection" },
   { id: 'kaas', label: 'KaaS', icon: 'mdi:kamaji' },

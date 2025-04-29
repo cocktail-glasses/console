@@ -144,7 +144,7 @@ const defaultRouteGroupTable: RouteGroupTable = {
   },
   settings: {
     indexId: 'settings',
-    routes: [{ id: 'settings', path: '/settings', element: () => <Settings /> }],
+    routes: [{ id: 'settings', path: '/' /* '/settings' */, element: () => <Settings /> }],
     useClusterURL: false,
   },
   // k8s
