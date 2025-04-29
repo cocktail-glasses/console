@@ -6,21 +6,20 @@ import eq from 'lodash/eq';
 import stubTrue from 'lodash/stubTrue';
 import toLower from 'lodash/toLower';
 
-import { DotStatusEnum } from '../../../../components/atoms/KaaS/DotStatus';
-
+import { Status as DotStatus } from '@components/atoms/KaaS/DotStatus/DotStatus';
 import { KubeSecret } from '@lib/k8s/secret';
 import { IoClastixKamajiV1alpha1TenantControlPlane } from '@lib/kamaji';
 import yaml from 'js-yaml';
 
-export const getDotStatus = (status?: string) => {
+export const getDotStatus = (status?: string): DotStatus => {
   const equal = curry(eq);
 
   return cond([
-    [equal('loading'), constant(DotStatusEnum.WARNING)],
-    [equal('ready'), constant(DotStatusEnum.SUCCESS)],
-    [equal('error'), constant(DotStatusEnum.ERROR)],
-    [stubTrue, constant(DotStatusEnum.DEFAULT)],
-  ])(toLower(status));
+    [equal('loading'), constant('warning')],
+    [equal('ready'), constant('success')],
+    [equal('error'), constant('error')],
+    [stubTrue, constant('default')],
+  ])(toLower(status)) as DotStatus;
 };
 
 export const k8sJsonToYaml = (obj: any) => yaml.dump(get(obj, 'jsonData', obj));

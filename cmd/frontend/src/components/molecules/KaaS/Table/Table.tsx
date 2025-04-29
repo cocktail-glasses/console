@@ -1,4 +1,4 @@
-import { ReactElement, useEffect, ReactNode, useState } from 'react';
+import { useEffect, ReactNode, useState } from 'react';
 
 import {
   Table as TableBase,
@@ -23,31 +23,19 @@ import {
   ColumnDef,
   getFilteredRowModel,
   getPaginationRowModel,
+  FilterFnOption,
 } from '@tanstack/react-table';
 import clsx from 'clsx';
 
-enum FilterFn {
-  includeString = 'includesString',
-  includeStringSensitive = 'includesStringSensitive',
-  equalsString = 'equalsString',
-  equalsStringSensitive = 'equalsStringSensitive',
-  arrIncludes = 'arrIncludes',
-  arrIncludesAll = 'arrIncludesAll',
-  arrIncludesSome = 'arrIncludesSome',
-  equals = 'equals',
-  weakEquals = 'weakEquals',
-  inNumberRange = 'inNumberRange',
-}
-
-interface PagingOption {
+export interface PagingOption {
   pageIndex: number;
   pageSize: number;
 }
 
-interface TableBaseProps<TData> extends React.ComponentPropsWithoutRef<typeof TableBase> {
+interface TableBaseProps<TData> extends React.ComponentPropsWithRef<typeof TableBase> {
   data: Array<TData>;
   columns: ColumnDef<TData, any>[];
-  filter?: boolean | FilterFn;
+  filter?: boolean | FilterFnOption<TData>;
   // paging boolean 옵션은 단순히 페이징이 필요한 경우 페이징 기본 값을 이용해서 간단하게 사용하기 위함임
   // 만약 외부에서 데이터 크기 조건에 따라 페이징을 한다면 페이징 기본 값은 언제든 바뀔 수 있으므로 boolean 대신 PagingOption을 넘겨주는 것이 올바르다.
   paging?: boolean | PagingOption;
@@ -67,7 +55,7 @@ const Table = <TData,>({
   onClickRow,
   isLoading,
   ...props
-}: TableBaseProps<TData>): ReactElement => {
+}: TableBaseProps<TData>) => {
   const filterOption = () => {
     if (isBoolean(filter) && filter) {
       return getFilteredRowModel();
