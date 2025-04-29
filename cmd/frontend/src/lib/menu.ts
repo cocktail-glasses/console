@@ -34,13 +34,13 @@ export const Menus: MenuType[] = [
   //   group: 'config',
   // },
 
-  {
-    id: 'clusters',
-    label: 'Clusters',
-    icon: 'mdi:hexagon-multiple-outline',
-    route: 'clusters',
-    group: 'k8s',
-  },
+  // {
+  //   id: 'clusters',
+  //   label: 'Clusters',
+  //   icon: 'mdi:hexagon-multiple-outline',
+  //   route: 'clusters',
+  //   group: 'k8s',
+  // },
   {
     id: 'cluster',
     label: 'Cluster',
