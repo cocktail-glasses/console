@@ -38,7 +38,7 @@ import {
 import { downloadKubeconfig, getDotStatus, k8sJsonToYaml } from './utils/utils';
 
 import DescriptionItem from '@components/atoms/KaaS/DescriptionItem/DescriptionItem';
-import { DotStatus } from '@components/atoms/KaaS/DotStatus';
+import DotStatus from '@components/atoms/KaaS/DotStatus/DotStatus';
 import AddButton from '@components/molecules/KaaS/Button/AddButton/AddButton';
 import BackButton from '@components/molecules/KaaS/Button/BackButton/BackButton';
 import ContextMenuButton from '@components/molecules/KaaS/Button/ContextMenuButton/ContextMenuButton';

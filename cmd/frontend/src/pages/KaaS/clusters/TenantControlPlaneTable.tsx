@@ -10,7 +10,7 @@ import { identity, size, toLower } from 'lodash';
 
 import { getDotStatus } from './utils/utils';
 
-import { DotStatus } from '@components/atoms/KaaS/DotStatus';
+import DotStatus from '@components/atoms/KaaS/DotStatus/DotStatus';
 import DeleteIconButton from '@components/molecules/KaaS/Button/DeleteIconButton/DeleteIconButton';
 import Table from '@components/molecules/KaaS/Table/Table';
 import { IoClastixKamajiV1alpha1TenantControlPlane } from '@lib/kamaji';
