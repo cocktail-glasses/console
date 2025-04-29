@@ -178,6 +178,8 @@ const AddApplicationDialog = ({ isOpen = false, onClose }: AddApplicationDialogP
 
   const handleOnClose = () => {
     setIsOpen(false);
+    setApp(undefined);
+    setCurrentStep(0);
     if (isFunction(onClose)) onClose();
   };
 
