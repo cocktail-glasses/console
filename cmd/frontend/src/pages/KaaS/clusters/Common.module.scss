@@ -8,6 +8,10 @@
   color: #ffffff !important;
 }
 
+.kaas-primary-color:hover {
+  background-color: #003454;
+}
+
 .kaas-tertiary-color {
   border: 1px solid #7e868f;
   color: #7e868f !important;
@@ -30,6 +34,10 @@
       background-color: rgba(255, 255, 255, 0.12);
       color: rgba(255, 255, 255, 0.5) !important;
     }
+  }
+
+  .kaas-primary-color:hover {
+    background-color: #008bd6;
   }
 
   .kaas-tertiary-color {
