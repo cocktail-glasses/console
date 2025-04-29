@@ -38,14 +38,14 @@ export default function Create() {
   const steps = [
     { label: 'Cluster' },
     { label: 'Settings' },
-    { label: 'Static Nodes' },
+    // { label: 'Static Nodes' },
     { label: 'Applications' },
     { label: 'Summary' },
   ];
   const contents = [
     <ClusterSubForm values={get(formValue, 'cluster')} onSave={handleSubmitFormValue('cluster')} />,
     <SettingSubForm values={get(formValue, 'settings')} onSave={handleSubmitFormValue('settings')} />,
-    <StaticNodeForm values={get(formValue, 'statisNodes')} onSave={handleSubmitFormValue('statisNodes')} />,
+    // <StaticNodeForm values={get(formValue, 'statisNodes')} onSave={handleSubmitFormValue('statisNodes')} />,
     <ApplicationsSubForm values={get(formValue, 'applications')} onSave={handleSubmitFormValue('applications')} />,
     <SummarySubForm values={formValue} onSubmit={(e) => console.log(e)} />,
   ];

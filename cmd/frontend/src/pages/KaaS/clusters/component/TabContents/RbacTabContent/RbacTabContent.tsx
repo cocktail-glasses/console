@@ -69,24 +69,24 @@ const RbacTabContent = () => {
   ];
   const [rbacSelect, setRbacSelect] = useState(head(rbacTypes)?.value);
 
-  const rbacUserData = [
-    {
-      scope: 'Cluster',
-      user: 'skyikho@acornsoft.io',
-      clusterRole: 'cluster-admin',
-    },
-    {
-      scope: 'Namespace',
-      user: 'yunwansu@acornsoft.io',
-      clusterRole: 'namespace-admin',
-      namespace: 'default',
-    },
-    {
-      scope: 'Namespace',
-      user: 'yunwansu@acornsoft.io',
-      clusterRole: 'namespace-editor',
-      namespace: 'default',
-    },
+  const rbacUserData: RbacUser[] = [
+    // {
+    //   scope: 'Cluster',
+    //   user: 'skyikho@acornsoft.io',
+    //   clusterRole: 'cluster-admin',
+    // },
+    // {
+    //   scope: 'Namespace',
+    //   user: 'yunwansu@acornsoft.io',
+    //   clusterRole: 'namespace-admin',
+    //   namespace: 'default',
+    // },
+    // {
+    //   scope: 'Namespace',
+    //   user: 'yunwansu@acornsoft.io',
+    //   clusterRole: 'namespace-editor',
+    //   namespace: 'default',
+    // },
   ];
 
   // create service account
