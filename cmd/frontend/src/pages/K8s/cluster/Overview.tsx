@@ -87,7 +87,7 @@ function EventsSection() {
       )
     )
   );
-  const [events, eventsError] = Event.useList({ limit: Event.maxLimit });
+  const { items: events, errors: eventsErrors } = Event.useList({ limit: Event.maxLimit });
 
   const warningActionFilterFunc = (event: Event, search?: string) => {
     if (!filterFunc(event, search)) {
@@ -148,21 +148,23 @@ function EventsSection() {
       }}
       defaultGlobalFilter={eventsFilter ?? undefined}
       data={events}
-      errorMessage={Event.getErrorMessage(eventsError)}
+      errors={eventsErrors}
       columns={[
         {
           label: t('Type'),
+          gridTemplate: 'min-content',
           getValue: (event) => event.involvedObject.kind,
         },
         {
           label: t('Name'),
           getValue: (event) => event.involvedObjectInstance?.getName() ?? event.involvedObject.name,
           render: (event) => makeObjectLink(event),
-          gridTemplate: 1.5,
+          gridTemplate: 'auto',
         },
         'namespace',
         {
           label: t('Reason'),
+          gridTemplate: 'min-content',
           getValue: (event) => event.reason,
           render: (event) => (
             <LightTooltip title={event.reason} interactive>
@@ -174,7 +176,7 @@ function EventsSection() {
           label: t('Message'),
           getValue: (event) => event.message ?? '',
           render: (event) => <ShowHideLabel labelId={event.metadata?.uid || ''}>{event.message || ''}</ShowHideLabel>,
-          gridTemplate: 1.5,
+          gridTemplate: 'auto',
         },
         {
           id: 'last-seen',
