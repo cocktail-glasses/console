@@ -1,4 +1,5 @@
 // import VersionDialog from '@lib/App/VersionDialog';
+import { useTranslation } from 'react-i18next';
 import { Outlet } from 'react-router-dom';
 
 import { useAtomValue } from 'jotai';
@@ -9,12 +10,14 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { useTheme } from '@mui/material/styles';
 import { styled } from '@mui/material/styles';
 
+import ErrorBoundary from '@components/common/ErrorBoundary';
 import DetailsDrawer from '@components/common/Resource/DetailsDrawer';
 // import ActionsNotifier from '@components/common/ActionsNotifier';
 // import AlertNotification from '@components/common/AlertNotification';
 import Sidebar, { NavigationTabs } from '@lib/Layout/Sidebar';
 import TopBar from '@lib/Layout/TopBar';
 import { additionalLayoutStyle } from '@lib/stores/layout';
+import ErrorComponent from '@pages/Common/ErrorPage';
 
 const Div = styled('div')``;
 const Main = styled('main')``;
@@ -53,13 +56,27 @@ export default function Layout() {
           <Container maxWidth="xl">
             <NavigationTabs />
             {/* <RouteComponent route={route} key={`AuthRoute-children-${getCluster()}`} /> */}
-            <Outlet />
+            <ErrorBoundary fallback={(props: { error: Error }) => <RouteErrorBoundary error={props.error} />}>
+              <Outlet />
+            </ErrorBoundary>
           </Container>
         </Box>
       </Main>
       <DetailsDrawer />
       {/* <ActionsNotifier /> */}
     </Box>
+  );
+}
+
+function RouteErrorBoundary(props: { error: Error }) {
+  const { error } = props;
+  const { t } = useTranslation();
+  return (
+    <ErrorComponent
+      title={t('Uh-oh! Something went wrong.')}
+      error={error}
+      message={t('translation|Error loading {{ routeName }}', { routeName: '' })}
+    />
   );
 }
 

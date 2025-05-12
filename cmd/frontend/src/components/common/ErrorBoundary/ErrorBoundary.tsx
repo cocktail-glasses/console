@@ -1,10 +1,11 @@
-import { Children, Component, ComponentType, isValidElement, ReactElement } from 'react';
+import { Component, ComponentType, isValidElement, ReactElement, ReactNode } from 'react';
+
 // import { eventAction, HeadlampEventType } from 'redux/headlampEventSlice';
 // import store from 'redux/stores/store';
 
 export interface ErrorBoundaryProps {
-  children: ReactElement;
-  fallback?: ComponentType<{ error: Error }> | ReactElement | null;
+  fallback?: ReactElement<{ error: Error }> | ComponentType<{ error: Error }>;
+  children?: ReactNode;
 }
 
 interface State {
@@ -42,18 +43,29 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, State> 
     return { error };
   }
 
+  componentDidUpdate(prevProps: ErrorBoundaryProps) {
+    if (prevProps.children !== this.props.children) {
+      this.setState({ error: null });
+    }
+    // if (prevState.error !== this.state.error && this.state.error) {
+    //   store.dispatch(
+    //     eventAction({ type: HeadlampEventType.ERROR_BOUNDARY, data: this.state.error })
+    //   );
+    // }
+  }
+
   render() {
     const { error } = this.state;
-    if (error) {
-      // store.dispatch(eventAction({ type: HeadlampEventType.ERROR_BOUNDARY, data: error }));
-    }
+
     if (!error) {
       return this.props.children;
     }
-    if (isValidElement(this.props.fallback)) {
-      return this.props.fallback;
+
+    const FallbackComponent = this.props.fallback;
+    if (isValidElement(FallbackComponent)) {
+      return FallbackComponent;
     }
-    const Fallback = this.props.fallback as ComponentType<{ error: Error }>;
-    return this.props.fallback ? Children.toArray([<Fallback error={error} />]) : null;
+
+    return FallbackComponent ? <FallbackComponent error={error} /> : null;
   }
 }
