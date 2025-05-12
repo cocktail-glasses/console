@@ -1,4 +1,4 @@
-import { forwardRef } from 'react';
+import { forwardRef, useEffect, useState } from 'react';
 
 import { Chip } from '@mui/material';
 import Grid from '@mui/material/Grid';
@@ -266,10 +266,29 @@ export function DateLabel(props: DateLabelProps) {
   const { date, format = 'brief', iconProps = {} } = props;
   return (
     <HoverInfoLabel
-      label={timeAgo(date, { format })}
+      label={<TimeAgo date={date} format={format} />}
       hoverInfo={localeDate(date)}
       icon="mdi:calendar"
       iconProps={iconProps}
     />
   );
+}
+
+/**
+ * Shows time passed since given date
+ * Automatically refreshes
+ */
+function TimeAgo({ date, format }: { date: number | string | Date; format?: DateFormatOptions }) {
+  const [formattedDate, setFormattedDate] = useState<string>(() => timeAgo(date, { format }));
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      const newFormattedDate = timeAgo(date, { format });
+      setFormattedDate(newFormattedDate);
+    }, 1_000);
+
+    return () => clearInterval(id);
+  }, []);
+
+  return formattedDate;
 }

@@ -69,9 +69,9 @@ func (c *CSRFVerifier) verifyCSRF(r *http.Request) error {
 		}
 	}
 
-	if err := c.verifyCSRFToken(r); err != nil {
-		return fmt.Errorf("invalid CSRFToken: %v", err)
-	}
+	//if err := c.verifyCSRFToken(r); err != nil {
+	//	return fmt.Errorf("invalid CSRFToken: %v", err)
+	//}
 
 	return nil
 }

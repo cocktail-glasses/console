@@ -1,14 +1,16 @@
-import { Trans, useTranslation } from "react-i18next";
+import { Trans, useTranslation } from 'react-i18next';
 
-import Grid from "@mui/material/Grid2";
-import Link from "@mui/material/Link";
-import Typography from "@mui/material/Typography";
-import { styled } from "@mui/material/styles";
+import { Accordion, AccordionDetails, AccordionSummary, Box, Button } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import Link from '@mui/material/Link';
+import Typography from '@mui/material/Typography';
+import { styled } from '@mui/material/styles';
 
-import headlampBrokenImage from "@assets/headlamp-broken.svg";
+import headlampBrokenImage from '@assets/headlamp-broken.svg';
+import { Icon } from '@iconify/react/dist/iconify.js';
 
-const WidthImg = styled("img")({
-  width: "100%",
+const WidthImg = styled('img')({
+  width: '100%',
 });
 
 export interface ErrorComponentProps {
@@ -21,46 +23,41 @@ export interface ErrorComponentProps {
   graphic?: React.ReactChild;
   /** Whether to use Typography or not. By default it is true. */
   withTypography?: boolean;
+  /** The error object to display. */
+  error?: Error;
 }
 
 export default function ErrorComponent(props: ErrorComponentProps) {
   const { t } = useTranslation();
   const {
-    title = t("Uh-oh! Something went wrong."),
-    message = "",
+    title = t('Uh-oh! Something went wrong.'),
+    message = '',
     withTypography = true,
     graphic = headlampBrokenImage,
+    error,
   } = props;
   return (
     <Grid
       container
       spacing={0}
       direction="column"
-      alignItems="center"
-      justifyContent="center"
-      sx={{ textAlign: "center" }}
+      sx={{
+        textAlign: 'center',
+        justifyContent: 'center',
+        alignItems: 'center',
+      }}
     >
-      <Grid size={{ xs: 12 }}>
-        {typeof graphic === "string" ? (
-          <WidthImg src={graphic} alt="" />
-        ) : (
-          graphic
-        )}
+      <Grid columns={{ xs: 12 }}>
+        {typeof graphic === 'string' ? <WidthImg src={graphic} alt="" /> : graphic}
         {withTypography ? (
-          <Typography
-            variant="h1"
-            sx={{ fontSize: "2.125rem", lineHeight: 1.2, fontWeight: 400 }}
-          >
+          <Typography variant="h1" sx={{ fontSize: '2.125rem', lineHeight: 1.2, fontWeight: 400 }}>
             {title}
           </Typography>
         ) : (
           title
         )}
         {withTypography ? (
-          <Typography
-            variant="h2"
-            sx={{ fontSize: "1.25rem", lineHeight: 3.6, fontWeight: 500 }}
-          >
+          <Typography variant="h2" sx={{ fontSize: '1.25rem', lineHeight: 3.6, fontWeight: 500 }}>
             {message ? (
               message
             ) : (
@@ -73,6 +70,44 @@ export default function ErrorComponent(props: ErrorComponentProps) {
           message
         )}
       </Grid>
+      {!!error?.stack && (
+        <Grid>
+          <Box
+            sx={{
+              width: '100%',
+              maxWidth: 800,
+            }}
+          >
+            <Accordion>
+              <AccordionSummary expandIcon={<Icon icon="mdi:chevron-down" />}>
+                <Typography>{t('translation|Error Details')}</Typography>
+              </AccordionSummary>
+              <AccordionDetails>
+                <Box textAlign="right">
+                  <Button
+                    onClick={() => {
+                      navigator.clipboard.writeText(error.stack!);
+                    }}
+                  >
+                    {t('translation|Copy')}
+                  </Button>
+                </Box>
+                <Typography
+                  variant="body2"
+                  component="pre"
+                  sx={{
+                    textWrapMode: 'wrap',
+                    textAlign: 'left',
+                    overflowWrap: 'anywhere',
+                  }}
+                >
+                  {error.stack}
+                </Typography>
+              </AccordionDetails>
+            </Accordion>
+          </Box>
+        </Grid>
+      )}
     </Grid>
   );
 }

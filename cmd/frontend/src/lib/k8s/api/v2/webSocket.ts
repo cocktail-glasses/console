@@ -386,14 +386,24 @@ export type WebSocketConnectionRequest<T> = {
 export function useWebSocket<T>({
   url: createUrl,
   enabled = true,
+  protocols,
+  type = 'json',
   cluster = '',
   onMessage,
-  onError,
+  // onError,
 }: {
   /** Function that returns the WebSocket URL to connect to */
   url: () => string;
   /** Whether the WebSocket connection should be active */
   enabled?: boolean;
+  /**
+   * Any additional protocols to include in WebSocket connection
+   */
+  protocols?: string | string[];
+  /**
+   * Type of websocket data
+   */
+  type?: 'json' | 'binary';
   /** The Kubernetes cluster ID to watch */
   cluster?: string;
   /** Callback function to handle incoming messages */
@@ -401,59 +411,67 @@ export function useWebSocket<T>({
   /** Callback function to handle connection errors */
   onError?: (error: Error) => void;
 }) {
-  const url = useMemo(() => (enabled ? createUrl() : ''), [enabled, createUrl]);
+  const url = useMemo(() => (enabled ? createUrl() : ''), [enabled]);
+  const connections = useMemo(() => [{ cluster: cluster ?? '', url, onMessage }], [cluster, url]);
 
-  const stableOnMessage = useCallback(
-    (rawData: any) => {
-      try {
-        let parsedData: T;
-        try {
-          parsedData = typeof rawData === 'string' ? JSON.parse(rawData) : rawData;
-        } catch (parseError) {
-          console.error('Failed to parse WebSocket message:', parseError);
-          onError?.(parseError as Error);
-          return;
-        }
+  return useWebSockets({
+    connections,
+    protocols,
+    type,
+  });
+  // const url = useMemo(() => (enabled ? createUrl() : ''), [enabled, createUrl]);
 
-        onMessage(parsedData);
-      } catch (err) {
-        console.error('Failed to process WebSocket message:', err);
-        onError?.(err as Error);
-      }
-    },
-    [onMessage, onError]
-  );
+  // const stableOnMessage = useCallback(
+  //   (rawData: any) => {
+  //     try {
+  //       let parsedData: T;
+  //       try {
+  //         parsedData = typeof rawData === 'string' ? JSON.parse(rawData) : rawData;
+  //       } catch (parseError) {
+  //         console.error('Failed to parse WebSocket message:', parseError);
+  //         onError?.(parseError as Error);
+  //         return;
+  //       }
 
-  useEffect(() => {
-    if (!enabled || !url) {
-      return;
-    }
+  //       onMessage(parsedData);
+  //     } catch (err) {
+  //       console.error('Failed to process WebSocket message:', err);
+  //       onError?.(err as Error);
+  //     }
+  //   },
+  //   [onMessage, onError]
+  // );
 
-    let cleanup: (() => void) | undefined;
+  // useEffect(() => {
+  //   if (!enabled || !url) {
+  //     return;
+  //   }
 
-    const connectWebSocket = async () => {
-      try {
-        const parsedUrl = new URL(url, BASE_WS_URL);
-        cleanup = await WebSocketManager.subscribe(
-          cluster,
-          parsedUrl.pathname,
-          parsedUrl.search.slice(1),
-          stableOnMessage
-        );
-      } catch (err) {
-        console.error('WebSocket connection failed:', err);
-        onError?.(err as Error);
-      }
-    };
+  //   let cleanup: (() => void) | undefined;
 
-    connectWebSocket();
+  //   const connectWebSocket = async () => {
+  //     try {
+  //       const parsedUrl = new URL(url, BASE_WS_URL);
+  //       cleanup = await WebSocketManager.subscribe(
+  //         cluster,
+  //         parsedUrl.pathname,
+  //         parsedUrl.search.slice(1),
+  //         stableOnMessage
+  //       );
+  //     } catch (err) {
+  //       console.error('WebSocket connection failed:', err);
+  //       onError?.(err as Error);
+  //     }
+  //   };
 
-    return () => {
-      if (cleanup) {
-        cleanup();
-      }
-    };
-  }, [url, enabled, cluster, stableOnMessage, onError]);
+  //   connectWebSocket();
+
+  //   return () => {
+  //     if (cleanup) {
+  //       cleanup();
+  //     }
+  //   };
+  // }, [url, enabled, cluster, stableOnMessage, onError]);
 }
 
 /**
