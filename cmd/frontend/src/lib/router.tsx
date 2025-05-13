@@ -3,7 +3,7 @@
 import React, { Children, ReactNode, useEffect } from 'react';
 import { generatePath, useLocation, useNavigationType } from 'react-router';
 
-import { groupBy, isUndefined, mapValues, reduce, toLower } from 'lodash';
+import { get, groupBy, isUndefined, mapValues, reduce, toLower } from 'lodash';
 
 import Clusters from '@pages/Clusters/Clusters';
 import Home from '@pages/Home';
@@ -948,6 +948,12 @@ export function getRoutePathPattern(route: Route, cluster?: string | null) {
 // getRoute 라우트 id로 라우트 객체를 조회합니다.
 export function getRoute(routeId: string): Route {
   return routeTable[toLower(routeId)];
+}
+
+// 라우트 그룹으로 index 라우터를 조회합니다.
+export function getIndexRoute(routeGroupKey: string): Route {
+  const routeGroup = Routes[routeGroupKey];
+  return getRoute(get(routeGroup, 'indexId'));
 }
 
 export interface RouteURLProps {

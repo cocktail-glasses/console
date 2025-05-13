@@ -23,6 +23,7 @@ import {
   getRoutePathPattern,
   PreviousRouteProvider,
   RouteGroup,
+  getIndexRoute,
 } from '@lib/router';
 import { sidebarGroupId, sidebarGroups, sidebarMenus, sidebarMenuSelected, sidebarSub } from '@lib/stores';
 import Login from '@pages/Auth/Login';
@@ -43,7 +44,7 @@ const makeMenuList = (t: Translator) => {
 
   const makeSubMenu = (subMenu: MenuType) => ({
     ...subMenu,
-    url: createRouteURL(subMenu.route),
+    url: createRouteURL(getIndexRoute(subMenu.route).id),
     label: t(subMenu.label),
     isOnlyTab: false,
   });
@@ -53,7 +54,7 @@ const makeMenuList = (t: Translator) => {
 
     return {
       ...rootMenu,
-      url: createRouteURL(rootMenu.route),
+      url: createRouteURL(getIndexRoute(rootMenu.route).id),
       label: t(rootMenu.label),
       sub: isNotExistRootRouteInSub ? [{ ...makeSubMenu(rootMenu), isOnlyTab: true }].concat(sub) : sub,
     };
