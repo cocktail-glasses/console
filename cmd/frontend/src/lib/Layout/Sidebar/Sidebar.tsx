@@ -156,7 +156,7 @@ export default function Sidebar() {
           label: menu.label,
           url: murl,
           icon: menu.icon,
-          hide: false,
+          hide: menu.isVisible === false,
           isSelected,
           subList: menu.sub
             ?.filter((s: any) => s.isOnlyTab === false)

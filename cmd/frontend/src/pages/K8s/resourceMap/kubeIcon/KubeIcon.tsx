@@ -1,4 +1,8 @@
+import { useAtomValue } from 'jotai';
+
 import { Box } from '@mui/material';
+import { alpha } from '@mui/material/styles';
+
 import CRoleIcon from './img/c-role.svg?react';
 import CmIcon from './img/cm.svg?react';
 import CrbIcon from './img/crb.svg?react';
@@ -29,6 +33,8 @@ import StsIcon from './img/sts.svg?react';
 import SvcIcon from './img/svc.svg?react';
 import UserIcon from './img/user.svg?react';
 import VolIcon from './img/vol.svg?react';
+
+import { graphView } from '@lib/stores/graphView';
 
 const kindToIcon = {
   ClusterRole: CRoleIcon,
@@ -65,32 +71,11 @@ const kindToIcon = {
 } as const;
 
 const kindGroups = {
-  workloads: new Set([
-    'Pod',
-    'Deployment',
-    'ReplicaSet',
-    'StatefulSet',
-    'DaemonSet',
-    'ReplicaSet',
-    'Job',
-    'CronJob',
-  ]),
+  workloads: new Set(['Pod', 'Deployment', 'ReplicaSet', 'StatefulSet', 'DaemonSet', 'ReplicaSet', 'Job', 'CronJob']),
   storage: new Set(['PersistentVolumeClaim']),
-  network: new Set([
-    'Service',
-    'Endpoints',
-    'Endpoint',
-    'Ingress',
-    'IngressClass',
-    'NetworkPolicy',
-  ]),
+  network: new Set(['Service', 'Endpoints', 'Endpoint', 'Ingress', 'IngressClass', 'NetworkPolicy']),
   security: new Set(['ServiceAccount', 'Role', 'RoleBinding']),
-  configuration: new Set([
-    'ConfigMap',
-    'Secret',
-    'MutatingWebhookConfiguration',
-    'ValidatingWebhookConfiguration',
-  ]),
+  configuration: new Set(['ConfigMap', 'Secret', 'MutatingWebhookConfiguration', 'ValidatingWebhookConfiguration']),
 } as const;
 
 const getKindGroup = (kind: string) =>
@@ -124,28 +109,26 @@ export const getKindGroupColor = (group: keyof typeof kindGroupColors) =>
  * @param params.height - width in css units
  * @returns
  */
-export function KubeIcon({
-  kind,
-  width,
-  height,
-}: {
-  kind: keyof typeof kindToIcon;
-  width?: string;
-  height?: string;
-}) {
-  const IconComponent = kindToIcon[kind] ?? kindToIcon['Pod'];
+export function KubeIcon({ kind, width, height }: { kind: keyof typeof kindToIcon; width?: string; height?: string }) {
+  const pluginDefinedIcons = useAtomValue(graphView).kindIcons;
 
-  const color = getKindColor(kind);
+  const IconComponent = kindToIcon[kind] ?? kindToIcon['Pod'];
+  const icon = pluginDefinedIcons[kind]?.icon ?? (
+    <IconComponent style={{ scale: '1.1', width: '100%', height: '100%' }} />
+  );
+
+  const color = pluginDefinedIcons[kind]?.color ?? getKindColor(kind);
 
   return (
     <Box
       style={{ color }}
       sx={{
+        color,
         flexShrink: 0,
         borderRadius: '50%',
         width: width ?? '100%',
         height: height ?? '100%',
-        background: color.replace(')', ' / 12%)'),
+        background: color.includes('oklch') ? color.replace(')', ' / 12%)') : alpha(color, 0.12),
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -154,7 +137,7 @@ export function KubeIcon({
         },
       }}
     >
-      <IconComponent style={{ scale: '1.1', width: '100%', height: '100%' }} />
+      {icon}
     </Box>
   );
 }

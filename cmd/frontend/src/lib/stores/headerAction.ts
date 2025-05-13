@@ -60,10 +60,12 @@ export interface HeaderActionState {
   headerActionsProcessors: HeaderActionsProcessor[];
 }
 
-export const actionButtons = atom<HeaderActionState>({
+export const actionButtonsInitState = {
   headerActions: [],
   headerActionsProcessors: [],
-});
+};
+
+export const actionButtons = atom<HeaderActionState>(actionButtonsInitState);
 if (process.env.NODE_ENV !== 'production') {
   actionButtons.debugLabel = 'actionButtons';
 }

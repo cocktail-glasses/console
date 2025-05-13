@@ -113,7 +113,7 @@ export const KubeObjectDetails = memo(
 
     useEffect(() => {
       if (!kindComponentMap[kind]) {
-        console.error('No details component for kind ${kind} was found. See KubeNodeDetails.tsx for more info');
+        console.error(`No details component for kind ${kind} was found. See KubeNodeDetails.tsx for more info`);
       }
     }, [kind, kindComponentMap]);
 
