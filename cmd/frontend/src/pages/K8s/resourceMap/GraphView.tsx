@@ -12,7 +12,7 @@ import {
 } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { useSetAtom } from 'jotai';
+import { useAtomValue, useSetAtom } from 'jotai';
 
 import { Box, Chip, Theme } from '@mui/material';
 import { ThemeProvider, styled } from '@mui/material/styles';
@@ -38,6 +38,7 @@ import { NamespacesAutocomplete } from '@components/common';
 import { Icon } from '@iconify/react';
 import Namespace from '@lib/k8s/namespace';
 import K8sNode from '@lib/k8s/node';
+import { graphView } from '@lib/stores/graphView';
 import { additionalLayoutStyle } from '@lib/stores/layout';
 import { Edge, Node, Panel, ReactFlowProvider } from '@xyflow/react';
 import '@xyflow/react/dist/base.css';
@@ -419,11 +420,18 @@ function CustomThemeProvider({ children }: { children: ReactNode }) {
  * @returns
  */
 export default function GraphView(props: GraphViewContentProps) {
+  const propsSources = props.defaultSources ?? allSources;
+
+  // Load plugin defined sources
+  const pluginGraphSources = useAtomValue(graphView).graphSources;
+
+  const sources = useMemo(() => [...propsSources, ...pluginGraphSources], [propsSources, pluginGraphSources]);
+
   return (
     <StrictMode>
       <ReactFlowProvider>
-        <GraphSourceManager sources={props.defaultSources ?? allSources} relations={kubeObjectRelations}>
-          <GraphViewContent {...props} />
+        <GraphSourceManager sources={sources} relations={kubeObjectRelations}>
+          <GraphViewContent {...props} defaultSources={sources} />
         </GraphSourceManager>
       </ReactFlowProvider>
     </StrictMode>

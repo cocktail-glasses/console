@@ -71,11 +71,13 @@ export interface DetailsViewSectionState {
   detailsViewSectionsProcessors: DetailsViewsSectionProcessor[];
 }
 
-export const detailsViewSectionState = atom<DetailsViewSectionState>({
+export const detailsViewSectionInitState: DetailsViewSectionState = {
   detailViews: [],
   detailsViewSections: [],
   detailsViewSectionsProcessors: [],
-});
+};
+
+export const detailsViewSectionState = atom<DetailsViewSectionState>(detailsViewSectionInitState);
 if (process.env.NODE_ENV !== 'production') {
   detailsViewSectionState.debugLabel = 'detailsViewSection';
 }

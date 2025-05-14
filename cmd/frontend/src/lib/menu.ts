@@ -1,3 +1,5 @@
+import { isEmpty, keyBy, memoize } from 'lodash';
+
 export interface MenuType {
   id: string;
   label: string;
@@ -5,6 +7,7 @@ export interface MenuType {
   route: string;
   group: string;
   parent?: string;
+  isVisible?: boolean;
 }
 
 export const Menus: MenuType[] = [
@@ -418,6 +421,80 @@ export const Menus: MenuType[] = [
     route: 'tenantClusters',
     group: 'kaas',
   },
+
+  // flux
+  {
+    id: 'flux',
+    label: 'Flux',
+    icon: 'simple-icons:flux',
+    route: 'overview',
+    group: 'k8s',
+    isVisible: false,
+  },
+  {
+    id: 'overview',
+    label: 'Overview',
+    icon: 'simple-icons:flux',
+    route: 'overview',
+    group: 'k8s',
+    parent: 'flux',
+  },
+  {
+    id: 'kustomizations',
+    label: 'Kustomizations',
+    icon: 'simple-icons:flux',
+    route: 'kustomizations',
+    group: 'k8s',
+    parent: 'flux',
+  },
+  {
+    id: 'helmreleases',
+    label: 'HelmReleases',
+    icon: 'simple-icons:flux',
+    route: 'helmreleases',
+    group: 'k8s',
+    parent: 'flux',
+  },
+  {
+    id: 'sources',
+    label: 'Sources',
+    icon: 'simple-icons:flux',
+    route: 'sources',
+    group: 'k8s',
+    parent: 'flux',
+  },
+  {
+    id: 'imageAutomations',
+    label: 'Image Automations',
+    icon: 'simple-icons:flux',
+    route: 'imageAutomations',
+    group: 'k8s',
+    parent: 'flux',
+  },
+  {
+    id: 'notifications',
+    label: 'Notifications',
+    icon: 'simple-icons:flux',
+    route: 'notifications',
+    group: 'k8s',
+    parent: 'flux',
+  },
+  {
+    id: 'canaries',
+    label: 'Canaries',
+    icon: 'simple-icons:flux',
+    route: 'canaries',
+    group: 'k8s',
+    parent: 'flux',
+  },
+  {
+    id: 'runtime',
+    label: 'Flux Runtime',
+    icon: 'simple-icons:flux',
+    route: 'runtime',
+    group: 'k8s',
+    parent: 'flux',
+  },
 ];
 
 export interface GroupType {
@@ -432,3 +509,23 @@ export const Groups: GroupType[] = [
   // { id: "build", label: "Build", icon: "mdi:connection" },
   { id: 'kaas', label: 'KaaS', icon: 'mdi:kamaji' },
 ];
+
+export const getMenu = (menus: MenuType[], menuId: string) => {
+  if (!hasMenu(menus, menuId)) return null;
+
+  const menuTable = transformer(menus, 'id');
+
+  return menuTable[menuId];
+};
+
+export const hasMenu = (menus: MenuType[], menuId: string) => hasKeyInArray(menus, menuId);
+export const hasGroup = (groups: GroupType[], groupId: string) => hasKeyInArray(groups, groupId);
+
+const transformer = memoize(keyBy);
+const hasKeyInArray = <T extends MenuType | GroupType>(arr: T[], key: string): boolean => {
+  if (isEmpty(key)) return false;
+
+  const table = transformer(arr, 'id');
+
+  return !!table[key];
+};

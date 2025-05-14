@@ -56,7 +56,7 @@ const queryClient = new QueryClient({
 
 function App() {
   return (
-    <ErrorBoundary fallback={<ErrorComponent />}>
+    <ErrorBoundary fallback={(props: { error: Error }) => <ErrorComponent error={props.error} />}>
       <Provider store={store}>
         <JProvider>
           <DevTools position="bottom-right" />

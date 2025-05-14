@@ -3,7 +3,7 @@
 import React, { Children, ReactNode, useEffect } from 'react';
 import { generatePath, useLocation, useNavigationType } from 'react-router';
 
-import { groupBy, isUndefined, mapValues, reduce, toLower } from 'lodash';
+import { assign, cloneDeep, findKey, get, groupBy, isUndefined, mapValues, reduce, toLower } from 'lodash';
 
 import Clusters from '@pages/Clusters/Clusters';
 import Home from '@pages/Home';
@@ -119,13 +119,12 @@ export type Route = {
   path: string;
   element: () => ReactNode;
   index?: boolean;
-  props?: any;
 
   // URL에 cluster prefix 여부
   useClusterURL?: boolean;
 };
 
-const Routes: RouteGroupTable = {
+const defaultRouteGroupTable: RouteGroupTable = {
   home: {
     indexId: 'home',
     routes: [
@@ -904,7 +903,7 @@ const Routes: RouteGroupTable = {
 
 // 라우트 id를 키로 가지는 라우트 객체를 반환
 // {route1Id: route1, route2Id, route2, ...}
-const getRouteById = (acc: object, group: RouteGroup) => {
+const getRouteById = (acc: object, group: RouteGroup): { [id: string]: Route } => {
   const routes = mapValues(
     groupBy(group.routes, (route: Route) => toLower(route.id)),
     (route: Route[]) => {
@@ -925,7 +924,22 @@ const getRouteById = (acc: object, group: RouteGroup) => {
   };
 };
 
-export const routeTable = reduce(Routes, getRouteById, {});
+const initRouteTable = () => reduce(defaultRouteGroupTable, getRouteById, {});
+const initRouteGroupTable = () => cloneDeep(defaultRouteGroupTable);
+
+// 플러그인에 의해 라우터가 동적으로 변경될 수 있어야 하므로, 객체 상태를 초기화, 업데이트하는 기능이 필요하다.
+let routeTable = initRouteTable();
+let routeGroupTable = initRouteGroupTable();
+
+export const addRouteGroupTable = (routeGroupTableProps: RouteGroupTable) => {
+  assign(routeGroupTable, routeGroupTableProps);
+  assign(routeTable, reduce(routeGroupTableProps, getRouteById, {}));
+};
+
+export const resetRoute = () => {
+  routeTable = initRouteTable();
+  routeGroupTable = initRouteGroupTable();
+};
 
 // isUseClusterURL route가 cluster URL을 사용하는지 여부를 반환합니다.
 export function isUseClusterURL(route: Route): boolean {
@@ -950,6 +964,12 @@ export function getRoute(routeId: string): Route {
   return routeTable[toLower(routeId)];
 }
 
+// 라우트 그룹으로 index 라우터를 조회합니다.
+export function getIndexRoute(routeGroupKey: string): Route {
+  const routeGroup = routeGroupTable[routeGroupKey];
+  return getRoute(get(routeGroup, 'indexId'));
+}
+
 export interface RouteURLProps {
   cluster?: string;
   [prop: string]: any;
@@ -963,12 +983,23 @@ export function createRouteURL(routeId: string, params: RouteURLProps = {}) {
     ...params,
   };
 
-  const route = getRoute(routeId);
+  // 하위 호환성을 위해 routeId 대신 경로로 조회하는 케이스 유지
+  const routeIdByPath = findKey(routeTable, (route: Route) => route.path === routeId);
+
+  const route = getRoute(routeIdByPath || routeId);
+  if (!route) {
+    return '';
+  }
+
   return generatePath(getRoutePathPattern(route, cluster), fullParams);
 }
 
-export function getRoutes() {
-  return Routes;
+export function getRouteGroupTable() {
+  return routeGroupTable;
+}
+
+export function hasRouteGroup(routeGroupKey: string): boolean {
+  return !!routeGroupTable[routeGroupKey];
 }
 
 export function PreviousRouteProvider({ children }: React.PropsWithChildren<{}>) {
