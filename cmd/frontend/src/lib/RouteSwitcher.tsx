@@ -151,6 +151,7 @@ export default function RouteSwitcher({ groups, menus }: RouteSwitcherProps) {
 
   const dynamicRouteGroupTable = useAtomValue(routeGroupTableAtom);
   useEffect(() => {
+    // 렌더링중 사이드이펙트가 발생하지 않도록 useEffect 안에서 routeGroupTable과 routeList를 동기화한다.
     addRouteGroupTable(dynamicRouteGroupTable);
 
     const menuList = makeMenuList(groups, menus, t);
@@ -163,7 +164,7 @@ export default function RouteSwitcher({ groups, menus }: RouteSwitcherProps) {
     return () => resetRoute();
   }, [groups, menus, dynamicRouteGroupTable]);
 
-  if (isLoadingMenus(menus)) {
+  if (isLoadingRoute(routeList)) {
     const routes = [
       {
         path: '*',
@@ -209,4 +210,4 @@ export default function RouteSwitcher({ groups, menus }: RouteSwitcherProps) {
   return <RouterProvider router={router} />;
 }
 
-const isLoadingMenus = (menus: MenuType[]) => size(menus) == 0;
+const isLoadingRoute = (routeList: ConcreteRoute[]) => size(routeList) == 0;
