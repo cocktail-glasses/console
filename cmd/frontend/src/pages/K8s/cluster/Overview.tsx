@@ -61,7 +61,7 @@ export default function Overview() {
           <Grid container justifyContent="flex-start" alignItems="stretch" spacing={4}>
             {charts.map((chart) => (
               <Grid key={chart.id} size={{ xs: 4 }} sx={{ maxWidth: '300px' }}>
-                <chart.component />
+                {chart.component()}
               </Grid>
             ))}
           </Grid>
