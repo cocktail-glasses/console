@@ -9,6 +9,7 @@ import { filter, groupBy, has, map, size } from 'lodash';
 import { routeGroupTable as routeGroupTableAtom } from './stores/router';
 
 import { Loader } from '@components/common';
+import ErrorBoundary from '@components/common/ErrorBoundary';
 import BasicLayout from '@lib/Layout/BasicLayout';
 import { authCheck } from '@lib/api/common';
 import { getCluster } from '@lib/cluster';
@@ -133,7 +134,24 @@ function AuthRoute(props: { children: React.ReactNode | JSX.Element; [otherProps
     }
   }, [menu, sub]);
 
-  return <Suspense fallback={<Loader title="Loading..." />}>{children}</Suspense>;
+  // 메뉴 선택이 이곳에 위치하기 때문에 ErrorBoundary는 이곳에 위치시킨다.
+  return (
+    <ErrorBoundary fallback={(props: { error: Error }) => <RouteErrorBoundary error={props.error} />}>
+      <Suspense fallback={<Loader title="Loading..." />}>{children}</Suspense>
+    </ErrorBoundary>
+  );
+}
+
+function RouteErrorBoundary(props: { error: Error }) {
+  const { error } = props;
+  const { t } = useTranslation();
+  return (
+    <ErrorComponent
+      title={t('Uh-oh! Something went wrong.')}
+      error={error}
+      message={t('translation|Error loading {{ routeName }}', { routeName: '' })}
+    />
+  );
 }
 
 interface RouteSwitcherProps {
@@ -151,6 +169,7 @@ export default function RouteSwitcher({ groups, menus }: RouteSwitcherProps) {
 
   const dynamicRouteGroupTable = useAtomValue(routeGroupTableAtom);
   useEffect(() => {
+    // 렌더링중 사이드이펙트가 발생하지 않도록 useEffect 안에서 routeGroupTable과 routeList를 동기화한다.
     addRouteGroupTable(dynamicRouteGroupTable);
 
     const menuList = makeMenuList(groups, menus, t);
@@ -163,7 +182,7 @@ export default function RouteSwitcher({ groups, menus }: RouteSwitcherProps) {
     return () => resetRoute();
   }, [groups, menus, dynamicRouteGroupTable]);
 
-  if (isLoadingMenus(menus)) {
+  if (isLoadingRoute(routeList)) {
     const routes = [
       {
         path: '*',
@@ -209,4 +228,4 @@ export default function RouteSwitcher({ groups, menus }: RouteSwitcherProps) {
   return <RouterProvider router={router} />;
 }
 
-const isLoadingMenus = (menus: MenuType[]) => size(menus) == 0;
+const isLoadingRoute = (routeList: ConcreteRoute[]) => size(routeList) == 0;
