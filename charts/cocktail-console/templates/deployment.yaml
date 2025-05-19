@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "cocktail-console.fullname" . }}
+  namespace: {{ $.Release.Namespace }}
   labels:
     {{- include "cocktail-console.labels" . | nindent 4 }}
 spec:
@@ -31,10 +32,17 @@ spec:
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
-        - name: {{ .Chart.Name }}
+        - name: gateway
+         {{- with .Values.arguments }}
+          args: 
+            {{- toYaml . | nindent 10 }}
+         {{- end }}
+          env:
+          - name: BACKEND_CONFIG
+            value: /config/config.yaml
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          image: {{ template "cocktail-console.image-base-url" . }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: http
@@ -46,14 +54,35 @@ spec:
             {{- toYaml .Values.readinessProbe | nindent 12 }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-          {{- with .Values.volumeMounts }}
           volumeMounts:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
-      {{- with .Values.volumes }}
+      {{- if ne .Values.auth.authType "disabled"}}
+          - mountPath: /data
+            name: session-keys
+            readOnly: true
+      {{- end}}
+          - mountPath: /config
+            name: config
+            readOnly: true
+          {{- with .Values.volumeMounts }}
+              {{- toYaml . | nindent 10 }}
+          {{- end}}
       volumes:
-        {{- toYaml . | nindent 8 }}
+        - name: config
+          configMap:
+            defaultMode: 420
+            items:
+            - key: config
+              path: config.yaml
+            name: {{ include "cocktail-console.fullname" . }}
+      {{- if ne .Values.auth.authType "disabled" }}
+        - name: session-keys
+          secret:
+            defaultMode: 420
+            secretName: {{ include "cocktail-console.fullname" . }}
       {{- end }}
+      {{- with .Values.volumes }}
+        {{- toYaml . | nindent 8 }}
+      {{- end}}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

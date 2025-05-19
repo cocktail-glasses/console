@@ -60,3 +60,52 @@ Create the name of the service account to use
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
+
+{{/*
+Check whether BaseAddress can be used
+*/}}
+{{- define "cocktail-console.shouldUseBaseAddress" -}}
+{{- if .Values.auth.redirectBaseAddress }}
+  {{- true}}
+{{- else if .Values.ingress.enabled }}
+  {{- if and .Values.ingress.hosts (gt (len .Values.ingress.hosts) 0) }}
+    {{- true}}
+  {{- else }}
+    {{- false}}
+  {{- end }}
+{{- else }}
+  {{- false}}
+{{- end }}
+{{- end }}
+
+{{/*
+Create BaseAddress for OIDC redirect_uri
+*/}}
+{{- define "cocktail-console.baseAddress" -}}
+{{- $redirect := .Values.auth.redirectBaseAddress | default "" | trim }}
+{{- if $redirect }}
+  {{- $redirect }}
+{{- else if .Values.ingress.enabled }}
+  {{- if and .Values.ingress.hosts (gt (len .Values.ingress.hosts) 0) (index .Values.ingress.hosts 0).host }}
+    {{- printf "https://%s" (index .Values.ingress.hosts 0).host }}
+  {{- else }}
+    {{- ""}}
+  {{- end }}
+{{- else }}
+  {{- ""}}
+{{- end }}
+{{- end }}
+
+
+{{/*
+Return ImageBaseUrl
+*/}}
+{{- define "cocktail-console.image-base-url" -}}
+{{- if .Values.imageBaseUrl }}
+    {{- .Values.imageBaseUrl -}}
+{{- else if .Values.global.defaultImageBaseUrl -}}
+    {{- .Values.global.defaultImageBaseUrl -}}
+{{- else -}}
+    {{ default "regi.acloud.run" .Values.imageBaseUrl }}
+{{- end -}}
+{{- end -}}
