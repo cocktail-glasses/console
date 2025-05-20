@@ -1,0 +1,10 @@
+imageBaseUrl: ccpr.cocktailcloud.io
+
+# for debuging
+arguments:
+  - --v=4
+
+
+#### disabled auth-type
+# auth:
+#   authType: 'disabled'
