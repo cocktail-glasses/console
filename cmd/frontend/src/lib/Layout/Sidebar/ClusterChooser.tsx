@@ -1,14 +1,10 @@
 import * as React from 'react';
+import { generatePath, useNavigate } from 'react-router';
 
-import AddRoundedIcon from '@mui/icons-material/AddRounded';
-import ConstructionRoundedIcon from '@mui/icons-material/ConstructionRounded';
 import DevicesRoundedIcon from '@mui/icons-material/DevicesRounded';
-import SmartphoneRoundedIcon from '@mui/icons-material/SmartphoneRounded';
 import UnfoldMoreRoundedIcon from '@mui/icons-material/UnfoldMoreRounded';
 import MuiAvatar from '@mui/material/Avatar';
-import Divider from '@mui/material/Divider';
 import MuiListItemAvatar from '@mui/material/ListItemAvatar';
-import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import ListSubheader from '@mui/material/ListSubheader';
 import MenuItem from '@mui/material/MenuItem';
@@ -18,40 +14,48 @@ import { styled } from '@mui/material/styles';
 
 import './sidebar.scss';
 
+import { getClusterPrefixedPath } from '@lib/cluster';
+import { KubeObject } from '@lib/k8s/KubeObject';
 import clsx from 'clsx';
-
-const Avatar = styled(MuiAvatar)(({ theme }) => ({
-  width: 28,
-  height: 28,
-  backgroundColor: theme.palette.background.paper,
-  color: theme.palette.text.secondary,
-  border: `1px solid ${theme.palette.divider}`,
-}));
-
-const ListItemAvatar = styled(MuiListItemAvatar)({
-  minWidth: 0,
-  marginRight: 12,
-});
 
 interface ClusterChooserProps {
   fullWidth: boolean;
 }
 
 export default function ClusterChooser({ fullWidth }: ClusterChooserProps) {
-  const [company, setCompany] = React.useState('');
+  const [clusters, setClusters] = React.useState<string[]>([]);
+  const [cluster, setCluster] = React.useState<string>('hub');
+  const navigate = useNavigate();
+
+  React.useEffect(() => {
+    // TODO 실패한 경우를 고려하면 실패시 재시도, 데이터 캐싱 처리 해주는 tanstack-query를 쓰는게 맘 편하다.
+    fetch('/k8s/apis/gateway.open-cluster-management.io/v1alpha1/clustergateways')
+      .then((res) => res.json())
+      .then((res) => setClusters(res.items.map((cluster: KubeObject) => cluster.metadata.name)));
+  }, []);
 
   const handleChange = (event: SelectChangeEvent) => {
-    setCompany(event.target.value as string);
+    const selectedCluster = event.target.value as string;
+
+    setCluster(selectedCluster);
+
+    const url =
+      selectedCluster !== 'hub'
+        ? generatePath('/' + getClusterPrefixedPath() + '/cluster', { cluster: selectedCluster })
+        : generatePath('/cluster');
+
+    navigate(url);
   };
+
   return (
     <Select
       labelId="select-content-label"
       id="select-content"
       className={clsx('selectContent', { collapse: !fullWidth })}
-      value={company}
+      value={cluster}
       onChange={handleChange}
       displayEmpty
-      inputProps={{ 'aria-label': 'Select company' }}
+      inputProps={{ 'aria-label': 'Select cluster' }}
       fullWidth
       SelectDisplayProps={{ className: 'SelectDisplayProps', id: 'select-content-selected' }}
       IconComponent={React.forwardRef<SVGSVGElement, SvgIconProps>((props, ref) => (
@@ -62,93 +66,50 @@ export default function ClusterChooser({ fullWidth }: ClusterChooserProps) {
           className: 'select-content-menu',
         },
       }}
-      // sx={(theme) => ({
-      //   maxHeight: 56,
-      //   width: 215,
-      //   border: '1px solid',
-      //   borderRadius: 2,
-      //   borderColor: theme.palette.grey['700'],
-      //   // '&.MuiList-root': {
-      //   //   p: '8px',
-      //   // },
-      //   [`& .${selectClasses.select}`]: {
-      //     // display: 'flex',
-      //     // alignItems: 'center',
-      //     // gap: '2px',
-      //     // pl: 1,
-      //   },
-      //   '&:before': {
-      //     border: 'none',
-      //   },
-      //   '&:after': {
-      //     border: 'none',
-      //   },
-      //   '&:hover': {},
-      // })}
     >
       <ListSubheader className="select-content-subheader" sx={{ fontSize: '12px' }}>
-        Production
+        Hub Cluster
       </ListSubheader>
-      <MenuItem value="" sx={{ borderRadius: '8px' }}>
-        <ListItemAvatar>
-          <Avatar alt="Sitemark web">
-            <DevicesRoundedIcon sx={{ fontSize: '1rem' }} />
-          </Avatar>
-        </ListItemAvatar>
-        <ListItemText
-          primary="Sitemark-web"
-          secondary="Web app"
-          slotProps={{ primary: { fontWeight: 'bold', fontSize: '14px' }, secondary: { fontSize: '12px' } }}
-        />
+      <MenuItem value="hub" sx={{ borderRadius: '8px' }}>
+        <ClusterItem clusterName="hub" description="in-cluster" />
       </MenuItem>
-      <MenuItem value={10} sx={{ borderRadius: '8px' }}>
-        <ListItemAvatar>
-          <Avatar alt="Sitemark App">
-            <SmartphoneRoundedIcon sx={{ fontSize: '1rem' }} />
-          </Avatar>
-        </ListItemAvatar>
-        <ListItemText
-          primary="Sitemark-app"
-          secondary="Mobile application"
-          slotProps={{ primary: { fontWeight: 'bold', fontSize: '14px' }, secondary: { fontSize: '12px' } }}
-        />
-      </MenuItem>
-      <MenuItem value={20} sx={{ borderRadius: '8px' }}>
-        <ListItemAvatar>
-          <Avatar alt="Sitemark Store">
-            <DevicesRoundedIcon sx={{ fontSize: '1rem' }} />
-          </Avatar>
-        </ListItemAvatar>
-        <ListItemText
-          primary="Sitemark-Store"
-          secondary="Web app"
-          slotProps={{ primary: { fontWeight: 'bold', fontSize: '14px' }, secondary: { fontSize: '12px' } }}
-        />
-      </MenuItem>
-      <ListSubheader sx={{ fontSize: '12px' }}>Development</ListSubheader>
-      <MenuItem value={30} sx={{ borderRadius: '8px' }}>
-        <ListItemAvatar>
-          <Avatar alt="Sitemark Store">
-            <ConstructionRoundedIcon sx={{ fontSize: '1rem' }} />
-          </Avatar>
-        </ListItemAvatar>
-        <ListItemText
-          primary="Sitemark-Admin"
-          secondary="Web app"
-          slotProps={{ primary: { fontWeight: 'bold', fontSize: '14px' }, secondary: { fontSize: '12px' } }}
-        />
-      </MenuItem>
-      <Divider sx={{ mx: -1 }} />
-      <MenuItem value={40} sx={{ borderRadius: '8px' }}>
-        <ListItemIcon>
-          <AddRoundedIcon />
-        </ListItemIcon>
-        <ListItemText
-          primary="Add product"
-          secondary="Web app"
-          slotProps={{ primary: { fontWeight: 'bold', fontSize: '14px' }, secondary: { fontSize: '12px' } }}
-        />
-      </MenuItem>
+
+      <ListSubheader className="select-content-subheader" sx={{ fontSize: '12px' }}>
+        Managed Clusters
+      </ListSubheader>
+      {clusters.map((cluster) => (
+        <MenuItem value={cluster} sx={{ borderRadius: '8px' }} key={cluster}>
+          <ClusterItem clusterName={cluster} description={`managed cluster ${cluster}`} />
+        </MenuItem>
+      ))}
     </Select>
   );
 }
+
+const ListItemAvatar = styled(MuiListItemAvatar)({
+  minWidth: 0,
+  marginRight: 12,
+});
+
+const Avatar = styled(MuiAvatar)(({ theme }) => ({
+  width: 28,
+  height: 28,
+  backgroundColor: theme.palette.background.paper,
+  color: theme.palette.text.secondary,
+  border: `1px solid ${theme.palette.divider}`,
+}));
+
+const ClusterItem = ({ clusterName, description = '' }: { clusterName: string; description?: string }) => (
+  <>
+    <ListItemAvatar>
+      <Avatar alt="Sitemark web">
+        <DevicesRoundedIcon sx={{ fontSize: '1rem' }} />
+      </Avatar>
+    </ListItemAvatar>
+    <ListItemText
+      primary={clusterName}
+      secondary={description}
+      slotProps={{ primary: { fontWeight: 'bold', fontSize: '14px' }, secondary: { fontSize: '12px' } }}
+    />
+  </>
+);

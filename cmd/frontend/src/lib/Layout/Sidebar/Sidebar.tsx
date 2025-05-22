@@ -395,7 +395,8 @@ export function PureSidebar({
         {...conditionalProps}
       >
         {topContent}
-        {getSidebarGroup == 'k8s' && clusterChooser}
+        {/* kaas 서비스는 어차피 허브 클러스터에서 할 것 같은데.. 일단은 설정 메뉴를 제외하고 clusterChooser 노출 */}
+        {getSidebarGroup != 'config' && clusterChooser}
         {contents}
       </Drawer>
     </Box>
