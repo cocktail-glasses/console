@@ -1,9 +1,26 @@
 imageBaseUrl: ccpr.cocktailcloud.io
 
+image:
+  tag: "release-freeze-1"
+
 # for debuging
 arguments:
   - --v=4
 
+# acloude 호스트
+auth:
+  redirectBaseAddress: https://managed-console.acloud.run
+
+ingress:
+  hosts:
+    - host: managed-console.acloud.run
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls:
+  - secretName: 2024-acloud-run-tls
+    hosts:
+      - managed-console.acloud.run
 
 #### disabled auth-type
 # auth:
