@@ -21,6 +21,8 @@ export interface PureSidebarProps {
   search?: string;
   /** A place to put extra components below the links. */
   linkArea: React.ReactNode;
+  // 클러스터 스위칭 가능 여부
+  isClusterSwitchAvailable: boolean;
 }
 
 export interface SidebarEntry {

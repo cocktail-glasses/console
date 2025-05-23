@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { generatePath } from 'react-router';
 import { useParams } from 'react-router-dom';
@@ -13,7 +13,7 @@ import Grid from '@mui/material/Grid2';
 import List from '@mui/material/List';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
-import { has } from 'lodash';
+import { find, get, has } from 'lodash';
 
 import ClusterChooser from './ClusterChooser';
 import { PureSidebarProps, SidebarItemProps } from './SidebarInterface';
@@ -21,8 +21,14 @@ import { PureSidebarProps, SidebarItemProps } from './SidebarInterface';
 import { ActionButton } from '@components/common';
 import { Icon } from '@iconify/react';
 import SidebarItem from '@lib/Layout/Sidebar/SidebarItem';
+import {
+  ApiregistrationV1Api as ApiRegistrationAPI,
+  IoK8sKubeAggregatorPkgApisApiregistrationV1APIServiceCondition as ApiServiceCondition,
+} from '@lib/apiRegistration';
 import { MenuType } from '@lib/menu';
 import { sidebarGroupId, sidebarGroups, sidebarMenus, sidebarMenuSelected, sidebarIsOpen } from '@lib/stores';
+import { clusterAtom, mainClusterKey } from '@lib/stores/cluster';
+import { useQuery } from '@tanstack/react-query';
 import { useTypedSelector } from 'redux/reducers/reducers';
 
 // import { UriPrefix } from '@lib/api/constants';
@@ -132,6 +138,32 @@ export default function Sidebar() {
   const groupID = useAtomValue(sidebarGroupId);
   const params = useParams();
 
+  const setCluster = useSetAtom(clusterAtom);
+
+  const [isGatewayAvailable, setIsGatewayAvailable] = useState(false);
+  const { data: clusterGatewayApiService } = useQuery({
+    queryKey: ['cluster-gateway-apiservice'],
+    queryFn: async () => {
+      const apiRegistrationAPI = new ApiRegistrationAPI(undefined, '/k8s/');
+      return await apiRegistrationAPI.readApiregistrationV1APIServiceStatus(
+        'v1alpha1.gateway.open-cluster-management.io'
+      );
+    },
+    refetchInterval: 5000,
+  });
+
+  useEffect(() => {
+    const conditions = get(clusterGatewayApiService, 'data.status.conditions', []);
+    const condition = find(conditions, (condition: ApiServiceCondition) => condition.type === 'Available');
+    setIsGatewayAvailable(condition?.status === 'True');
+  }, [clusterGatewayApiService]);
+
+  useEffect(() => {
+    if (isGatewayAvailable) {
+      setCluster(mainClusterKey);
+    }
+  }, [isGatewayAvailable]);
+
   // const sidebar = useTypedSelector(state => state.sidebar);
   // const sidebar = {
   //   selected: { sidebar: 'HOME', item: 'settings' },
@@ -193,6 +225,7 @@ export default function Sidebar() {
       search={search}
       onToggleOpen={() => setIsOpen((prev) => !prev)}
       linkArea={<DefaultLinkArea sidebarName={selectedMenu.label} isOpen={isOpen} />}
+      isClusterSwitchAvailable={isGatewayAvailable}
     />
   );
 }
@@ -206,6 +239,7 @@ export function PureSidebar({
   onToggleOpen,
   search,
   linkArea,
+  isClusterSwitchAvailable,
 }: PureSidebarProps) {
   const { t } = useTranslation(['glossary']);
   const [getSidebarGroup, setSidebarGroup] = useAtom(sidebarGroupId);
@@ -316,7 +350,7 @@ export function PureSidebar({
     </>
   );
 
-  const clusterChooser = (
+  const clusterChooser = isClusterSwitchAvailable && (
     <>
       <Box
         sx={{
@@ -396,7 +430,7 @@ export function PureSidebar({
       >
         {topContent}
         {/* kaas 서비스는 어차피 허브 클러스터에서 할 것 같은데.. 일단은 설정 메뉴를 제외하고 clusterChooser 노출 */}
-        {getSidebarGroup != 'config' && clusterChooser}
+        {getSidebarGroup == 'k8s' && clusterChooser}
         {contents}
       </Drawer>
     </Box>
