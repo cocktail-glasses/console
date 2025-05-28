@@ -520,7 +520,7 @@ const defaultRouteGroupTable: RouteGroupTable = {
         element: () => <K8sHttpRouteList />,
       },
       {
-        id: 'httprout',
+        id: 'httproute',
         path: '/httproutes/:namespace/:name',
 
         element: () => <K8sHttpRouteDetails />,
