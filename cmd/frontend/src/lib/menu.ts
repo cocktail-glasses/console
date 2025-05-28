@@ -429,7 +429,7 @@ export const Menus: MenuType[] = [
     icon: 'simple-icons:flux',
     route: 'overview',
     group: 'k8s',
-    isVisible: false,
+    // isVisible: false,
   },
   {
     id: 'overview',
