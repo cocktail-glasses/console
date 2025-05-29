@@ -328,6 +328,10 @@ func (s *Server) HTTPHandler() (http.Handler, error) {
 				return
 			}
 
+			r.Header.Set("Impersonate-User", user.Username)
+			for _, role := range user.SplitUserRole() {
+				r.Header.Add("Impersonate-Group", role)
+			}
 			r.Header.Set("Authorization", fmt.Sprintf("bearer %s", tokenByte))
 			k8sProxy.ServeHTTP(w, r)
 		}),
