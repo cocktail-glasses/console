@@ -13,7 +13,7 @@ import Grid from '@mui/material/Grid2';
 import List from '@mui/material/List';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
-import { find, get, has } from 'lodash';
+import { find, get, has, isEmpty } from 'lodash';
 
 import ClusterChooser from './ClusterChooser';
 import { PureSidebarProps, SidebarItemProps } from './SidebarInterface';
@@ -25,6 +25,7 @@ import {
   ApiregistrationV1Api as ApiRegistrationAPI,
   IoK8sKubeAggregatorPkgApisApiregistrationV1APIServiceCondition as ApiServiceCondition,
 } from '@lib/apiRegistration';
+import { useCluster } from '@lib/k8s';
 import { MenuType } from '@lib/menu';
 import { sidebarGroupId, sidebarGroups, sidebarMenus, sidebarMenuSelected, sidebarIsOpen } from '@lib/stores';
 import { clusterAtom, mainClusterKey } from '@lib/stores/cluster';
@@ -138,6 +139,7 @@ export default function Sidebar() {
   const groupID = useAtomValue(sidebarGroupId);
   const params = useParams();
 
+  const clusterInURL = useCluster();
   const setCluster = useSetAtom(clusterAtom);
 
   const [isGatewayAvailable, setIsGatewayAvailable] = useState(false);
@@ -159,7 +161,7 @@ export default function Sidebar() {
   }, [clusterGatewayApiService]);
 
   useEffect(() => {
-    if (isGatewayAvailable) {
+    if (isGatewayAvailable && isEmpty(clusterInURL)) {
       setCluster(mainClusterKey);
     }
   }, [isGatewayAvailable]);

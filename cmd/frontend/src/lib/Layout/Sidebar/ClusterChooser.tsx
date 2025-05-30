@@ -12,17 +12,19 @@ import Select, { SelectChangeEvent } from '@mui/material/Select';
 import { SvgIconProps } from '@mui/material/SvgIcon';
 import { styled } from '@mui/material/styles';
 
-import { filter, get, has, isUndefined, keyBy, map, pickBy, size, toPairs } from 'lodash';
+import { filter, get, has, isEmpty, isUndefined, keyBy, map, pickBy, size, toPairs } from 'lodash';
 
 import './sidebar.scss';
 
+import { Loader } from '@components/common';
 import { Icon } from '@iconify/react';
+import { useCluster } from '@lib/k8s';
 import {
   ClusterOpenClusterManagementIoV1Api as OCMClusterAPI,
   IoOpenClusterManagementClusterV1ManagedCluster as ManagedCluster,
 } from '@lib/ocm/Cluster';
 import { GatewayOpenClusterManagementIoV1alpha1Api as ClusterGatewayAPI } from '@lib/ocm/ClusterGateway';
-import { clusterAtom, ClusterInfo, clustersAtom, mainClusterKey } from '@lib/stores/cluster';
+import { clusterAtom, ClusterInfo, clustersAtom, isClusterNotSelect, mainClusterKey } from '@lib/stores/cluster';
 import { useQuery } from '@tanstack/react-query';
 import clsx from 'clsx';
 
@@ -31,11 +33,19 @@ interface ClusterChooserProps {
 }
 
 export default function ClusterChooser({ fullWidth }: ClusterChooserProps) {
+  const clusterInURL = useCluster();
   const [cluster, setCluster] = useAtom(clusterAtom);
   const [clusters, setClusters] = useAtom(clustersAtom);
   const navigate = useNavigate();
 
   const isSingleCluster = size(clusters) == 1;
+
+  React.useEffect(() => {
+    if (isEmpty(clusterInURL)) return;
+    if (isClusterNotSelect(cluster)) {
+      setCluster(clusterInURL!);
+    }
+  }, [cluster, clusterInURL]);
 
   const versionQuery = useQuery({
     queryKey: ['cluster-version'],
