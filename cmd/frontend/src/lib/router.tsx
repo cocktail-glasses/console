@@ -3,7 +3,7 @@
 import React, { Children, ReactNode, useEffect } from 'react';
 import { generatePath, useLocation, useNavigationType } from 'react-router';
 
-import { assign, cloneDeep, findKey, get, groupBy, isUndefined, mapValues, reduce, toLower } from 'lodash';
+import { assign, cloneDeep, findKey, get, groupBy, has, isUndefined, mapValues, reduce, toLower } from 'lodash';
 
 import Clusters from '@pages/Clusters/Clusters';
 import Home from '@pages/Home';
@@ -910,10 +910,12 @@ const getRouteById = (acc: object, group: RouteGroup): { [id: string]: Route } =
       // groupBy의 value는 array이므로 첫 번째 인덱스 선택
       const isIndex = group.indexId === route[0].id;
 
+      const clusterURL = has(route[0], 'useClusterURL') ? route[0].useClusterURL : group.useClusterURL;
+
       return {
         ...route[0],
         index: isIndex,
-        useClusterURL: route[0].useClusterURL,
+        useClusterURL: clusterURL,
       };
     }
   );
@@ -991,7 +993,7 @@ export function createRouteURL(routeId: string, params: RouteURLProps = {}) {
     return '';
   }
 
-  return generatePath(getRoutePathPattern(route, cluster), fullParams);
+  return generatePath(getRoutePathPattern(route, fullParams.cluster), fullParams);
 }
 
 export function getRouteGroupTable() {

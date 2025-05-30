@@ -6,6 +6,7 @@ import { useAtomValue, useSetAtom } from 'jotai';
 
 import { filter, groupBy, has, map, size } from 'lodash';
 
+import { clusterAtom, isClusterNotSelect } from './stores/cluster';
 import { routeGroupTable as routeGroupTableAtom } from './stores/router';
 
 import { Loader } from '@components/common';
@@ -26,6 +27,7 @@ import {
   resetRoute,
   Route,
   RouteGroup,
+  RouteURLProps,
 } from '@lib/router';
 import { sidebarGroupId, sidebarGroups, sidebarMenus, sidebarMenuSelected, sidebarSub } from '@lib/stores';
 import Login from '@pages/Auth/Login';
@@ -46,7 +48,9 @@ interface SubMenu extends MenuType {
 }
 
 // makeMenuList menu 데이터간의 root, sub 계층 구조를 만들고 root 메뉴 목록으로 반환함
-const makeMenuList = (groups: GroupType[], menus: MenuType[], t: Translator): RootMenu[] => {
+const makeMenuList = (groups: GroupType[], menus: MenuType[], cluster: string, t: Translator): RootMenu[] => {
+  const urlParams: RouteURLProps = isClusterNotSelect(cluster) ? {} : { cluster: cluster! };
+
   const availableMenus = menus
     .filter((menu: MenuType) => hasGroup(groups, menu.group))
     .filter((menu: MenuType) => hasRouteGroup(menu.route));
@@ -55,7 +59,7 @@ const makeMenuList = (groups: GroupType[], menus: MenuType[], t: Translator): Ro
 
   const makeSubMenu = (subMenu: MenuType) => ({
     ...subMenu,
-    url: createRouteURL(getIndexRoute(subMenu.route).id),
+    url: createRouteURL(getIndexRoute(subMenu.route).id, urlParams),
     label: t(subMenu.label),
     isOnlyTab: false,
   });
@@ -65,7 +69,7 @@ const makeMenuList = (groups: GroupType[], menus: MenuType[], t: Translator): Ro
 
     return {
       ...rootMenu,
-      url: createRouteURL(getIndexRoute(rootMenu.route).id),
+      url: createRouteURL(getIndexRoute(rootMenu.route).id, urlParams),
       label: t(rootMenu.label),
       sub: isNotExistRootRouteInSub ? [{ ...makeSubMenu(rootMenu), isOnlyTab: true }].concat(sub) : sub,
     };
@@ -90,8 +94,8 @@ interface ConcreteRoute extends Omit<Route, 'element'> {
 }
 
 // makeRouteList 라우터 배열을 생성합니다.
-const makeRouteList = (menus: MenuType[], menuList: RootMenu[]): ConcreteRoute[] => {
-  const clusterName = getCluster();
+const makeRouteList = (menus: MenuType[], menuList: RootMenu[], cluster: string): ConcreteRoute[] => {
+  const clusterName = isClusterNotSelect(cluster) ? undefined : cluster;
 
   return Object.entries(getRouteGroupTable())
     .filter(([id]: [string, RouteGroup]) => hasMenu(menus, id))
@@ -167,20 +171,25 @@ export default function RouteSwitcher({ groups, menus }: RouteSwitcherProps) {
 
   const [routeList, setRouteList] = useState<ConcreteRoute[]>([]);
 
+  const cluster = useAtomValue(clusterAtom);
+  const clusterInURL = getCluster();
+
   const dynamicRouteGroupTable = useAtomValue(routeGroupTableAtom);
   useEffect(() => {
     // 렌더링중 사이드이펙트가 발생하지 않도록 useEffect 안에서 routeGroupTable과 routeList를 동기화한다.
     addRouteGroupTable(dynamicRouteGroupTable);
 
-    const menuList = makeMenuList(groups, menus, t);
-    const routeList = makeRouteList(menus, menuList);
+    const clusterName = clusterInURL === null ? cluster || '' : clusterInURL;
+
+    const menuList = makeMenuList(groups, menus, clusterName, t);
+    const routeList = makeRouteList(menus, menuList, clusterName);
     setRouteList(routeList);
 
     setSidebarGroups(groups);
     setSidebarList(menuList);
 
     return () => resetRoute();
-  }, [groups, menus, dynamicRouteGroupTable]);
+  }, [groups, menus, dynamicRouteGroupTable, cluster, clusterInURL]);
 
   if (isLoadingRoute(routeList)) {
     const routes = [

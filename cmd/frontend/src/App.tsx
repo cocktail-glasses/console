@@ -21,6 +21,7 @@ import { theme } from '@lib/stores';
 import themes, { getThemeName } from '@lib/themes';
 import ErrorComponent from '@pages/Common/ErrorPage';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 // TODO: ccambno, unused
 //import { Loader } from '@components/common';
@@ -64,6 +65,7 @@ function App() {
             <AppWithRedux>
               <AppContainer />
             </AppWithRedux>
+            <ReactQueryDevtools initialIsOpen={false} buttonPosition="top-right" />
           </QueryClientProvider>
         </JProvider>
       </Provider>

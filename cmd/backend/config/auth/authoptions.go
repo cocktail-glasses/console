@@ -254,7 +254,9 @@ func (c *completedOptions) getAuthenticator(
 
 		klog.Warning("running with AUTHENTICATION DISABLED -- for development use only!")
 		return static.NewStaticAuthenticator(auth.User{
-			Token: c.StaticUserBearerToken,
+			Username: "managed-console-disabled",
+			UserRole: auth.JoinUserRole([]string{"acornstack-cluster-admin"}),
+			Token:    c.StaticUserBearerToken,
 		}), nil
 	}
 
