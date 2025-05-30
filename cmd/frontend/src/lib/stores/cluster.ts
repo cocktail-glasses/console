@@ -25,7 +25,7 @@ export const mainClusterKey = '@main';
 export const NoneClusterKey = '';
 const defaultClusters = {
   selected: '',
-  table: { [mainClusterKey]: { name: '', isManagedCluster: false, version: 'v1.30.13' } },
+  table: { [mainClusterKey]: { name: '', isManagedCluster: false, version: '' } },
 };
 
 export const isClusterNotSelect = (selected: string) => isEmpty(selected);
@@ -49,9 +49,13 @@ export const clusterAtom = atom(
   }
 );
 
+type PartialClusterInfoTable = {
+  [key: string]: Partial<ClusterInfo>;
+};
+
 export const clustersAtom = atom(
   (get) => get(clusters).table,
-  (get, set, nextTable: ClusterInfoTable) => {
+  (get, set, nextTable: ClusterInfoTable | PartialClusterInfoTable) => {
     const c = get(clusters);
 
     set(clusters, { ...c, table: merge({}, c.table, nextTable) });

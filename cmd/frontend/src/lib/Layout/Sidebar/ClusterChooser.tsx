@@ -3,9 +3,7 @@ import { useNavigate } from 'react-router';
 
 import { useAtom } from 'jotai';
 
-import DevicesRoundedIcon from '@mui/icons-material/DevicesRounded';
 import UnfoldMoreRoundedIcon from '@mui/icons-material/UnfoldMoreRounded';
-import MuiAvatar from '@mui/material/Avatar';
 import MuiListItemAvatar from '@mui/material/ListItemAvatar';
 import ListItemText from '@mui/material/ListItemText';
 import ListSubheader from '@mui/material/ListSubheader';
@@ -14,15 +12,16 @@ import Select, { SelectChangeEvent } from '@mui/material/Select';
 import { SvgIconProps } from '@mui/material/SvgIcon';
 import { styled } from '@mui/material/styles';
 
-import { get, has, keyBy, keys, pickBy, size } from 'lodash';
+import { filter, get, has, isUndefined, keyBy, map, pickBy, size, toPairs } from 'lodash';
 
 import './sidebar.scss';
 
 import { Icon } from '@iconify/react';
 import {
-  GatewayOpenClusterManagementIoV1alpha1Api as ClusterGatewayAPI,
-  ComGithubKlusterManagerClusterGatewayPkgApisGatewayV1alpha1ClusterGateway as ClusterGateway,
-} from '@lib/ocm/ClusterGateway';
+  ClusterOpenClusterManagementIoV1Api as OCMClusterAPI,
+  IoOpenClusterManagementClusterV1ManagedCluster as ManagedCluster,
+} from '@lib/ocm/Cluster';
+import { GatewayOpenClusterManagementIoV1alpha1Api as ClusterGatewayAPI } from '@lib/ocm/ClusterGateway';
 import { clusterAtom, ClusterInfo, clustersAtom, mainClusterKey } from '@lib/stores/cluster';
 import { useQuery } from '@tanstack/react-query';
 import clsx from 'clsx';
@@ -38,27 +37,52 @@ export default function ClusterChooser({ fullWidth }: ClusterChooserProps) {
 
   const isSingleCluster = size(clusters) == 1;
 
-  const { data: clusterGateways } = useQuery({
+  const versionQuery = useQuery({
+    queryKey: ['cluster-version'],
+    queryFn: async () => await fetch('/k8s/version').then((res) => res.json()),
+  });
+
+  React.useEffect(() => {
+    if (isUndefined(versionQuery.data)) return;
+
+    const mainClusterVersion = get(versionQuery.data, 'gitVersion', '') as string;
+    setClusters({ [mainClusterKey]: { version: mainClusterVersion } });
+  }, [versionQuery.data]);
+
+  const clusterGatewaysQuery = useQuery({
     queryKey: ['cluster-gateway'],
     queryFn: async () => {
+      const ocmClusterAIP = new OCMClusterAPI(undefined, '/k8s');
       const clusterGatewayAPI = new ClusterGatewayAPI(undefined, '/k8s');
-      return await clusterGatewayAPI.listGatewayOpenClusterManagementIoV1alpha1ClusterGateway();
+
+      const clusterGateways = await clusterGatewayAPI.listGatewayOpenClusterManagementIoV1alpha1ClusterGateway();
+      const managedClusters = await ocmClusterAIP.listClusterOpenClusterManagementIoV1ManagedCluster();
+
+      const clusterGatewaysItems = get(clusterGateways, 'data.items', []);
+      const managedClustersItems = get(managedClusters, 'data.items', []);
+
+      const byName = keyBy(clusterGatewaysItems, 'metadata.name');
+
+      const filteredManagedClusters = filter(
+        managedClustersItems,
+        (managedCluster: ManagedCluster) =>
+          has(managedCluster, 'metadata.name') && has(byName, get(managedCluster, 'metadata.name') as string)
+      );
+
+      return map(filteredManagedClusters, (managedCluster: ManagedCluster) => ({
+        name: get(managedCluster, 'metadata.name', ''),
+        isManagedCluster: true,
+        version: get(managedCluster, 'status.version.kubernetes', '') as string,
+      }));
     },
     refetchInterval: 5000,
   });
 
   React.useEffect(() => {
-    const items = get(clusterGateways, 'data.items', []);
-    const result = items
-      .filter((item: ClusterGateway) => has(item, 'metadata.name'))
-      .map<ClusterInfo>((item: ClusterGateway) => ({
-        name: get(item, 'metadata.name')!,
-        isManagedCluster: true,
-        version: 'v1.30.13',
-      }));
+    if (isUndefined(clusterGatewaysQuery.data)) return;
 
-    setClusters(keyBy(result, (r: ClusterInfo) => r.name));
-  }, [clusterGateways]);
+    setClusters(keyBy(clusterGatewaysQuery.data, (r: ClusterInfo) => r.name));
+  }, [clusterGatewaysQuery.data]);
 
   const handleChange = (event: SelectChangeEvent) => {
     const selectedCluster = event.target.value as string;
@@ -66,7 +90,13 @@ export default function ClusterChooser({ fullWidth }: ClusterChooserProps) {
     navigate(`/clusters/${selectedCluster}/cluster`);
   };
 
-  if (isSingleCluster) return <ClusterItem clusterName={mainClusterKey} description="in-cluster" />;
+  if (isSingleCluster)
+    return (
+      <ClusterItem
+        clusterName={mainClusterKey}
+        description={get(clusters, `${mainClusterKey}.version`, '') as string}
+      />
+    );
 
   return (
     <Select
@@ -92,18 +122,23 @@ export default function ClusterChooser({ fullWidth }: ClusterChooserProps) {
         Hub Cluster
       </ListSubheader>
       <MenuItem value={mainClusterKey} sx={{ borderRadius: '8px' }}>
-        <ClusterItem clusterName={mainClusterKey} description={'v1.30.13'} />
+        <ClusterItem
+          clusterName={mainClusterKey}
+          description={get(clusters, `${mainClusterKey}.version`, '') as string}
+        />
       </MenuItem>
 
       {!isSingleCluster && [
         <ListSubheader className="select-content-subheader" sx={{ fontSize: '12px' }}>
           Managed Clusters
         </ListSubheader>,
-        ...keys(pickBy(clusters, (cluster: ClusterInfo) => cluster.isManagedCluster)).map((clusterKey: string) => (
-          <MenuItem value={clusterKey} sx={{ borderRadius: '8px' }} key={clusterKey}>
-            <ClusterItem clusterName={clusterKey} description={'v1.31.0'} />
-          </MenuItem>
-        )),
+        ...toPairs(pickBy(clusters, (cluster: ClusterInfo) => cluster.isManagedCluster)).map(
+          ([clusterKey, clusterInfo]: [clusterKey: string, clusterInfo: ClusterInfo]) => (
+            <MenuItem value={clusterKey} sx={{ borderRadius: '8px' }} key={clusterKey}>
+              <ClusterItem clusterName={clusterKey} description={get(clusterInfo, 'version', '') as string} />
+            </MenuItem>
+          )
+        ),
       ]}
     </Select>
   );
