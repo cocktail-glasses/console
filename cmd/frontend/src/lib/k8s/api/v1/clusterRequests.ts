@@ -5,6 +5,7 @@ import { getToken, logout, setToken } from '../../../auth';
 import { getCluster } from '../../../cluster';
 import { KubeObjectInterface } from '../../KubeObject';
 import { ApiError } from '../v2/ApiError';
+import { makeUrl } from '../v2/makeUrl';
 import { BASE_HTTP_URL, CLUSTERS_PREFIX, DEFAULT_TIMEOUT, JSON_HEADERS } from './constants';
 import { asQuery, combinePath } from './formatUrl';
 import { QueryParameters } from './queryParameters';
@@ -151,7 +152,7 @@ export async function clusterRequest(
   const requestData = { signal: controller.signal, ...opts };
   let response: Response = new Response(undefined, { status: 502, statusText: 'Unreachable' });
   try {
-    response = await fetch(url, requestData);
+    response = await fetch(makeUrl(url), requestData);
   } catch (err) {
     if (err instanceof Error) {
       if (err.name === 'AbortError') {
