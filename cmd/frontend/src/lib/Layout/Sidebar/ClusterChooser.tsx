@@ -22,7 +22,7 @@ import { Icon } from '@iconify/react';
 import {
   GatewayOpenClusterManagementIoV1alpha1Api as ClusterGatewayAPI,
   ComGithubKlusterManagerClusterGatewayPkgApisGatewayV1alpha1ClusterGateway as ClusterGateway,
-} from '@lib/ClusterGateway';
+} from '@lib/ocm/ClusterGateway';
 import { clusterAtom, ClusterInfo, clustersAtom, mainClusterKey } from '@lib/stores/cluster';
 import { useQuery } from '@tanstack/react-query';
 import clsx from 'clsx';
