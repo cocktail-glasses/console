@@ -118,6 +118,7 @@ export function useCluster() {
     const clusterURLMatch = matchPath(
       {
         path: getClusterPrefixedPath(),
+        end: false,
       },
       urlPath
     );
