@@ -2,6 +2,8 @@ import { useTranslation } from 'react-i18next';
 
 import Box from '@mui/material/Box';
 
+import { has } from 'lodash';
+
 import { LightTooltip, SimpleTableProps, StatusLabel, StatusLabelProps } from '@components/common';
 import ResourceListView from '@components/common/Resource/ResourceListView';
 import { Icon } from '@iconify/react';
@@ -10,6 +12,8 @@ import Job from '@lib/k8s/job';
 import { formatDuration } from '@lib/util';
 
 export function makePodStatusLabel(job: Job) {
+  if (!has(job, 'status.conditions')) return null;
+
   if (!job?.status?.conditions) {
     return null;
   }
