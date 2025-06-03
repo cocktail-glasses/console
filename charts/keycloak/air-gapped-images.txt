@@ -1,0 +1,33 @@
+ccpr.cocktailcloud.io/library/cocktail-keycloak:base-theme-0.5
+ccpr.cocktailcloud.io/ghcr.io/cloudnative-pg/cloudnative-pg:1.25.0
+ccpr.cocktailcloud.io/quay.io/keycloak/keycloak:26.0.4
+ccpr.cocktailcloud.io/ghcr.io/cloudnative-pg/postgresql:17.2
+ccpr.cocktailcloud.io/epamedp/keycloak-operator:1.23.0
+
+
+crane copy ghcr.io/cloudnative-pg/cloudnative-pg:1.25.0 ccpr.cocktailcloud.io/ghcr.io/cloudnative-pg/cloudnative-pg:1.25.0
+crane copy quay.io/keycloak/keycloak:26.0.4 ccpr.cocktailcloud.io/quay.io/keycloak/keycloak:26.0.4
+crane copy ghcr.io/cloudnative-pg/postgresql:17.2 ccpr.cocktailcloud.io/ghcr.io/cloudnative-pg/postgresql:17.2
+crane copy epamedp/keycloak-operator:1.23.0 ccpr.cocktailcloud.io/epamedp/keycloak-operator:1.23.0
+
+
+
+
+
+crane copy dev-registry.cocktailcloud.io/library/cocktail-keycloak:base-theme-0.5 ccpr.cocktailcloud.io/library/cocktail-keycloak:base-theme-0.5
+crane copy ghcr.io/cloudnative-pg/cloudnative-pg:1.25.0 ccpr.cocktailcloud.io/ghcr.io/cloudnative-pg/cloudnative-pg:1.25.0
+crane copy quay.io/keycloak/keycloak:26.0.4 ccpr.cocktailcloud.io/quay.io/keycloak/keycloak:26.0.4
+crane copy ghcr.io/cloudnative-pg/postgresql:17.2 ccpr.cocktailcloud.io/ghcr.io/cloudnative-pg/postgresql:17.2
+crane copy epamedp/keycloak-operator:1.23.0 ccpr.cocktailcloud.io/epamedp/keycloak-operator:1.23.0
+
+
+
+
+crane copy dev-registry.cocktailcloud.io/library/cocktail-keycloak:base-theme-0.5 15.235.66.168/library/cocktail-keycloak:base-theme-0.5 --insecure
+crane copy ghcr.io/cloudnative-pg/cloudnative-pg:1.25.0 15.235.66.168/ghcr.io/cloudnative-pg/cloudnative-pg:1.25.0 --insecure
+crane copy quay.io/keycloak/keycloak:26.0.4 15.235.66.168/quay.io/keycloak/keycloak:26.0.4 --insecure
+crane copy ghcr.io/cloudnative-pg/postgresql:17.2 15.235.66.168/ghcr.io/cloudnative-pg/postgresql:17.2 --insecure
+crane copy epamedp/keycloak-operator:1.23.0 15.235.66.168/epamedp/keycloak-operator:1.23.0 --insecure
+
+
+

@@ -1,0 +1,56 @@
+.main-container {
+  margin-top: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.kaas-primary-color {
+  background-color: #00517d;
+  color: #ffffff !important;
+}
+
+.kaas-primary-color:hover {
+  background-color: #003454;
+}
+
+.kaas-tertiary-color {
+  border: 1px solid #7e868f;
+  color: #7e868f !important;
+}
+
+.kaas-quaternary-color {
+  border: 1px solid #e0e3e5;
+  color: #4d555c;
+}
+
+.title {
+  padding-bottom: 50px;
+}
+
+:global(.dark) {
+  .kaas-primary-color {
+    background-color: #0072b0;
+
+    &:global(.Mui-disabled) {
+      background-color: rgba(255, 255, 255, 0.12);
+      color: rgba(255, 255, 255, 0.5) !important;
+    }
+  }
+
+  .kaas-primary-color:hover {
+    background-color: #008bd6;
+  }
+
+  .kaas-tertiary-color {
+    border: 1px solid #b8b8b8;
+    color: #b8b8b8 !important;
+  }
+
+  .kaas-quaternary-color {
+    border: 1px solid #464647;
+    color: #ffffffd9;
+  }
+
+  .link-color {
+    color: #0072b0;
+  }
+}

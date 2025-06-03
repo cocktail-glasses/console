@@ -1,0 +1,43 @@
+.collapse-button {
+  display: flex;
+  align-items: center;
+  margin-top: 15px;
+  margin-bottom: 25px;
+  cursor: pointer;
+
+  .line {
+    border-width: 1px 0 0;
+    border-style: solid;
+    border-color: #7e868f3f;
+    flex: 1 1 0%;
+    margin-right: 4px;
+
+    &:last-child {
+      margin-right: 0px;
+    }
+  }
+
+  .label-container {
+    display: flex;
+
+    .label {
+      margin-right: 4px;
+      color: #7e868f;
+      font-weight: 700;
+    }
+
+    .icon-arrow-up {
+      transform: rotate(180deg);
+    }
+  }
+}
+
+:global(.dark) {
+  .collapse-button {
+    .label-container {
+      .label {
+        color: #b8b8b8;
+      }
+    }
+  }
+}

@@ -1,0 +1,32 @@
+{{- $acornConfig := lookup "v1" "ConfigMap" "cocktail-auth" "acornstack" }}
+{{- $host := index $acornConfig.data "root-host" }}
+
+{{- $rootns := lookup "v1" "Namespace" "" "cocktail-system" }}
+{{- $ingress := index $rootns.metadata.annotations "namespace.cocktailcloud.io/ingress" }}
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: keycloak-ingress
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  ingressClassName: {{ $ingress }}
+  tls:
+  - hosts:
+      - keycloak-{{ .Values.ingress.prefix }}.{{ $host }}
+    secretName: web-tls
+  rules:
+  - host: keycloak-{{ .Values.ingress.prefix }}.{{ $host }}
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: keycloak-http
+            port:
+              name: http

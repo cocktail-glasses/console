@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "cocktail-console.fullname" . }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    {{- include "cocktail-console.labels" . | nindent 4 }}
+data:
+  config: |- 
+    apiVersion: console.openshift.io/v1
+    kind: ConsoleConfig
+  {{- if and 
+         (eq .Values.auth.authType "oidc") 
+         (eq (include "cocktail-console.shouldUseBaseAddress" .) "true") 
+  }}
+    clusterInfo:
+      consoleBaseAddress: {{include "cocktail-console.baseAddress" .}}
+  {{- end }}
+    auth:
+      authType: {{ .Values.auth.authType }}
+  {{- if eq .Values.auth.authType "oidc" }}
+      oidcIssuer: {{ .Values.auth.oidcIssuer }}
+      clientID: {{ .Values.auth.clientID }}
+      clientSecretFile: /data/user-auth-oidc-client-secret
+  {{- end}}
+  {{- if eq .Values.auth.authType "oidc" }}
+    session:
+      cookieAuthenticationKeyFile: /data/auth-key
+      cookieEncryptionKeyFile: /data/enc-key
+  {{- end }}

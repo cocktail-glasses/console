@@ -1,0 +1,26 @@
+
+
+themeImage: library/cocktail-keycloak:base-theme-0.5
+image: quay.io/keycloak/keycloak:26.0.4
+
+ingress:
+  annotations:
+    nginx.ingress.kubernetes.io/affinity: "cookie"
+    nginx.ingress.kubernetes.io/session-cookie-expires: "86400"
+    nginx.ingress.kubernetes.io/session-cookie-max-age: "86400"
+    nginx.ingress.kubernetes.io/session-cookie-name: "keycloak-cookie"
+    nginx.ingress.kubernetes.io/ssl-redirect: 'true'
+  prefix: auth
+resources:
+  limits:
+    memory: 1500Mi
+  requests:
+    memory: 500Mi
+    cpu: 100m
+
+db:
+  imageName: ghcr.io/cloudnative-pg/postgresql:17.2
+  instances: 2
+  storage:
+    size: 20Gi
+    storageClass: nfs-csi

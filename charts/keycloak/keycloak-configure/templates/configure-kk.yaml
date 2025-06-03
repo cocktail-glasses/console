@@ -1,0 +1,227 @@
+{{- $acornConfig := lookup "v1" "ConfigMap" "cocktail-auth" "acornstack" }}
+{{- $host := index $acornConfig.data "root-host" }}
+{{- $extraRedirectUris := splitList "," ((index $acornConfig.data "extra-keycloak-redirect-uri-for-dashboard") | default "") }}
+{{- $rootSaConfigMap := lookup "v1" "ConfigMap" "kube-system" "kube-root-ca.crt" }}
+{{- $k8sCa := index $rootSaConfigMap.data "ca.crt" | b64enc }}
+
+{{- $existingK8sSecret := lookup "v1" "Secret" .Release.Namespace "k8s-client" }}
+{{- $existingKubeappsSecret := lookup "v1" "Secret" .Release.Namespace "cocktail-client" }}
+
+{{ $k8sClient := "" }}
+{{- if $existingK8sSecret }}
+  {{- $k8sClient = index $existingK8sSecret.data "client-secret-key" | b64dec }}
+{{- else }}
+  {{- $k8sClient = randAlphaNum 32 }}
+{{- end }}
+
+{{ $cocktailClient := "" }}
+{{- if $existingKubeappsSecret }}
+  {{- $cocktailClient = index $existingKubeappsSecret.data "client-secret-key" | b64dec }}
+{{- else }}
+  {{- $cocktailClient = randAlphaNum 32 }}
+{{- end }}
+
+---
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: k8s-client
+  namespace: {{ .Release.Namespace }}
+type: Opaque
+data:
+  client-secret-key: {{ $k8sClient | b64enc }}
+
+---
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: cocktail-client
+  namespace: {{ .Release.Namespace }}
+type: Opaque
+data:
+  client-secret-key: {{ $cocktailClient | b64enc }}
+
+---
+
+apiVersion: v1.edp.epam.com/v1alpha1
+kind: ClusterKeycloak
+metadata:
+  name: keycloak-acorn
+  namespace: {{ .Release.Namespace }}
+spec:
+  secret: keycloak-credentials
+  url: https://keycloak-auth.{{ $host }}
+
+---
+
+apiVersion: v1.edp.epam.com/v1alpha1
+kind: ClusterKeycloakRealm
+metadata:
+  name: keycloakrealm-acorn
+  namespace: {{ .Release.Namespace }}
+spec:
+  realmName: {{ .Values.realmName }}
+  clusterKeycloakRef: keycloak-acorn
+
+---
+
+apiVersion: v1.edp.epam.com/v1
+kind: KeycloakClientScope
+metadata:
+  name: keycloakclientscope-acorn
+spec:
+  name: groups
+  realmRef:
+    name: keycloakrealm-acorn
+    kind: ClusterKeycloakRealm
+  description: "Group Membership"
+  protocol: openid-connect
+  default: true
+  protocolMappers:
+    - name: groups
+      protocol: openid-connect
+      protocolMapper: "oidc-group-membership-mapper"
+      config:
+        "access.token.claim": "true"
+        "claim.name": "groups"
+        "full.path": "false"
+        "id.token.claim": "true"
+        "userinfo.token.claim": "true"
+  attributes:
+    "include.in.token.scope": "true"
+
+---
+
+apiVersion: v1.edp.epam.com/v1
+kind: KeycloakClient
+metadata:
+  name: keycloakclient
+spec:
+  serviceAccount:
+    enabled: true
+  realmRef:
+    name: keycloakrealm-acorn
+    kind: ClusterKeycloakRealm
+  secret: $k8s-client:client-secret-key
+  advancedProtocolMappers: true
+  authorizationServicesEnabled: true
+  name: kubernetes
+  clientId: kubernetes
+  directAccess: true
+  public: false
+  webUrl: https://localhost:8000/oauth2/callback
+  webOrigins:
+    - /*
+  defaultClientScopes:
+    - groups
+  redirectUris:
+    - http://localhost:18000
+    - http://localhost:8000
+
+---
+
+apiVersion: v1.edp.epam.com/v1
+kind: KeycloakClientScope
+metadata:
+  name: kubernetes-client
+spec:
+  name: kubernetes-client
+  realmRef:
+    name: keycloakrealm-acorn
+    kind: ClusterKeycloakRealm
+  description: "kubernetes-client"
+  protocol: openid-connect
+  default: true
+  attributes:
+    "include.in.token.scope": "true"
+  protocolMappers:
+    - name: audience
+      protocol: openid-connect
+      protocolMapper: "oidc-audience-mapper"
+      config:
+        "included.client.audience": "kubernetes"
+        "id.token.claim": "true"
+        "access.token.claim": "true"
+        "lightweight.claim": "false"
+        "introspection.token.claim": "true"
+---
+apiVersion: v1.edp.epam.com/v1
+kind: KeycloakClient
+metadata:
+  name: cocktail-client
+  namespace: cocktail-auth
+spec:
+  advancedProtocolMappers: true
+  clientAuthenticatorType: client-secret
+  clientId: cocktail
+  name: cocktail
+  realmRef:
+    kind: ClusterKeycloakRealm
+    name: keycloakrealm-acorn
+  defaultClientScopes:
+    - web-origins
+    - acr
+    - profile
+    - roles
+    - groups
+    - basic
+  enabled: true
+  authorizationServicesEnabled: true
+  standardFlowEnabled: true
+  directAccess: true
+  serviceAccount:
+    enabled: true
+  fullScopeAllowed: true
+  frontChannelLogout: true
+  secret: $cocktail-client:client-secret-key
+  redirectUris:
+    - "*"
+  webOrigins:
+    - "*"
+  webUrl: ""
+---
+apiVersion: v1.edp.epam.com/v1
+kind: KeycloakRealmGroup
+metadata:
+  name: cocktail-system
+  namespace: cocktail-auth
+spec:
+  name: cocktail-system
+  realmRef:
+    kind: ClusterKeycloakRealm
+    name: keycloakrealm-acorn
+---
+apiVersion: v1.edp.epam.com/v1
+kind: KeycloakRealmGroup
+metadata:
+  name: cocktail-sysuser
+  namespace: cocktail-auth
+spec:
+  name: cocktail-sysuser
+  realmRef:
+    kind: ClusterKeycloakRealm
+    name: keycloakrealm-acorn
+---
+apiVersion: v1.edp.epam.com/v1
+kind: KeycloakRealmGroup
+metadata:
+  name: cocktail-devops
+  namespace: cocktail-auth
+spec:
+  name: cocktail-devops
+  realmRef:
+    kind: ClusterKeycloakRealm
+    name: keycloakrealm-acorn
+---
+apiVersion: v1.edp.epam.com/v1
+kind: KeycloakRealmGroup
+metadata:
+  name: acornstack-cluster-admin
+  namespace: cocktail-auth
+spec:
+  name: acornstack-cluster-admin
+  realmRef:
+    name: keycloakrealm-acorn
+    kind: ClusterKeycloakRealm

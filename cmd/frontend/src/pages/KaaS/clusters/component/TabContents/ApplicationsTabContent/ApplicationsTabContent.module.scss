@@ -1,0 +1,13 @@
+.applications-content {
+  margin-left: 30px;
+  margin-right: 30px;
+
+  .menu-container {
+    display: flex;
+    justify-content: space-between;
+
+    .message {
+      flex: 1;
+    }
+  }
+}

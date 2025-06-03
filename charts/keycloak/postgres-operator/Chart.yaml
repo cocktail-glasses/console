@@ -1,0 +1,3 @@
+apiVersion: v2
+name: acorn-postgres-operator
+version: 4.8.2025021201

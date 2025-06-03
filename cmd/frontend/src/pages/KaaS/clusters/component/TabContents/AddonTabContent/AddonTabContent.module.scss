@@ -1,0 +1,13 @@
+.addon-content {
+  margin-left: 30px;
+  margin-right: 30px;
+
+  .menu-container {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .action-button-container {
+    display: flex;
+  }
+}
