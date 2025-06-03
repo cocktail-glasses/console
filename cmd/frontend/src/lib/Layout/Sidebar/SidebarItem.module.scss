@@ -1,0 +1,83 @@
+.sidebar-item {
+  --sidebar-color: rgb(11, 14, 20);
+
+  border-radius: 8px;
+  margin-left: 0px;
+
+  & * {
+    font-size: 1rem;
+    text-transform: 'none';
+  }
+
+  &:hover {
+    background-color: hsla(220, 20%, 88%, 0.2);
+  }
+
+  & svg {
+    color: var(--sidebar-color);
+    margin-right: 8px;
+    width: 1.2rem;
+  }
+
+  & :global {
+    .MuiListItem-root {
+      padding-top: '4px';
+      padding-bottom: '4px';
+      color: var(--sidebar-color);
+    }
+
+    .MuiListItemIcon-root {
+      min-width: 0;
+      align-self: auto;
+      padding-top: 0;
+      margin-right: 0;
+    }
+  }
+
+  &.sidear-item-sub {
+    margin-left: 40px;
+    margin-right: 0px;
+
+    & :global(.MuiListItem-root) {
+      padding-top: 0;
+      padding-bottom: 0;
+      padding-left: 8px;
+      padding-right: 8px;
+      min-height: 48px;
+    }
+
+    & * {
+      font-size: 0.875rem;
+    }
+  }
+
+  &.sidebar-item-selected {
+    background-color: hsla(220, 20%, 80%, 0.3);
+
+    &:hover {
+      background-color: hsla(220, 20%, 88%, 0.8);
+    }
+
+    & :global(.MuiTypography-root) {
+      font-weight: bold;
+    }
+  }
+}
+
+:global(.dark) {
+  .sidebar-item {
+    --sidebar-color: rgb(255, 255, 255);
+
+    &:hover {
+      background-color: hsla(220, 20%, 35%, 0.2);
+    }
+
+    &.sidebar-item-selected {
+      background-color: rgba(71, 83, 107, 0.3);
+
+      &:hover {
+        background-color: rgba(71, 83, 107, 0.5);
+      }
+    }
+  }
+}

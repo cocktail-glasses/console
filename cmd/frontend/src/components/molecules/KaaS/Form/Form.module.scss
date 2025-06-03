@@ -1,0 +1,83 @@
+.form {
+  --global-color: #007ce8;
+  --global-error-color: #e91e63;
+  --label-text-color: rgba(77, 85, 92, 0.6);
+  --input-boder-color: #e0e3e5;
+  --helper-text-color: #7e868f99;
+  --disabled-text-color: rgba(210, 215, 219, 0.38);
+  --disabled-input-border-color: #eff1f2;
+
+  :global {
+    // 라벨 관련 스타일
+    .MuiFormLabel-root {
+      color: var(--label-text-color) !important;
+
+      &.Mui-focused {
+        --label-text-color: var(--global-color);
+      }
+
+      &.Mui-disabled {
+        --label-text-color: var(--disabled-text-color);
+      }
+
+      &.Mui-error {
+        --label-text-color: var(--global-error-color);
+      }
+    }
+
+    // 입력 필드 관련 스타일
+    .MuiInputBase-root {
+      fieldset {
+        border-color: var(--input-boder-color) !important;
+      }
+
+      //   :disabled + fieldset {
+      //     --input-boder-color: var(--disabled-input-border-color);
+      //   }
+
+      &:hover {
+        --input-boder-color: var(--global-color);
+      }
+
+      &.Mui-disabled {
+        --input-boder-color: var(--disabled-input-border-color);
+      }
+
+      &.Mui-focused {
+        --input-boder-color: var(--global-color);
+      }
+
+      &.Mui-error {
+        --input-boder-color: var(--global-error-color);
+      }
+
+      .MuiInputBase-input {
+        &.Mui-disabled {
+          color: var(--disabled-text-color);
+          -webkit-text-fill-color: var(--disabled-text-color);
+        }
+      }
+    }
+
+    // helper 테긋트 관련 스타일
+    .MuiFormHelperText-root {
+      color: var(--helper-text-color);
+      font-size: 11px;
+
+      &.Mui-error {
+        --helper-text-color: var(--global-error-color);
+        font-weight: 700;
+      }
+    }
+  }
+}
+
+:global(.dark) {
+  .form {
+    --helper-text-color: #b8b8b8b3;
+    --label-text-color: rgba(255, 255, 255, 0.6);
+    --input-boder-color: #646466;
+    --disabled-text-color: rgba(99, 99, 99, 0.38);
+    --disabled-input-border-color: #575757;
+  }
+}

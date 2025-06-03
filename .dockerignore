@@ -1,0 +1,6 @@
+.idea/
+.DS_Store
+vendor/
+.history/
+build-api/build-api
+build-api/docker

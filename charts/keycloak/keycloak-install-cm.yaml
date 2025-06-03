@@ -1,0 +1,10 @@
+apiVersion: v1
+data:
+  extra-keycloak-redirect-uri-for-dashboard: http://127.0.0.1:8080/oauth2/callback/*,http://localhost:8080/oauth2/callback/*
+  oidc-enabled: "true"
+  root-host: cocktailcloud.io
+  image-registry: ccpr.cocktailcloud.io
+kind: ConfigMap
+metadata:
+  name: acornstack
+  namespace: cocktail-auth

@@ -1,0 +1,31 @@
+.rbac-content {
+  margin-left: 30px;
+  margin-right: 30px;
+
+  .menu-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .rbac-selector {
+      width: 192px;
+      height: 62px;
+      margin-right: 30px;
+    }
+
+    .rbac-action-container {
+      display: flex;
+      gap: 20px;
+    }
+  }
+
+  .action-icon {
+    color: gray;
+  }
+}
+
+.select-icon-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
