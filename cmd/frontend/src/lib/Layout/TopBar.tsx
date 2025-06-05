@@ -445,7 +445,7 @@ function PureTopBar({
             </>
           ) : (
             <>
-              <AppLogo />
+              {/* <AppLogo /> */}
               <Box sx={{ flexGrow: 1 }} />
               {/* <AppBarActions
                 appBarActions={processAppBarActions(allAppBarActions, appBarActionsProcessors)}
