@@ -139,15 +139,7 @@ type jsGlobals struct {
 }
 
 type Server struct {
-	APIServerProxyConfig            *proxy.Config
-	MonitoringProxyConfig           *proxy.Config
-	ClusterAPIProxyConfig           *proxy.Config
-	AlarmAPIProxyConfig             *proxy.Config
-	MetricAPIProxyConfig            *proxy.Config
-	BackupAPIProxyConfig            *proxy.Config
-	PackageAPIProxyConfig           *proxy.Config
-	ClusterManagementAPIProxyConfig *proxy.Config
-	VictoriaMetricsProxyConfig      *proxy.Config
+	VictoriaMetricsProxyConfig *proxy.Config
 
 	AddPage                            string
 	AuthDisabled                       bool
@@ -364,75 +356,12 @@ func (s *Server) HTTPHandler() (http.Handler, error) {
 		graphQLHandler(w, r.WithContext(ctx))
 	}))
 
-	apiServerProxy := proxy.NewProxy(s.APIServerProxyConfig)
-	handle(apiServerEndpoint, http.StripPrefix(
-		s.BaseURL.Path,
-		authHandlerWithUser(cocktailLoginMiddleware(apiServerProxy.ServeHTTP)),
-		//authHandler(apiServerProxy.ServeHTTP)),
-	))
-	handle("/terminal/", http.StripPrefix(
-		s.BaseURL.Path,
-		authHandler(apiServerProxy.ServeHTTP)),
-	)
-
 	/*handle("/ws", http.StripPrefix(
 		s.BaseURL.Path,
 		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			apiServerProxy.ServeHTTP(w, r)
 		})),
 	)*/
-
-	handle(builderAPIEndpoint, http.StripPrefix(
-		s.BaseURL.Path,
-		authHandler(apiServerProxy.ServeHTTP)),
-	)
-
-	monitoringProxy := proxy.NewProxy(s.MonitoringProxyConfig)
-	handle(monitoringEndpoint, http.StripPrefix(
-		s.BaseURL.Path,
-		authHandler(monitoringProxy.ServeHTTP)),
-	)
-
-	clusterAPIProxy := proxy.NewProxy(s.ClusterAPIProxyConfig)
-	handle(clusterAPIEndpoint, http.StripPrefix(
-		s.BaseURL.Path,
-		authHandler(clusterAPIProxy.ServeHTTP)),
-	)
-
-	alarmAPIProxy := proxy.NewProxy(s.AlarmAPIProxyConfig)
-	handle(alarmAPIEndpoint, http.StripPrefix(
-		s.BaseURL.Path,
-		authHandler(alarmAPIProxy.ServeHTTP)),
-	)
-
-	metricAPIProxy := proxy.NewProxy(s.MetricAPIProxyConfig)
-	handle(metricAPIEndpoint, http.StripPrefix(
-		proxy.SingleJoiningSlash(s.BaseURL.Path, metricAPIEndpoint),
-		authHandler(metricAPIProxy.ServeHTTP)),
-	)
-
-	backupAPIProxy := proxy.NewProxy(s.BackupAPIProxyConfig)
-	handle(backupAPIEndpoint, http.StripPrefix(
-		s.BaseURL.Path,
-		authHandler(backupAPIProxy.ServeHTTP)),
-	)
-
-	packageAPIProxy := proxy.NewProxy(s.PackageAPIProxyConfig)
-	handle(packageAPIEndpoint, http.StripPrefix(
-		s.BaseURL.Path,
-		authHandler(packageAPIProxy.ServeHTTP)),
-	)
-
-	clusterManagementAPIProxy1 := proxy.NewProxy(s.ClusterManagementAPIProxyConfig)
-	handle(clusterManagementAPIEndpoint1, http.StripPrefix(
-		s.BaseURL.Path,
-		authHandler(clusterManagementAPIProxy1.ServeHTTP)),
-	)
-	clusterManagementAPIProxy2 := proxy.NewProxy(s.ClusterManagementAPIProxyConfig)
-	handle(clusterManagementAPIEndpoint2, http.StripPrefix(
-		s.BaseURL.Path,
-		authHandler(clusterManagementAPIProxy2.ServeHTTP)),
-	)
 
 	victoriaMetricsProxy := proxy.NewProxy(s.VictoriaMetricsProxyConfig)
 	handle(victoriaMetricsEndpoint, http.StripPrefix(

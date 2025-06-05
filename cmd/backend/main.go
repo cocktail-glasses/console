@@ -24,17 +24,7 @@ import (
 const (
 	k8sInClusterCA          = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
 	k8sInClusterBearerToken = "/var/run/secrets/kubernetes.io/serviceaccount/token"
-
-	apiServerURL                  = "http://api-server:8080"
-	monitoringServerURL           = "http://monitoring:9000"
-	clusterAPIServerURL           = "http://cluster-api:9083"
-	alarmAPIServerURL             = "http://cluster-api:9013"
-	metricAPIServerURL            = "http://cluster-api:9010"
-	backupAPIServerURL            = "http://backup-api:8092"
-	packageAPIServerURL           = "http://package:9092"
-	clusterManagementAPIServerURL = "http://cocktail-cluster-mgmt:8092"
-	apmAPIServerURL               = "http://cocktail-apm:9100"
-	victoriaMetricsURL            = "http://vmselect-shortterm.tenant-root:8481"
+	victoriaMetricsURL      = "http://vmselect-shortterm.tenant-root:8481"
 )
 
 func main() {
@@ -290,89 +280,6 @@ func main() {
 		apiServerEndpoint = srv.K8sProxyConfig.Endpoint.String()
 	}
 	srv.KubeAPIServerURL = apiServerEndpoint
-
-	apiServerURL, err := url.Parse(apiServerURL)
-	if err != nil {
-		klog.Fatalf("failed to parse %q", apiServerURL)
-	}
-	srv.APIServerProxyConfig = &proxy.Config{
-		TLSClientConfig: oscrypto.SecureTLSConfig(&tls.Config{}),
-		HeaderBlacklist: []string{"Cookie", "X-CSRFToken"},
-		Endpoint:        apiServerURL,
-		Origin:          "http://localhost",
-	}
-
-	monitoringServerURL, err := url.Parse(monitoringServerURL)
-	if err != nil {
-		klog.Fatalf("failed to parse %q", monitoringServerURL)
-	}
-	srv.MonitoringProxyConfig = &proxy.Config{
-		TLSClientConfig: oscrypto.SecureTLSConfig(&tls.Config{}),
-		HeaderBlacklist: []string{"Cookie", "X-CSRFToken"},
-		Endpoint:        monitoringServerURL,
-	}
-
-	clusterAPIServerURL, err := url.Parse(clusterAPIServerURL)
-	if err != nil {
-		klog.Fatalf("failed to parse %q", clusterAPIServerURL)
-	}
-	srv.ClusterAPIProxyConfig = &proxy.Config{
-		TLSClientConfig: oscrypto.SecureTLSConfig(&tls.Config{}),
-		HeaderBlacklist: []string{"Cookie", "X-CSRFToken"},
-		Endpoint:        clusterAPIServerURL,
-		Origin:          "http://localhost",
-	}
-
-	alarmAPIServerURL, err := url.Parse(alarmAPIServerURL)
-	if err != nil {
-		klog.Fatalf("failed to parse %q", alarmAPIServerURL)
-	}
-	srv.AlarmAPIProxyConfig = &proxy.Config{
-		TLSClientConfig: oscrypto.SecureTLSConfig(&tls.Config{}),
-		HeaderBlacklist: []string{"Cookie", "X-CSRFToken"},
-		Endpoint:        alarmAPIServerURL,
-	}
-
-	metricAPIServerURL, err := url.Parse(metricAPIServerURL)
-	if err != nil {
-		klog.Fatalf("failed to parse %q", metricAPIServerURL)
-	}
-	srv.MetricAPIProxyConfig = &proxy.Config{
-		TLSClientConfig: oscrypto.SecureTLSConfig(&tls.Config{}),
-		HeaderBlacklist: []string{"Cookie", "X-CSRFToken"},
-		Endpoint:        metricAPIServerURL,
-	}
-
-	backupAPIServerURL, err := url.Parse(backupAPIServerURL)
-	if err != nil {
-		klog.Fatalf("failed to parse %q", backupAPIServerURL)
-	}
-	srv.BackupAPIProxyConfig = &proxy.Config{
-		TLSClientConfig: oscrypto.SecureTLSConfig(&tls.Config{}),
-		HeaderBlacklist: []string{"Cookie", "X-CSRFToken"},
-		Endpoint:        backupAPIServerURL,
-	}
-
-	packageAPIServerURL, err := url.Parse(packageAPIServerURL)
-	if err != nil {
-		klog.Fatalf("failed to parse %q", packageAPIServerURL)
-	}
-	srv.PackageAPIProxyConfig = &proxy.Config{
-		TLSClientConfig: oscrypto.SecureTLSConfig(&tls.Config{}),
-		HeaderBlacklist: []string{"Cookie", "X-CSRFToken"},
-		Endpoint:        packageAPIServerURL,
-	}
-
-	clusterManagementAPIServerURL, err := url.Parse(clusterManagementAPIServerURL)
-	if err != nil {
-		klog.Fatalf("failed to parse %q", clusterManagementAPIServerURL)
-	}
-	srv.ClusterManagementAPIProxyConfig = &proxy.Config{
-		TLSClientConfig: oscrypto.SecureTLSConfig(&tls.Config{}),
-		HeaderBlacklist: []string{"Cookie", "X-CSRFToken"},
-		Endpoint:        clusterManagementAPIServerURL,
-	}
-
 	victoriaMetricsURL, err := url.Parse(victoriaMetricsURL)
 	if err != nil {
 		klog.Fatalf("failed to parse %q", victoriaMetricsURL)
