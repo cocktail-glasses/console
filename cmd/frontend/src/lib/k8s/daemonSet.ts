@@ -1,6 +1,6 @@
-import { KubeContainer, LabelSelector } from './cluster';
 import { KubeMetadata } from './KubeMetadata';
 import { KubeObject, KubeObjectInterface } from './KubeObject';
+import { KubeContainer, LabelSelector } from './cluster';
 import { KubePodSpec } from './pod';
 
 export interface KubeDaemonSet extends KubeObjectInterface {
@@ -51,7 +51,7 @@ class DaemonSet extends KubeObject<KubeDaemonSet> {
         },
       },
       selector: {
-        matchLabels: { app: 'headlamp' },
+        matchLabels: { app: 'console' },
       },
       template: {
         spec: {
@@ -75,7 +75,7 @@ class DaemonSet extends KubeObject<KubeDaemonSet> {
 
   getNodeSelectors(): string[] {
     const selectors = this.spec?.template?.spec?.nodeSelector || {};
-    return Object.keys(selectors).map(key => `${key}=${selectors[key]}`);
+    return Object.keys(selectors).map((key) => `${key}=${selectors[key]}`);
   }
 }
 

@@ -4,12 +4,11 @@ import { getToken } from '../../../auth';
 import { getCluster } from '../../../cluster';
 import { KubeObjectInterface } from '../../KubeObject';
 import { ApiError } from '../v2/ApiError';
+import { makeUrl } from '../v2/makeUrl';
 import { clusterRequest } from './clusterRequests';
 import { BASE_HTTP_URL, CLUSTERS_PREFIX } from './constants';
 import { asQuery, combinePath } from './formatUrl';
 import { QueryParameters } from './queryParameters';
-
-import { isHubCluster } from '@lib/stores/cluster';
 
 export type StreamUpdate<T = any> = {
   type: 'ADDED' | 'MODIFIED' | 'DELETED' | 'ERROR';
@@ -393,9 +392,7 @@ export async function connectStreamWithParams<T>(
   const { isJson = false, additionalProtocols = [], cluster = '' } = params || {};
   let isClosing = false;
 
-  const clusterName = isHubCluster(cluster) ? '' : cluster;
-
-  const token = getToken(clusterName || '');
+  const token = getToken(cluster || '');
   // const userID = getUserIdFromLocalStorage();
 
   const protocols = ['base64.binary.k8s.io', ...additionalProtocols];
@@ -406,21 +403,9 @@ export async function connectStreamWithParams<T>(
 
   let fullPath = path;
   let url = '';
-  if (clusterName) {
-    fullPath = combinePath(`/${CLUSTERS_PREFIX}/${clusterName}`, path);
-    try {
-      // const kubeconfig = await findKubeconfigByClusterName(cluster);
-
-      // if (kubeconfig !== null) {
-      //   protocols.push(`base64url.headlamp.authorization.k8s.io.${userID}`);
-      // }
-
-      url = combinePath(BASE_WS_URL, fullPath);
-    } catch (error) {
-      console.error('Error while finding kubeconfig:', error);
-      // If we can't find the kubeconfig, we'll just use the base URL.
-      url = combinePath(BASE_WS_URL, fullPath);
-    }
+  if (cluster) {
+    fullPath = combinePath(`/${CLUSTERS_PREFIX}/${cluster}`, path);
+    url = makeUrl(combinePath(BASE_WS_URL, fullPath));
   } else {
     // cluster가 없는 경우 /k8s prefix 적용
     url = combinePath('/k8s', path);
