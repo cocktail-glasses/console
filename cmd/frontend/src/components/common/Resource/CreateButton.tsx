@@ -1,19 +1,14 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
-import { useLocation } from 'react-router-dom';
 import { Fragment } from 'react/jsx-runtime';
 
+import { FormControl, InputLabel, MenuItem, Select } from '@mui/material';
 import Button from '@mui/material/Button';
 
 import ActionButton from '@components/common/ActionButton';
 import EditorDialog from '@components/common/Resource/EditorDialog';
 import { InlineIcon } from '@iconify/react';
-import { getCluster } from '@lib/cluster';
-import { apply } from '@lib/k8s/apiProxy';
-import { KubeObjectInterface } from '@lib/k8s/cluster';
-import { clusterAction } from 'redux/clusterActionSlice';
-import { EventStatus, HeadlampEventType, useEventCallback } from 'redux/headlampEventSlice';
+import { useSelectedClusters } from '@lib/k8s';
 
 interface CreateButtonProps {
   isNarrow?: boolean;
@@ -21,86 +16,25 @@ interface CreateButtonProps {
 
 export default function CreateButton(props: CreateButtonProps) {
   const { isNarrow } = props;
-  const dispatch = useDispatch();
+
   const [openDialog, setOpenDialog] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-  const location = useLocation();
   const { t } = useTranslation(['translation']);
-  const dispatchCreateEvent = useEventCallback(HeadlampEventType.CREATE_RESOURCE);
+  const clusters = useSelectedClusters();
+  const [targetCluster, setTargetCluster] = useState(clusters[0] || '');
 
-  const applyFunc = async (newItems: KubeObjectInterface[], clusterName: string) => {
-    await Promise.allSettled(newItems.map((newItem) => apply(newItem, clusterName))).then((values: any) => {
-      values.forEach((value: any, index: number) => {
-        if (value.status === 'rejected') {
-          let msg;
-          const kind = newItems[index].kind;
-          const name = newItems[index].metadata.name;
-          const apiVersion = newItems[index].apiVersion;
-          if (newItems.length === 1) {
-            msg = t('translation|Failed to create {{ kind }} {{ name }}.', { kind, name });
-          } else {
-            msg = t('translation|Failed to create {{ kind }} {{ name }} in {{ apiVersion }}.', {
-              kind,
-              name,
-              apiVersion,
-            });
-          }
-          setErrorMessage(msg);
-          setOpenDialog(true);
-          throw msg;
-        }
-      });
-    });
-  };
+  // We want to avoid resetting the dialog state on close.
+  const itemRef = useRef({});
 
-  function handleSave(newItemDefs: KubeObjectInterface[]) {
-    let massagedNewItemDefs = newItemDefs;
-    const cancelUrl = location.pathname;
-
-    // check if all yaml objects are valid
-    for (let i = 0; i < massagedNewItemDefs.length; i++) {
-      if (massagedNewItemDefs[i].kind === 'List') {
-        // flatten this List kind with the items that it has which is a list of valid k8s resources
-        const deletedItem = massagedNewItemDefs.splice(i, 1);
-        massagedNewItemDefs = massagedNewItemDefs.concat(deletedItem[0].items);
-      }
-      if (!massagedNewItemDefs[i].metadata?.name) {
-        setErrorMessage(t("translation|Invalid: One or more of resources doesn't have a name property"));
-        return;
-      }
-      if (!massagedNewItemDefs[i].kind) {
-        setErrorMessage(t('translation|Invalid: Please set a kind to the resource'));
-        return;
-      }
+  // When the clusters in the group change, we want to reset the target cluster
+  // if it's not in the new list of clusters.
+  useEffect(() => {
+    if (clusters.length === 0) {
+      setTargetCluster('');
+    } else if (!clusters.includes(targetCluster)) {
+      setTargetCluster(clusters[0]);
     }
-    // all resources name
-    const resourceNames = massagedNewItemDefs.map((newItemDef) => newItemDef.metadata.name);
-    setOpenDialog(false);
-
-    const clusterName = getCluster() || '';
-
-    dispatch(
-      clusterAction(() => applyFunc(massagedNewItemDefs, clusterName), {
-        startMessage: t('translation|Applying {{ newItemName }}…', {
-          newItemName: resourceNames.join(','),
-        }),
-        cancelledMessage: t('translation|Cancelled applying {{ newItemName }}.', {
-          newItemName: resourceNames.join(','),
-        }),
-        successMessage: t('translation|Applied {{ newItemName }}.', {
-          newItemName: resourceNames.join(','),
-        }),
-        errorMessage: t('translation|Failed to apply {{ newItemName }}.', {
-          newItemName: resourceNames.join(','),
-        }),
-        cancelUrl,
-      })
-    );
-
-    dispatchCreateEvent({
-      status: EventStatus.CONFIRMED,
-    });
-  }
+  }, [clusters]);
 
   return (
     <Fragment>
@@ -109,9 +43,10 @@ export default function CreateButton(props: CreateButtonProps) {
           description={t('translation|Create / Apply')}
           onClick={() => setOpenDialog(true)}
           icon="mdi:plus-box"
-          width="48"
+          width="42"
           iconButtonProps={{
             color: 'primary',
+            sx: { justifyContent: 'center' },
           }}
         />
       ) : (
@@ -121,20 +56,52 @@ export default function CreateButton(props: CreateButtonProps) {
           }}
           startIcon={<InlineIcon icon="mdi:plus" />}
           color="primary"
+          // fullWidth
+          sx={(theme) => ({
+            textTransform: 'none',
+            color: theme.palette.mode === 'dark' ? 'rgb(245, 245, 245)' : 'rgb(255, 255, 255)',
+            backgroundColor: theme.palette.mode === 'dark' ? 'rgb(75, 85, 99)' : 'rgb(74, 144, 226)',
+          })}
+          // variant="text"
           variant="contained"
         >
-          {t('translation|Create')}
+          {/* {t('translation|Create')} */}
+          {/* {t('translation|Create / Apply')} */}
+          Create / Apply
         </Button>
       )}
       <EditorDialog
-        item={{}}
+        item={itemRef.current}
         open={openDialog}
         onClose={() => setOpenDialog(false)}
-        onSave={handleSave}
+        setOpen={setOpenDialog}
         saveLabel={t('translation|Apply')}
         errorMessage={errorMessage}
         onEditorChanged={() => setErrorMessage('')}
         title={t('translation|Create / Apply')}
+        actions={
+          clusters.length > 1
+            ? [
+                <FormControl>
+                  <InputLabel id="edit-dialog-cluster-target">{t('glossary|Cluster')}</InputLabel>
+                  <Select
+                    labelId="edit-dialog-cluster-target"
+                    id="edit-dialog-cluster-target-select"
+                    value={targetCluster}
+                    onChange={(event) => {
+                      setTargetCluster(event.target.value as string);
+                    }}
+                  >
+                    {clusters.map((cluster) => (
+                      <MenuItem key={cluster} value={cluster}>
+                        {cluster}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>,
+              ]
+            : []
+        }
       />
     </Fragment>
   );

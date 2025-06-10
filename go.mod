@@ -12,7 +12,6 @@ require (
 	github.com/gorilla/websocket v1.5.3
 	github.com/graph-gophers/graphql-go v1.5.0
 	github.com/openshift/api v0.0.0-20241222205659-188620a9ab5e
-	github.com/openshift/client-go v0.0.0-20241203091221-452dfb8fa071
 	github.com/openshift/library-go v0.0.0-20241218091209-6018a90c28d0
 	github.com/prometheus/client_golang v1.20.5
 	github.com/prometheus/common v0.61.0

@@ -1,7 +1,8 @@
-// import helpers from '@helpers';
 import { matchPath } from 'react-router-dom';
 
 import { Auth } from './auth';
+
+import helpers from '@helpers';
 
 // import { CLUSTERS_PREFIX } from './k8s/apiProxy';
 
@@ -34,6 +35,23 @@ export function getCluster(url?: string): string | null {
   return (!!clusterURLMatch && clusterURLMatch.params.cluster) || null;
 }
 
+/** Returns cluster URL parameter from the current path or the given path */
+export function getClusterPathParam(maybeUrlPath?: string): string | undefined {
+  const prefix = helpers.getBaseUrl();
+  const urlPath = maybeUrlPath ?? window.location.pathname.slice(prefix.length);
+
+  const clusterURLMatch = matchPath(
+    {
+      path: getClusterPrefixedPath(),
+      caseSensitive: false,
+      end: false,
+    },
+    urlPath
+  );
+
+  return clusterURLMatch?.params?.cluster;
+}
+
 export function getClustersPrefix() {
   console.log('getClustersPrefix()', Auth.getInstance().getAccountSeq);
   // const urlPath = window.location.pathname;
@@ -55,4 +73,16 @@ export function getClustersPrefix() {
   // console.log('3', account)
   // return `/${Auth.getInstance().getAccountSeq}`;
   return '/';
+}
+
+/**
+ * Get list of selected clusters.
+ *
+ * @param returnWhenNoClusters return this value when no clusters are found.
+ * @param urlPath optional, path string containing cluster parameters.
+ * @returns the cluster group from the URL.
+ */
+export function getSelectedClusters(returnWhenNoClusters: string[] = [], urlPath?: string): string[] {
+  const clusterFromURL = getClusterPathParam(urlPath);
+  return clusterFromURL?.split('+') || returnWhenNoClusters;
 }

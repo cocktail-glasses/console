@@ -45,6 +45,8 @@ import ServiceAccount from './serviceAccount';
 import StatefulSet from './statefulSet';
 import StorageClass from './storageClass';
 
+import { getSelectedClusters } from '@lib/cluster';
+
 export const ResourceClasses = {
   ClusterRole,
   ClusterRoleBinding,
@@ -147,6 +149,22 @@ export function useClusterGroup(): string[] {
 
   const clusterGroup = React.useMemo(() => {
     return getClusterGroup();
+  }, [clusterInURL]);
+
+  return clusterGroup;
+}
+
+/**
+ * Get a list of selected clusters. Updates when the cluster changes.
+ *
+ * @returns list of selected clusters. if no clusters are selected, an empty list is returned.
+ */
+export function useSelectedClusters(): string[] {
+  const clusterInURL = useCluster();
+  const location = useLocation();
+
+  const clusterGroup = React.useMemo(() => {
+    return getSelectedClusters([], location.pathname);
   }, [clusterInURL]);
 
   return clusterGroup;

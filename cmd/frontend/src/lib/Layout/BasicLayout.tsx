@@ -9,8 +9,8 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { useTheme } from '@mui/material/styles';
 import { styled } from '@mui/material/styles';
 
+import ActionsNotifier from '@components/common/ActionsNotifier';
 import DetailsDrawer from '@components/common/Resource/DetailsDrawer';
-// import ActionsNotifier from '@components/common/ActionsNotifier';
 // import AlertNotification from '@components/common/AlertNotification';
 import Sidebar, { NavigationTabs } from '@lib/Layout/Sidebar';
 import TopBar from '@lib/Layout/TopBar';
@@ -58,7 +58,7 @@ export default function Layout() {
         </Box>
       </Main>
       <DetailsDrawer />
-      {/* <ActionsNotifier /> */}
+      <ActionsNotifier />
     </Box>
   );
 }

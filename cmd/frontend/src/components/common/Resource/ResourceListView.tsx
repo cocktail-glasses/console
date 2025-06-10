@@ -1,6 +1,6 @@
 import { PropsWithChildren, ReactElement, ReactNode } from 'react';
 
-import { Box } from '@mui/material';
+import { CreateResourceButton } from '../CreateResourceButton';
 
 import ResourceTable, { ResourceTableProps } from '@components/common/Resource/ResourceTable';
 import SectionBox from '@components/common/SectionBox';
@@ -32,7 +32,7 @@ export default function ResourceListView(
 ) {
   const { title, children, headerProps, ...tableProps } = props;
   const withNamespaceFilter = 'resourceClass' in props && props.resourceClass?.isNamespaced;
-  // const resourceClass = (props as ResourceListViewWithResourceClassProps<any>).resourceClass as KubeObjectClass;
+  const resourceClass = (props as ResourceListViewWithResourceClassProps<any>).resourceClass as KubeObjectClass;
 
   return (
     <SectionBox
@@ -41,10 +41,10 @@ export default function ResourceListView(
           <SectionFilterHeader
             title={title}
             noNamespaceFilter={!withNamespaceFilter}
-            // titleSideActions={
-            //   headerProps?.titleSideActions ||
-            //   (resourceClass ? [<CreateResourceButton resourceClass={resourceClass} />] : undefined)
-            // }
+            titleSideActions={
+              headerProps?.titleSideActions ||
+              (resourceClass ? [<CreateResourceButton resourceClass={resourceClass} />] : undefined)
+            }
             {...headerProps}
           />
         ) : (
