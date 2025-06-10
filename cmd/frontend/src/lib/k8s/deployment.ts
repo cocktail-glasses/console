@@ -49,11 +49,11 @@ class Deployment extends KubeObject<KubeDeployment> {
     baseObject.metadata = {
       ...baseObject.metadata,
       namespace: '',
-      labels: { app: 'headlamp' },
+      labels: { app: 'console' },
     };
     baseObject.spec = {
       selector: {
-        matchLabels: { app: 'headlamp' },
+        matchLabels: { app: 'console' },
       },
       template: {
         spec: {

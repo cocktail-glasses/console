@@ -1,6 +1,6 @@
-import { KubeCondition, KubeContainer, LabelSelector } from './cluster';
 import { KubeMetadata } from './KubeMetadata';
 import { KubeObject, KubeObjectInterface } from './KubeObject';
+import { KubeCondition, KubeContainer, LabelSelector } from './cluster';
 import { KubePodSpec } from './pod';
 
 export interface KubeReplicaSet extends KubeObjectInterface {
@@ -48,7 +48,7 @@ class ReplicaSet extends KubeObject<KubeReplicaSet> {
       minReadySeconds: 0,
       replicas: 1,
       selector: {
-        matchLabels: { app: 'headlamp' },
+        matchLabels: { app: 'console' },
       },
       template: {
         spec: {
@@ -72,7 +72,7 @@ class ReplicaSet extends KubeObject<KubeReplicaSet> {
 
   getMatchLabelsList(): string[] {
     const labels = this.spec.selector.matchLabels || {};
-    return Object.keys(labels).map(key => `${key}=${labels[key]}`);
+    return Object.keys(labels).map((key) => `${key}=${labels[key]}`);
   }
 }
 
