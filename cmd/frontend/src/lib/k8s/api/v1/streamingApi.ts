@@ -4,6 +4,7 @@ import { getToken } from '../../../auth';
 import { getCluster } from '../../../cluster';
 import { KubeObjectInterface } from '../../KubeObject';
 import { ApiError } from '../v2/ApiError';
+import { makeUrl } from '../v2/makeUrl';
 import { clusterRequest } from './clusterRequests';
 import { BASE_HTTP_URL, CLUSTERS_PREFIX } from './constants';
 import { asQuery, combinePath } from './formatUrl';
@@ -404,19 +405,7 @@ export async function connectStreamWithParams<T>(
   let url = '';
   if (cluster) {
     fullPath = combinePath(`/${CLUSTERS_PREFIX}/${cluster}`, path);
-    try {
-      // const kubeconfig = await findKubeconfigByClusterName(cluster);
-
-      // if (kubeconfig !== null) {
-      //   protocols.push(`base64url.headlamp.authorization.k8s.io.${userID}`);
-      // }
-
-      url = combinePath(BASE_WS_URL, fullPath);
-    } catch (error) {
-      console.error('Error while finding kubeconfig:', error);
-      // If we can't find the kubeconfig, we'll just use the base URL.
-      url = combinePath(BASE_WS_URL, fullPath);
-    }
+    url = makeUrl(combinePath(BASE_WS_URL, fullPath));
   } else {
     // cluster가 없는 경우 /k8s prefix 적용
     url = combinePath('/k8s', path);
