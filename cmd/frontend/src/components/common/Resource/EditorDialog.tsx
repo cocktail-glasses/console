@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useDispatch } from 'react-redux';
 import { Fragment } from 'react/jsx-runtime';
 
+import { Grid2 } from '@mui/material';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import DialogActions from '@mui/material/DialogActions';
@@ -10,6 +12,9 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import FormGroup from '@mui/material/FormGroup';
 import Switch from '@mui/material/Switch';
 import Typography from '@mui/material/Typography';
+import { useTheme } from '@mui/material/styles';
+
+import { cloneDeep } from 'lodash';
 
 import ConfirmButton from '@components/common/ConfirmButton';
 import { Dialog, DialogProps } from '@components/common/Dialog';
@@ -17,9 +22,9 @@ import Loader from '@components/common/Loader';
 import DocsViewer from '@components/common/Resource/DocsViewer';
 import SimpleEditor from '@components/common/Resource/SimpleEditor';
 import Tabs from '@components/common/Tabs';
+import { apply } from '@lib/k8s/apiProxy';
 import { KubeObjectInterface } from '@lib/k8s/cluster';
-import { getThemeName } from '@lib/themes';
-import { useId } from '@lib/util';
+import { getCluster, useId } from '@lib/util';
 import Editor, { loader } from '@monaco-editor/react';
 import 'i18n/config';
 import * as yaml from 'js-yaml';
@@ -29,6 +34,9 @@ import cssWorker from 'monaco-editor/esm/vs/language/css/css.worker?worker';
 import htmlWorker from 'monaco-editor/esm/vs/language/html/html.worker?worker';
 import jsonWorker from 'monaco-editor/esm/vs/language/json/json.worker?worker';
 import tsWorker from 'monaco-editor/esm/vs/language/typescript/ts.worker?worker';
+import { clusterAction } from 'redux/clusterActionSlice';
+import { EventStatus, HeadlampEventType, useEventCallback } from 'redux/headlampEventSlice';
+import { AppDispatch } from 'redux/stores/store';
 
 (self as any).MonacoEnvironment = {
   getWorker(_: unknown, label: string) {
@@ -52,39 +60,70 @@ type KubeObjectIsh = Partial<KubeObjectInterface>;
 
 export interface EditorDialogProps extends DialogProps {
   /** The object to edit, or null to make the dialog be in "loading mode". Pass it an empty object if no contents are to be shown when the dialog is first open. */
-  item: KubeObjectIsh | null;
+  item: KubeObjectIsh | object | object[] | string | null;
   /** Called when the dialog is closed. */
   onClose: () => void;
   /** Called when the user clicks the save button. */
-  onSave: ((...args: any[]) => void) | null;
+  onSave?: ((...args: any[]) => void) | 'default' | null;
   /** Called when the editor's contents change. */
   onEditorChanged?: ((newValue: string) => void) | null;
+  /** The function to open the dialog. */
+  setOpen?: (open: boolean) => void;
+  allowToHideManagedFields?: boolean;
   /** The label to use for the save button. */
   saveLabel?: string;
   /** The error message to display. */
   errorMessage?: string;
   /** The dialog title. */
   title?: string;
+  /** Extra optional actions. */
+  actions?: React.ReactNode[];
 }
 
 export default function EditorDialog(props: EditorDialogProps) {
-  const { item, onClose, onSave, onEditorChanged, saveLabel, errorMessage, title, ...other } = props;
+  const {
+    item,
+    onClose,
+    onSave = 'default',
+    onEditorChanged,
+    setOpen,
+    saveLabel,
+    errorMessage,
+    allowToHideManagedFields,
+    title,
+    actions = [],
+    ...other
+  } = props;
   const editorOptions = {
     selectOnLineNumbers: true,
     readOnly: isReadOnly(),
+    automaticLayout: true,
   };
   const { i18n } = useTranslation();
   const [lang, setLang] = useState(i18n.language);
-  const themeName = getThemeName();
 
-  const originalCodeRef = useRef({ code: '', format: item ? 'yaml' : '' });
+  const theme = useTheme();
+  const themeName = theme.palette.mode;
+
+  const initialCode = typeof item === 'string' ? item : yaml.dump(item || {});
+  const originalCodeRef = useRef({ code: initialCode, format: item ? 'yaml' : '' });
   const [code, setCode] = useState(originalCodeRef.current);
   const codeRef = useRef(code);
   const lastCodeCheckHandler = useRef(0);
-  const previousVersionRef = useRef(item?.metadata?.resourceVersion || '');
+  const previousVersionRef = useRef(isKubeObjectIsh(item) ? item?.metadata?.resourceVersion || '' : '');
   const [error, setError] = useState('');
   const [docSpecs, setDocSpecs] = useState<KubeObjectInterface | KubeObjectInterface[] | null>([]);
   const { t } = useTranslation();
+
+  const [hideManagedFields, setHideManagedFieldsState] = useState(() => {
+    const localData = localStorage.getItem('hideManagedFields');
+    return localData ? JSON.parse(localData) : true;
+  });
+
+  function setHideManagedFields(data: any) {
+    localStorage.setItem('hideManagedFields', JSON.stringify(data));
+    setHideManagedFieldsState(data);
+  }
 
   const [useSimpleEditor, setUseSimpleEditorState] = useState(() => {
     const localData = localStorage.getItem('useSimpleEditor');
@@ -96,37 +135,57 @@ export default function EditorDialog(props: EditorDialogProps) {
     setUseSimpleEditorState(data);
   }
 
+  const dispatchCreateEvent = useEventCallback(HeadlampEventType.CREATE_RESOURCE);
+  const dispatch: AppDispatch = useDispatch();
+
+  function isKubeObjectIsh(item: any): item is KubeObjectIsh {
+    return item && typeof item === 'object' && !Array.isArray(item) && 'metadata' in item;
+  }
+
   // Update the code when the item changes, but only if the code hasn't been touched.
   useEffect(() => {
+    const clonedItem = cloneDeep(item);
     if (!item || Object.keys(item || {}).length === 0) {
+      const defaultCode = '# Enter your YAML or JSON here';
+      originalCodeRef.current = { code: defaultCode, format: 'yaml' };
+      setCode({ code: defaultCode, format: 'yaml' });
       return;
     }
 
-    const originalCode = originalCodeRef.current.code;
-    const itemCode = originalCodeRef.current.format === 'json' ? JSON.stringify(item) : yaml.dump(item);
+    if (allowToHideManagedFields && hideManagedFields) {
+      if (isKubeObjectIsh(clonedItem) && clonedItem.metadata) {
+        delete clonedItem.metadata.managedFields;
+      }
+    }
+
+    // Determine the format (YAML or JSON) and serialize to string
+    const format = looksLikeJson(originalCodeRef.current.code) ? 'json' : 'yaml';
+    const itemCode = format === 'json' ? JSON.stringify(clonedItem) : yaml.dump(clonedItem);
+
+    // Update the code if the item representation has changed
     if (itemCode !== originalCodeRef.current.code) {
-      originalCodeRef.current = { code: itemCode, format: originalCodeRef.current.format };
+      originalCodeRef.current = { code: itemCode, format };
+      setCode({ code: itemCode, format });
     }
 
-    if (!item.metadata) {
-      return;
-    }
+    // Additional handling for Kubernetes objects
+    if (isKubeObjectIsh(item) && item.metadata) {
+      const resourceVersionsDiffer = (previousVersionRef.current || '') !== (item.metadata!.resourceVersion || '');
+      // Only change if the code hasn't been touched.
+      // We use the codeRef in this effect instead of the code, because we need to access the current
+      // state of the code but we don't want to trigger a re-render when we set the code here.
+      if (resourceVersionsDiffer || codeRef.current.code === originalCodeRef.current.code) {
+        // Prevent updating to the same code, which would lead to an infinite loop.
+        if (codeRef.current.code !== itemCode) {
+          setCode({ code: itemCode, format: originalCodeRef.current.format });
+        }
 
-    const resourceVersionsDiffer = (previousVersionRef.current || '') !== (item.metadata!.resourceVersion || '');
-    // Only change if the code hasn't been touched.
-    // We use the codeRef in this effect instead of the code, because we need to access the current
-    // state of the code but we don't want to trigger a re-render when we set the code here.
-    if (resourceVersionsDiffer || codeRef.current.code === originalCode) {
-      // Prevent updating to the same code, which would lead to an infinite loop.
-      if (codeRef.current.code !== itemCode) {
-        setCode({ code: itemCode, format: originalCodeRef.current.format });
+        if (resourceVersionsDiffer && !!item.metadata!.resourceVersion) {
+          previousVersionRef.current = item.metadata!.resourceVersion;
+        }
       }
-
-      if (resourceVersionsDiffer && !!item.metadata!.resourceVersion) {
-        previousVersionRef.current = item.metadata!.resourceVersion;
-      }
     }
-  }, [item]);
+  }, [item, hideManagedFields]);
 
   useEffect(() => {
     codeRef.current = code;
@@ -149,7 +208,7 @@ export default function EditorDialog(props: EditorDialogProps) {
 
   function looksLikeJson(code: string) {
     const trimmedCode = code.trimLeft();
-    const firstChar = !!trimmedCode ? trimmedCode[0] : '';
+    const firstChar = trimmedCode ? trimmedCode[0] : '';
     if (['{', '['].includes(firstChar)) {
       return true;
     }
@@ -215,13 +274,14 @@ export default function EditorDialog(props: EditorDialogProps) {
       res.format = 'yaml';
       try {
         res.obj = yaml.loadAll(code) as KubeObjectInterface[];
+        res.obj = res.obj.filter((obj) => !!obj);
         return res;
       } catch (e) {
         res.error = new Error((e as Error).message || t('Invalid YAML'));
       }
     }
 
-    if (!!res.obj) {
+    if (res.obj) {
       res.error = null;
     }
 
@@ -242,10 +302,37 @@ export default function EditorDialog(props: EditorDialogProps) {
     setCode(originalCodeRef.current);
   }
 
+  const applyFunc = async (newItems: KubeObjectInterface[], clusterName: string) => {
+    await Promise.allSettled(newItems.map((newItem) => apply(newItem, clusterName))).then((values: any) => {
+      values.forEach((value: any, index: number) => {
+        if (value.status === 'rejected') {
+          let msg;
+          const kind = newItems[index].kind;
+          const name = newItems[index].metadata.name;
+          const apiVersion = newItems[index].apiVersion;
+          if (newItems.length === 1) {
+            msg = t('translation|Failed to create {{ kind }} {{ name }}.', { kind, name });
+          } else {
+            msg = t('translation|Failed to create {{ kind }} {{ name }} in {{ apiVersion }}.', {
+              kind,
+              name,
+              apiVersion,
+            });
+          }
+          const errorDetail = value.reason?.message || msg;
+          setError(errorDetail);
+          setOpen?.(true);
+          // throw msg;
+          throw new Error(msg);
+        }
+      });
+    });
+  };
+
   function handleSave() {
     // Verify the YAML even means anything before trying to use it.
     const { obj, format, error } = getObjectsFromCode(code);
-    if (!!error) {
+    if (error) {
       setError(t('Error parsing the code: {{error}}', { error: error.message }));
       return;
     }
@@ -258,7 +345,39 @@ export default function EditorDialog(props: EditorDialogProps) {
       setError(t("Error parsing the code. Please verify it's valid YAML or JSON!"));
       return;
     }
-    onSave!(obj);
+
+    const newItemDefs = obj!;
+
+    if (typeof onSave === 'string' && onSave === 'default') {
+      const resourceNames = newItemDefs.map((newItemDef) => newItemDef.metadata.name);
+      const clusterName = getCluster() || '';
+
+      dispatch(
+        clusterAction(() => applyFunc(newItemDefs, clusterName), {
+          startMessage: t('translation|Applying {{ newItemName }}…', {
+            newItemName: resourceNames.join(','),
+          }),
+          cancelledMessage: t('translation|Cancelled applying {{ newItemName }}.', {
+            newItemName: resourceNames.join(','),
+          }),
+          successMessage: t('translation|Applied {{ newItemName }}.', {
+            newItemName: resourceNames.join(','),
+          }),
+          errorMessage: t('translation|Failed to apply {{ newItemName }}.', {
+            newItemName: resourceNames.join(','),
+          }),
+          cancelUrl: location.pathname,
+        })
+      );
+
+      dispatchCreateEvent({
+        status: EventStatus.CONFIRMED,
+      });
+
+      onClose();
+    } else if (typeof onSave === 'function') {
+      onSave!(obj);
+    }
   }
 
   function makeEditor() {
@@ -274,7 +393,7 @@ export default function EditorDialog(props: EditorDialogProps) {
         <SimpleEditor language={originalCodeRef.current.format || 'yaml'} value={code.code} onChange={onChange} />
       </Box>
     ) : (
-      <Box paddingTop={2} height="100%">
+      <Box height="100%">
         <Editor
           language={originalCodeRef.current.format || 'yaml'}
           theme={themeName === 'dark' ? 'vs-dark' : 'light'}
@@ -290,13 +409,17 @@ export default function EditorDialog(props: EditorDialogProps) {
   const errorLabel = error || errorMessage;
   let dialogTitle = title;
   if (!dialogTitle && item) {
-    const itemName = item.metadata?.name || t('New Object');
+    const itemName = (isKubeObjectIsh(item) && item.metadata?.name) || t('New Object');
     dialogTitle = isReadOnly()
       ? t('translation|View: {{ itemName }}', { itemName })
       : t('translation|Edit: {{ itemName }}', { itemName });
   }
 
   const dialogTitleId = useId('editor-dialog-title-');
+
+  if (!other.open && !other.keepMounted) {
+    return null;
+  }
 
   return (
     <Dialog
@@ -323,21 +446,42 @@ export default function EditorDialog(props: EditorDialogProps) {
               overflowY: 'hidden',
             }}
           >
-            <Box display="flex" flexDirection="row-reverse">
-              <Box p={1}>
-                <FormGroup row>
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={useSimpleEditor}
-                        onChange={() => setUseSimpleEditor(!useSimpleEditor)}
-                        name="useSimpleEditor"
+            <Box py={1}>
+              <Grid2 container spacing={2} justifyContent="space-between" sx={{ flexGrow: 1 }}>
+                {
+                  actions.length > 0 ? (
+                    actions.map((action, i) => <Grid2 key={`editor_action_${i}`}>{action}</Grid2>)
+                  ) : (
+                    <Grid2></Grid2>
+                  ) // Just to keep the layout consistent.
+                }
+                <Grid2>
+                  <FormGroup row>
+                    {allowToHideManagedFields && (
+                      <FormControlLabel
+                        control={
+                          <Switch
+                            checked={hideManagedFields}
+                            onChange={() => setHideManagedFields(() => !hideManagedFields)}
+                            name="hideManagedFields"
+                          />
+                        }
+                        label={t('Hide Managed Fields')}
                       />
-                    }
-                    label={t('Use minimal editor')}
-                  />
-                </FormGroup>
-              </Box>
+                    )}
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          checked={useSimpleEditor}
+                          onChange={() => setUseSimpleEditor(!useSimpleEditor)}
+                          name="useSimpleEditor"
+                        />
+                      }
+                      label={t('Use minimal editor')}
+                    />
+                  </FormGroup>
+                </Grid2>
+              </Grid2>
             </Box>
             {isReadOnly() ? (
               makeEditor()
