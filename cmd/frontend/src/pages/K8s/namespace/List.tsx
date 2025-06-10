@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import CreateNamespaceButton from './CreateNamespaceButton';
+
 import { Link } from '@components/common';
 import { StatusLabel } from '@components/common/Label';
 import ResourceListView from '@components/common/Resource/ResourceListView';
@@ -87,9 +89,10 @@ export default function NamespacesList() {
     <ResourceListView
       title={t('Namespaces')}
       headerProps={{
+        titleSideActions: [<CreateNamespaceButton />],
         noNamespaceFilter: true,
       }}
-      {...resourceTableProps}
+      {...(resourceTableProps as ResourceTableProps<Namespace>)}
     />
   );
 }

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Fragment } from 'react/jsx-runtime';
@@ -20,6 +20,7 @@ function PureActionsNotifier({ dispatch, clusterActions }: PureActionsNotifierPr
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
   const navigate = useNavigate();
   const location = useLocation();
+  const snackbarRefs = useRef<{ [id: string]: string | undefined }>({});
 
   function handleAction(clusterAction: ClusterAction) {
     if (isEmpty(clusterAction)) {
@@ -54,13 +55,31 @@ function PureActionsNotifier({ dispatch, clusterActions }: PureActionsNotifierPr
       closeSnackbar(clusterAction.dismissSnackbar);
     }
 
+    const prevKey = snackbarRefs.current[clusterAction.id];
+    const uniqueKey = `${clusterAction.key || clusterAction.id}-${Date.now()}`;
+
+    if (prevKey && prevKey !== uniqueKey) {
+      closeSnackbar(prevKey);
+    }
+
     if (clusterAction.message) {
-      enqueueSnackbar(clusterAction.message, {
-        key: clusterAction.key,
-        autoHideDuration: clusterAction.autoHideDuration || CLUSTER_ACTION_GRACE_PERIOD,
-        action,
-        ...clusterAction.snackbarProps,
-      });
+      // Check for success or error states
+      const refKey =
+        clusterAction.state === 'complete'
+          ? `${clusterAction.id}-complete`
+          : clusterAction.state === 'error'
+            ? `${clusterAction.id}-error`
+            : clusterAction.id;
+
+      if (!snackbarRefs.current[refKey]) {
+        snackbarRefs.current[refKey] = uniqueKey;
+        enqueueSnackbar(clusterAction.message, {
+          key: uniqueKey,
+          autoHideDuration: clusterAction.autoHideDuration || CLUSTER_ACTION_GRACE_PERIOD,
+          action,
+          ...clusterAction.snackbarProps,
+        });
+      }
     }
   }
 
@@ -73,6 +92,15 @@ function PureActionsNotifier({ dispatch, clusterActions }: PureActionsNotifierPr
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [clusterActions]
   );
+
+  useEffect(() => {
+    return () => {
+      Object.keys(snackbarRefs.current).forEach((key) => {
+        closeSnackbar(snackbarRefs.current[key]);
+        delete snackbarRefs.current[key];
+      });
+    };
+  }, [closeSnackbar]);
 
   return null;
 }
