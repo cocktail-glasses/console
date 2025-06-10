@@ -1,5 +1,5 @@
-import { LabelSelector } from './cluster';
 import { KubeObject, KubeObjectInterface } from './KubeObject';
+import { LabelSelector } from './cluster';
 
 export interface NetworkPolicyPort {
   port?: string | number;
@@ -54,7 +54,7 @@ class NetworkPolicy extends KubeObject<KubeNetworkPolicy> {
         to: [
           {
             podSelector: {
-              matchLabels: { app: 'headlamp' },
+              matchLabels: { app: 'console' },
             },
           },
         ],
@@ -71,14 +71,14 @@ class NetworkPolicy extends KubeObject<KubeNetworkPolicy> {
         from: [
           {
             podSelector: {
-              matchLabels: { app: 'headlamp' },
+              matchLabels: { app: 'console' },
             },
           },
         ],
       },
     ];
     baseObject.podSelector = {
-      matchLabels: { app: 'headlamp' },
+      matchLabels: { app: 'console' },
     };
     baseObject.policyTypes = ['Ingress', 'Egress'];
     return baseObject;

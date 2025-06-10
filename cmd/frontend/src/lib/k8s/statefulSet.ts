@@ -1,6 +1,6 @@
-import { KubeContainer, LabelSelector } from './cluster';
 import { KubeMetadata } from './KubeMetadata';
 import { KubeObject, KubeObjectInterface } from './KubeObject';
+import { KubeContainer, LabelSelector } from './cluster';
 import { KubePodSpec } from './pod';
 
 export interface KubeStatefulSet extends KubeObjectInterface {
@@ -45,7 +45,7 @@ class StatefulSet extends KubeObject<KubeStatefulSet> {
     };
     baseObject.spec = {
       selector: {
-        matchLabels: { app: 'headlamp' },
+        matchLabels: { app: 'console' },
       },
       updateStrategy: {
         type: 'RollingUpdate',
