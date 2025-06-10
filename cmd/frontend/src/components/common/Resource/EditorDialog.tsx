@@ -519,6 +519,7 @@ export default function EditorDialog(props: EditorDialogProps) {
               <ConfirmButton
                 disabled={originalCodeRef.current.code === code.code}
                 color="secondary"
+                variant="contained"
                 aria-label={t('translation|Undo')}
                 onConfirm={onUndo}
                 confirmTitle={t('translation|Are you sure?')}
@@ -531,13 +532,14 @@ export default function EditorDialog(props: EditorDialogProps) {
             <div style={{ flex: '1 0 0' }} />
             {errorLabel && <Typography color="error">{errorLabel}</Typography>}
             <div style={{ flex: '1 0 0' }} />
-            <Button onClick={onClose} color="primary">
+            <Button onClick={onClose} color="secondary" variant="contained">
               {t('translation|Close')}
             </Button>
             {!isReadOnly() && (
               <Button
                 onClick={handleSave}
                 color="primary"
+                variant="contained"
                 disabled={originalCodeRef.current.code === code.code || !!error}
                 // @todo: aria-controls should point to the textarea id
               >

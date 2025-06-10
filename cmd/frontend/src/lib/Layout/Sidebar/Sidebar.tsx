@@ -5,7 +5,7 @@ import { useParams } from 'react-router-dom';
 
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 
-import { ToggleButton, ToggleButtonGroup, Tooltip } from '@mui/material';
+import { Container, ToggleButton, ToggleButtonGroup, Tooltip } from '@mui/material';
 import Box from '@mui/material/Box';
 import Divider from '@mui/material/Divider';
 import Drawer from '@mui/material/Drawer';
@@ -18,7 +18,7 @@ import { find, get, has, isEmpty } from 'lodash';
 import ClusterChooser from './ClusterChooser';
 import { PureSidebarProps, SidebarItemProps } from './SidebarInterface';
 
-import { ActionButton } from '@components/common';
+import { ActionButton, CreateButton } from '@components/common';
 import { Icon } from '@iconify/react';
 import SidebarItem from '@lib/Layout/Sidebar/SidebarItem';
 import {
@@ -126,6 +126,14 @@ function DefaultLinkArea(props: { sidebarName: string; isOpen: boolean }) {
   // );
 }
 
+function ActionArea({ isOpen }: { isOpen: boolean }) {
+  return (
+    <Box marginBottom={isOpen ? '1rem' : undefined} sx={{ display: 'flex', justifyContent: 'center' }}>
+      <CreateButton isNarrow={!isOpen} />
+    </Box>
+  );
+}
+
 export interface SidebarMenuType extends MenuType {
   url: string;
   sub?: SidebarMenuType[];
@@ -228,6 +236,7 @@ export default function Sidebar() {
       onToggleOpen={() => setIsOpen((prev) => !prev)}
       linkArea={<DefaultLinkArea sidebarName={selectedMenu.label} isOpen={isOpen} />}
       isClusterSwitchAvailable={isGatewayAvailable}
+      actionArea={<ActionArea isOpen={isOpen} />}
     />
   );
 }
@@ -242,6 +251,7 @@ export function PureSidebar({
   search,
   linkArea,
   isClusterSwitchAvailable,
+  actionArea,
 }: PureSidebarProps) {
   const { t } = useTranslation(['glossary']);
   const [getSidebarGroup, setSidebarGroup] = useAtom(sidebarGroupId);
@@ -303,26 +313,31 @@ export function PureSidebar({
           </List>
         </Grid>
         <Grid>
-          <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-            <ToggleButtonGroup
-              orientation={open ? 'horizontal' : 'vertical'}
-              color="primary"
-              value={getSidebarGroup}
-              exclusive
-              onChange={(event: React.MouseEvent<HTMLElement>, newAlignment: string) => {
-                newAlignment && setSidebarGroup(newAlignment);
-              }}
-              sx={(theme) => ({ background: theme.palette.sidebarGroupBg })}
-              aria-label="Platform"
-            >
-              {groups.map((g) => (
-                <ToggleButton key={g.id} value={g.id}>
-                  <Tooltip title={t(g.label)}>
-                    <Icon icon={g.icon} width={'2em'} height={'2em'} />
-                  </Tooltip>
-                </ToggleButton>
-              ))}
-            </ToggleButtonGroup>
+          <Box sx={{ padding: open ? 2 : 0 }}>
+            {getSidebarGroup === 'k8s' && actionArea}
+            <Divider sx={{ marginBottom: '1rem' }} />
+            <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+              <ToggleButtonGroup
+                // fullWidth
+                orientation={open ? 'horizontal' : 'vertical'}
+                color="primary"
+                value={getSidebarGroup}
+                exclusive
+                onChange={(event: React.MouseEvent<HTMLElement>, newAlignment: string) => {
+                  newAlignment && setSidebarGroup(newAlignment);
+                }}
+                sx={(theme) => ({ background: theme.palette.sidebarGroupBg })}
+                aria-label="Platform"
+              >
+                {groups.map((g) => (
+                  <ToggleButton key={g.id} value={g.id}>
+                    <Tooltip title={t(g.label)}>
+                      <Icon icon={g.icon} width={'2em'} height={'2em'} />
+                    </Tooltip>
+                  </ToggleButton>
+                ))}
+              </ToggleButtonGroup>
+            </Box>
           </Box>
           <Box
             textAlign="center"

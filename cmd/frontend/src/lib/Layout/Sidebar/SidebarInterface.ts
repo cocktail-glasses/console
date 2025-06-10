@@ -23,6 +23,9 @@ export interface PureSidebarProps {
   linkArea: React.ReactNode;
   // 클러스터 스위칭 가능 여부
   isClusterSwitchAvailable: boolean;
+
+  /** 사이드바 하단 액션 영역 */
+  actionArea: React.ReactNode;
 }
 
 export interface SidebarEntry {
