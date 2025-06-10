@@ -6,6 +6,8 @@ import { OptionsObject as SnackbarProps } from 'notistack';
  * See components/common/ActionsNotifier.tsx for a user of cluster actions.
  */
 
+type ActionState = 'start' | 'complete' | 'error';
+
 /**
  * A button to display on the action.
  */
@@ -21,6 +23,7 @@ export interface ClusterActionButton {
 }
 
 export interface ClusterAction {
+  callbackArgs?: any[];
   /**
    * A unique id for the action.
    */
@@ -41,6 +44,10 @@ export interface ClusterAction {
    * The url to navigate to when the action is complete.
    */
   url?: string;
+  /**
+   * The state of the action. Helps identify if in progress, complete, or failed.
+   */
+  state?: ActionState;
   /**
    * The buttons to display on the action.
    */
@@ -157,6 +164,7 @@ export const executeClusterAction = createAsyncThunk(
       errorMessage,
       errorUrl,
       successMessage,
+      callbackArgs,
       cancelCallback,
       startOptions = {},
       cancelledOptions = {},
@@ -172,6 +180,7 @@ export const executeClusterAction = createAsyncThunk(
           id: actionKey,
           key: actionKey,
           message: startMessage,
+          state: 'start',
           url: startUrl,
           buttons: [
             {
@@ -190,6 +199,7 @@ export const executeClusterAction = createAsyncThunk(
           dismissSnackbar: actionKey,
           id: actionKey,
           message: successMessage,
+          state: 'complete',
           snackbarProps: successOptions,
           url: successUrl,
         })
@@ -201,6 +211,7 @@ export const executeClusterAction = createAsyncThunk(
           buttons: undefined,
           id: actionKey,
           message: cancelledMessage,
+          state: 'complete',
           dismissSnackbar: actionKey,
           url: cancelUrl,
           snackbarProps: cancelledOptions,
@@ -215,6 +226,7 @@ export const executeClusterAction = createAsyncThunk(
           dismissSnackbar: actionKey,
           id: actionKey,
           message: errorMessage,
+          state: 'error',
           snackbarProps: errorOptions,
           url: errorUrl,
         })
@@ -242,7 +254,11 @@ export const executeClusterAction = createAsyncThunk(
         if (controller.signal.aborted) {
           return rejectWithValue('Action cancelled');
         }
-        callback();
+        if (callbackArgs === undefined) {
+          await Promise.resolve(callback());
+        } else {
+          await Promise.resolve(callback(...callbackArgs));
+        }
         dispatchSuccess();
       } catch (err) {
         if ((err as Error).message === 'Action cancelled' || controller.signal.aborted) {
@@ -278,10 +294,7 @@ const clusterActionSlice = createSlice({
      *
      * If only id is provided, the action is removed from the state.
      */
-    updateClusterAction: (
-      state,
-      action: PayloadAction<Partial<ClusterAction> & { id: string }>
-    ) => {
+    updateClusterAction: (state, action: PayloadAction<Partial<ClusterAction> & { id: string }>) => {
       const { id, ...actionOptions } = action.payload;
       if (Object.keys(actionOptions).length === 0) {
         delete state[id];
@@ -307,9 +320,9 @@ const clusterActionSlice = createSlice({
     },
   },
 
-  extraReducers: builder => {
+  extraReducers: (builder) => {
     builder.addMatcher(
-      action => action.type.startsWith('clusterAction/cancel/'),
+      (action) => action.type.startsWith('clusterAction/cancel/'),
       (state, action) => {
         const actionKey = action.type.split('clusterAction/cancel/')[1];
         clusterActionSlice.caseReducers.cancelClusterAction(state, {
@@ -326,10 +339,7 @@ export const { updateClusterAction, cancelClusterAction } = clusterActionSlice.a
 /**
  * Executes the callback action with the given options.
  */
-export function clusterAction(
-  callback: CallbackAction['callback'],
-  actionOptions: CallbackActionOptions = {}
-) {
+export function clusterAction(callback: CallbackAction['callback'], actionOptions: CallbackActionOptions = {}) {
   return executeClusterAction({ callback, ...actionOptions });
 }
 
