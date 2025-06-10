@@ -9,6 +9,8 @@ import { BASE_HTTP_URL, CLUSTERS_PREFIX } from './constants';
 import { asQuery, combinePath } from './formatUrl';
 import { QueryParameters } from './queryParameters';
 
+import { isHubCluster } from '@lib/stores/cluster';
+
 export type StreamUpdate<T = any> = {
   type: 'ADDED' | 'MODIFIED' | 'DELETED' | 'ERROR';
   object: T;
@@ -391,7 +393,9 @@ export async function connectStreamWithParams<T>(
   const { isJson = false, additionalProtocols = [], cluster = '' } = params || {};
   let isClosing = false;
 
-  const token = getToken(cluster || '');
+  const clusterName = isHubCluster(cluster) ? '' : cluster;
+
+  const token = getToken(clusterName || '');
   // const userID = getUserIdFromLocalStorage();
 
   const protocols = ['base64.binary.k8s.io', ...additionalProtocols];
@@ -402,8 +406,8 @@ export async function connectStreamWithParams<T>(
 
   let fullPath = path;
   let url = '';
-  if (cluster) {
-    fullPath = combinePath(`/${CLUSTERS_PREFIX}/${cluster}`, path);
+  if (clusterName) {
+    fullPath = combinePath(`/${CLUSTERS_PREFIX}/${clusterName}`, path);
     try {
       // const kubeconfig = await findKubeconfigByClusterName(cluster);
 
