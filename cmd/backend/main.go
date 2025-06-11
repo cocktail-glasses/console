@@ -24,7 +24,7 @@ import (
 const (
 	k8sInClusterCA          = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
 	k8sInClusterBearerToken = "/var/run/secrets/kubernetes.io/serviceaccount/token"
-	victoriaMetricsURL      = "http://vmselect-shortterm.tenant-root:8481"
+	victoriaMetricsURL      = "http://192.168.88.223:32000"
 )
 
 func main() {
