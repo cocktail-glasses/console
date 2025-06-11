@@ -40,6 +40,7 @@ import {
   KubeCondition,
   KubeContainer,
   KubeContainerStatus,
+  KubeObject,
   KubeObjectClass,
   KubeObjectInterface,
 } from '@lib/k8s/cluster';
@@ -919,7 +920,7 @@ export function ContainerInfo(props: ContainerInfoProps) {
 }
 
 export interface OwnedPodsSectionProps {
-  resource: KubeObjectInterface;
+  resource: KubeObject;
   hideColumns?: PodListProps['hideColumns'];
   /**
    * Hides the namespace selector
@@ -938,8 +939,9 @@ export function OwnedPodsSection(props: OwnedPodsSectionProps) {
   }
   const queryData = {
     namespace,
-    labelSelector: resource?.spec?.selector ? labelSelectorToQuery(resource?.spec?.selector) : '',
+    labelSelector: resource?.jsonData?.spec?.selector ? labelSelectorToQuery(resource?.jsonData?.spec?.selector) : '',
     fieldSelector: resource.kind === 'Node' ? `spec.nodeName=${resource.metadata.name}` : undefined,
+    cluster: resource.cluster,
   };
 
   const { items: pods, errors } = Pod.useList(queryData);
