@@ -295,6 +295,9 @@ export interface ClusterSettings {
   allowedNamespaces?: string[];
 }
 
+export const DEFAULT_NODE_SHELL_LINUX_IMAGE = 'docker.io/library/alpine:latest';
+export const DEFAULT_NODE_SHELL_NAMESPACE = 'kube-system';
+
 function storeClusterSettings(clusterName: string, settings: ClusterSettings) {
   if (!clusterName) {
     return;
