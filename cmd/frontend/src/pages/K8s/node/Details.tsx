@@ -9,6 +9,7 @@ import Paper from '@mui/material/Paper';
 
 import { cloneDeep } from 'lodash';
 
+import { NodeShellAction } from './NodeShellAction';
 import { NodeTaintsLabel } from './utils';
 
 import { ActionButton, ConfirmDialog, StatusLabelProps } from '@components/common';
@@ -58,12 +59,14 @@ export default function NodeDetails(props: { name?: string }) {
   }, [nodeFromAPI]);
 
   function getAddresses(item: Node) {
-    return item.status.addresses.map(({ type, address }) => {
-      return {
-        name: type,
-        value: address,
-      };
-    });
+    return (
+      item.status.addresses?.map(({ type, address }) => {
+        return {
+          name: type,
+          value: address,
+        };
+      }) || []
+    );
   }
 
   function handleNodeScheduleState(node: Node, cordon: boolean) {
@@ -118,7 +121,7 @@ export default function NodeDetails(props: { name?: string }) {
           }
           const cloneNode = cloneDeep(node);
 
-          cloneNode.spec.unschedulable = !node.spec.unschedulable;
+          cloneNode!.spec.unschedulable = !node!.spec.unschedulable;
           setNode(cloneNode);
         })
         .catch((error) => {
@@ -172,7 +175,7 @@ export default function NodeDetails(props: { name?: string }) {
           })}
           onConfirm={() => {
             setDrainDialogOpen(false);
-            handleNodeDrain(node);
+            handleNodeDrain(node!);
           }}
           handleClose={() => setDrainDialogOpen(false)}
           open={drainDialogOpen}
@@ -225,6 +228,10 @@ export default function NodeDetails(props: { name?: string }) {
                 </AuthVisible>
               ),
             },
+            {
+              id: DefaultHeaderAction.NODE_SHELL,
+              action: <NodeShellAction item={item} />,
+            },
           ];
         }}
         extraInfo={(item) =>
@@ -260,7 +267,7 @@ export default function NodeDetails(props: { name?: string }) {
             },
             {
               id: 'headlamp.node-owned-pods',
-              section: <OwnedPodsSection resource={item?.jsonData} />,
+              section: <OwnedPodsSection resource={item} />,
             },
           ]
         }
@@ -284,7 +291,7 @@ function ChartsSection(props: ChartsSectionProps) {
       return '…';
     }
 
-    const readyInfo = node.status.conditions.find(({ type }) => type === 'Ready');
+    const readyInfo = node.status.conditions?.find(({ type }) => type === 'Ready');
     if (readyInfo) {
       return timeAgo(readyInfo.lastTransitionTime as string);
     }
@@ -349,7 +356,7 @@ function SystemInfoSection(props: SystemInfoSectionProps) {
     );
   }
 
-  if (!node) {
+  if (!node || !node.status.nodeInfo) {
     return null;
   }
 
@@ -409,7 +416,7 @@ interface NodeReadyLabelProps {
 
 export function NodeReadyLabel(props: NodeReadyLabelProps) {
   const { node } = props;
-  const isReady = !!node.status.conditions.find(
+  const isReady = !!node.status.conditions?.find(
     (condition) => condition.type === 'Ready' && condition.status === 'True'
   );
   const { t } = useTranslation();
